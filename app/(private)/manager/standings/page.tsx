@@ -1,0 +1,226 @@
+"use client";
+import { Layout } from "@/components/Layout";
+
+export default function ManagerStandings() {
+  const userName = localStorage.getItem("userName") || "Manager";
+
+  const standings = [
+    {
+      rank: 1,
+      team: "Tigers United",
+      matches: 7,
+      wins: 6,
+      draws: 1,
+      losses: 0,
+      goals: "18-2",
+      points: 19,
+    },
+    {
+      rank: 2,
+      team: "Eagles Sports",
+      matches: 7,
+      wins: 5,
+      draws: 2,
+      losses: 0,
+      goals: "16-4",
+      points: 17,
+    },
+    {
+      rank: 3,
+      team: "Phoenix FC",
+      matches: 7,
+      wins: 4,
+      draws: 3,
+      losses: 0,
+      goals: "14-6",
+      points: 15,
+    },
+    {
+      rank: 4,
+      team: "Lions Club",
+      matches: 7,
+      wins: 3,
+      draws: 1,
+      losses: 3,
+      goals: "10-10",
+      points: 10,
+    },
+    {
+      rank: 5,
+      team: "Warriors",
+      matches: 7,
+      wins: 2,
+      draws: 2,
+      losses: 3,
+      goals: "8-12",
+      points: 8,
+    },
+    {
+      rank: 6,
+      team: "Strikers",
+      matches: 7,
+      wins: 1,
+      draws: 3,
+      losses: 3,
+      goals: "6-14",
+      points: 6,
+    },
+  ];
+
+  return (
+    <Layout role="manager" userName={userName}>
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-foreground">Standings</h1>
+        <p className="text-muted-foreground mt-2">
+          Current tournament rankings and statistics
+        </p>
+      </div>
+
+      {/* Table */}
+      <div className="bg-white rounded-lg border border-border overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-muted border-b border-border">
+              <tr>
+                <th className="text-left py-3 px-4 font-semibold text-sm text-muted-foreground w-12">
+                  Rank
+                </th>
+                <th className="text-left py-3 px-4 font-semibold text-sm text-muted-foreground">
+                  Team
+                </th>
+                <th className="text-center py-3 px-4 font-semibold text-sm text-muted-foreground">
+                  MP
+                </th>
+                <th className="text-center py-3 px-4 font-semibold text-sm text-muted-foreground">
+                  W
+                </th>
+                <th className="text-center py-3 px-4 font-semibold text-sm text-muted-foreground">
+                  D
+                </th>
+                <th className="text-center py-3 px-4 font-semibold text-sm text-muted-foreground">
+                  L
+                </th>
+                <th className="text-center py-3 px-4 font-semibold text-sm text-muted-foreground">
+                  GF:GA
+                </th>
+                <th className="text-center py-3 px-4 font-semibold text-sm text-muted-foreground">
+                  Pts
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {standings.map((row, idx) => (
+                <tr
+                  key={idx}
+                  className={`border-b border-border ${
+                    idx < 2
+                      ? "bg-green-50"
+                      : idx < 4
+                      ? "bg-blue-50"
+                      : "hover:bg-muted"
+                  } transition-colors`}
+                >
+                  <td className="py-3 px-4 text-center">
+                    <span
+                      className={`inline-flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm ${
+                        row.rank === 1
+                          ? "bg-yellow-400 text-white"
+                          : row.rank === 2
+                          ? "bg-gray-300 text-white"
+                          : row.rank === 3
+                          ? "bg-orange-400 text-white"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {row.rank}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-sm font-medium text-foreground">
+                    {row.team}
+                  </td>
+                  <td className="py-3 px-4 text-center text-sm text-muted-foreground">
+                    {row.matches}
+                  </td>
+                  <td className="py-3 px-4 text-center text-sm font-semibold text-foreground">
+                    {row.wins}
+                  </td>
+                  <td className="py-3 px-4 text-center text-sm text-muted-foreground">
+                    {row.draws}
+                  </td>
+                  <td className="py-3 px-4 text-center text-sm text-muted-foreground">
+                    {row.losses}
+                  </td>
+                  <td className="py-3 px-4 text-center text-sm text-muted-foreground">
+                    {row.goals}
+                  </td>
+                  <td className="py-3 px-4 text-center text-sm font-bold text-primary">
+                    {row.points}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-lg border border-border p-4">
+          <p className="text-sm text-muted-foreground font-medium">Legend</p>
+          <div className="space-y-2 mt-3 text-xs">
+            <div className="flex gap-2 items-center">
+              <span className="w-4 h-4 bg-yellow-400 rounded-full"></span>
+              <span>Champion</span>
+            </div>
+            <div className="flex gap-2 items-center">
+              <span className="w-4 h-4 bg-gray-300 rounded-full"></span>
+              <span>Runner-up</span>
+            </div>
+            <div className="flex gap-2 items-center">
+              <span className="w-4 h-4 bg-orange-400 rounded-full"></span>
+              <span>Third Place</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg border border-border p-4">
+          <p className="text-sm text-muted-foreground font-medium">
+            Abbreviations
+          </p>
+          <div className="space-y-1 mt-3 text-xs">
+            <p>
+              <span className="font-semibold">MP</span> - Matches Played
+            </p>
+            <p>
+              <span className="font-semibold">W</span> - Wins
+            </p>
+            <p>
+              <span className="font-semibold">D</span> - Draws
+            </p>
+            <p>
+              <span className="font-semibold">L</span> - Losses
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg border border-border p-4 md:col-span-2">
+          <p className="text-sm text-muted-foreground font-medium">
+            Points System
+          </p>
+          <div className="space-y-1 mt-3 text-xs">
+            <p>
+              <span className="font-semibold">Win</span> - 3 points
+            </p>
+            <p>
+              <span className="font-semibold">Draw</span> - 1 point
+            </p>
+            <p>
+              <span className="font-semibold">Loss</span> - 0 points
+            </p>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+}

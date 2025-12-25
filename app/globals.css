@@ -1,0 +1,99 @@
+@import "tailwindcss";
+@layer base {
+  @theme {
+    /* Base UI colors */
+    --border: #e5e7eb;
+    --input: #f3f4f6;
+    --ring: #3b82f6;
+    --background: #f9fafb;
+    --foreground: #111827;
+
+    /* Semantic colors */
+    --primary: #3b82f6;
+    --primary-foreground: #ffffff;
+
+    --secondary: #8b5cf6;
+    --secondary-foreground: #ffffff;
+
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+
+    --muted: #f3f4f6;
+    --muted-foreground: #6b7280;
+
+    --accent: #10b981;
+    --accent-foreground: #ffffff;
+
+    /* Components */
+    --popover: #ffffff;
+    --popover-foreground: #111827;
+
+    --card: #ffffff;
+    --card-foreground: #111827;
+
+    /* Sidebar */
+    --sidebar-background: #1f2937;
+    --sidebar-foreground: #f9fafb;
+    --sidebar-primary: #3b82f6;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #8b5cf6;
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: #374151;
+    --sidebar-ring: #3b82f6;
+
+    /* Status */
+    --status-active: #10b981;
+    --status-pending: #f59e0b;
+    --status-completed: #3b82f6;
+    --status-finished: #6b7280;
+  }
+}
+
+/* Optional: mapping theme variables to Tailwind-like classes */
+@layer base {
+  .bg-primary {
+    background-color: var(--primary);
+  }
+  .text-primary {
+    color: var(--primary);
+  }
+  .text-primary-foreground {
+    color: var(--primary-foreground);
+  }
+
+  .bg-secondary {
+    background-color: var(--secondary);
+  }
+  .text-secondary {
+    color: var(--secondary);
+  }
+  .text-secondary-foreground {
+    color: var(--secondary-foreground);
+  }
+
+  .bg-sidebar-background {
+    background-color: var(--sidebar-background);
+  }
+  .text-sidebar-foreground {
+    color: var(--sidebar-foreground);
+  }
+  .bg-sidebar-primary {
+    background-color: var(--sidebar-primary);
+  }
+  .text-sidebar-primary-foreground {
+    color: var(--sidebar-primary-foreground);
+  }
+
+  .bg-status-active {
+    background-color: var(--status-active);
+  }
+  .bg-status-pending {
+    background-color: var(--status-pending);
+  }
+  .bg-status-completed {
+    background-color: var(--status-completed);
+  }
+  .bg-status-finished {
+    background-color: var(--status-finished);
+  }
+}

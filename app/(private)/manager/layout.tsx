@@ -12,8 +12,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "System Manager",
-  description: "Manage your system efficiently",
+  title: "Tournament Manager",
+  description: "manage your tournaments efficiently",
 };
 
 export default function RootLayout({

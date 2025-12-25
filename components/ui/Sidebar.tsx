@@ -1,0 +1,296 @@
+"use client";
+
+import {
+  LayoutDashboard,
+  Trophy,
+  Users,
+  Newspaper,
+  Image,
+  Settings,
+  Menu,
+  X,
+  Calendar,
+  BarChart3,
+  Shield,
+  AlertCircle,
+  MessageSquare,
+  ChevronRight,
+} from "lucide-react";
+import { useState } from "react";
+import { Button } from "./button";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+interface SidebarProps {
+  role?: "super_admin" | "manager";
+}
+
+const superAdminMenu = [
+  { label: "Dashboard", path: "/admin/", icon: LayoutDashboard },
+  { label: "Tournaments", path: "/admin/tournaments", icon: Trophy },
+  { label: "Managers", path: "/admin/managers", icon: Users },
+  { label: "News", path: "/admin/news", icon: Newspaper },
+  { label: "Gallery", path: "/admin/gallery", icon: Image },
+  { label: "System Logs", path: "/admin/system-logs", icon: AlertCircle },
+  { label: "Messages", path: "/admin/messages", icon: MessageSquare },
+  { label: "Settings", path: "/admin/settings", icon: Settings },
+];
+
+const managerMenu = [
+  { label: "Dashboard", path: "/manager/", icon: LayoutDashboard },
+  { label: "Overview", path: "/manager/overview", icon: BarChart3 },
+  { label: "Teams", path: "/manager/teams", icon: Users },
+  { label: "Players", path: "/manager/players", icon: Shield },
+  { label: "Fixtures", path: "/manager/fixtures", icon: Calendar },
+  { label: "Matches", path: "/manager/matches", icon: Trophy },
+  { label: "Standings", path: "/manager/standings", icon: BarChart3 },
+  { label: "News", path: "/manager/news", icon: Newspaper },
+  { label: "Gallery", path: "/manager/gallery", icon: Image },
+  { label: "Messages", path: "/manager/messages", icon: MessageSquare },
+  { label: "Settings", path: "/manager/settings", icon: Settings },
+];
+
+export function Sidebar({ role = "super_admin" }: SidebarProps) {
+  const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(true);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const menu = role === "super_admin" ? superAdminMenu : managerMenu;
+
+  const toggleSidebar = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const toggleMobileSidebar = () => {
+    setIsMobileOpen(!isMobileOpen);
+  };
+
+  const isActive = (path: string) => {
+    if (path === "/admin/" || path === "/manager/") {
+      return pathname === path;
+    }
+    return pathname.startsWith(path);
+  };
+
+  return (
+    <>
+      {/* Mobile Toggle Button */}
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={toggleMobileSidebar}
+        className="lg:hidden fixed top-20 left-4 z-50 rounded-lg bg-white shadow-md border-gray-200 hover:bg-gray-50"
+      >
+        {isMobileOpen ? (
+          <X className="w-5 h-5" />
+        ) : (
+          <Menu className="w-5 h-5" />
+        )}
+      </Button>
+
+      {/* Desktop Sidebar */}
+      <aside
+        className={cn(
+          "hidden lg:flex fixed left-0 top-16 h-[calc(100vh-64px)] bg-white border-r border-gray-200 transition-all duration-300 z-40",
+          isOpen ? "w-64" : "w-20"
+        )}
+      >
+        <div className="flex flex-col w-full h-full">
+          {/* Sidebar Header */}
+          <div
+            className={cn(
+              "p-4 border-b border-gray-100 flex-shrink-0",
+              !isOpen && "px-3 py-4"
+            )}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
+                <span className="text-white font-bold">⚽</span>
+              </div>
+              {isOpen && (
+                <div className="overflow-hidden">
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    FootballHub
+                  </h2>
+                  <p className="text-xs text-gray-500">
+                    {role === "super_admin" ? "Super Admin" : "Team Manager"}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+            {isOpen && (
+              <div className="px-2 py-2 mb-1">
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {role === "super_admin"
+                    ? "Administration"
+                    : "Team Management"}
+                </p>
+              </div>
+            )}
+
+            {menu.map((item) => {
+              const Icon = item.icon;
+              const active = isActive(item.path);
+              const isHovered = hoveredItem === item.path;
+
+              return (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  onMouseEnter={() => setHoveredItem(item.path)}
+                  onMouseLeave={() => setHoveredItem(null)}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg transition-all duration-200 group",
+                    active
+                      ? "bg-primary/10 text-primary"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                    isOpen ? "px-3 py-2.5" : "px-2.5 py-2.5 justify-center"
+                  )}
+                >
+                  <div className="relative">
+                    <Icon
+                      className={cn(
+                        "w-5 h-5",
+                        (active || isHovered) && "scale-105"
+                      )}
+                    />
+                  </div>
+                  {isOpen && (
+                    <>
+                      <span className="text-sm font-medium flex-1">
+                        {item.label}
+                      </span>
+                      {active && (
+                        <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                      )}
+                    </>
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Sidebar Footer */}
+          {isOpen && (
+            <div className="p-4 border-t border-gray-100 flex-shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">AU</span>
+                </div>
+                <div className="overflow-hidden">
+                  <p className="text-sm font-semibold text-gray-900 truncate">
+                    Admin User
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {role === "super_admin" ? "Super Admin" : "Team Manager"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Desktop Collapse Toggle Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleSidebar}
+            className={cn(
+              "absolute -right-3 top-1/2 transform -translate-y-1/2 bg-white border border-gray-200 shadow-sm rounded-full w-6 h-6 hover:bg-gray-50 z-50",
+              !isOpen && "rotate-180"
+            )}
+          >
+            <ChevronRight className="w-3 h-3" />
+          </Button>
+        </div>
+      </aside>
+
+      {/* Mobile Sidebar Overlay */}
+      {isMobileOpen && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden"
+            onClick={toggleMobileSidebar}
+          />
+          <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 z-50 lg:hidden transform transition-transform duration-300 shadow-xl">
+            <div className="flex flex-col h-full pt-16">
+              {/* Mobile Sidebar Header */}
+              <div className="p-6 border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center shadow-sm">
+                    <span className="text-white font-bold text-xl">⚽</span>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900">
+                      FootballHub
+                    </h2>
+                    <p className="text-sm text-gray-500">
+                      {role === "super_admin" ? "Super Admin" : "Team Manager"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mobile Navigation */}
+              <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+                <div className="px-2 py-3 mb-2">
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {role === "super_admin"
+                      ? "Administration"
+                      : "Team Management"}
+                  </p>
+                </div>
+
+                {menu.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item.path);
+
+                  return (
+                    <Link
+                      key={item.path}
+                      href={item.path}
+                      onClick={toggleMobileSidebar}
+                      className={cn(
+                        "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
+                        active
+                          ? "bg-primary/10 text-primary font-medium"
+                          : "text-gray-700 hover:bg-gray-100"
+                      )}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span className="text-sm">{item.label}</span>
+                      {active && (
+                        <div className="ml-auto w-2 h-2 bg-primary rounded-full"></div>
+                      )}
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              {/* Mobile Footer */}
+              <div className="p-6 border-t border-gray-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">AU</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">
+                      Admin User
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {role === "super_admin" ? "Super Admin" : "Team Manager"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </>
+      )}
+    </>
+  );
+}
