@@ -47,7 +47,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary to-secondary flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary/20 to-secondary flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Card */}
         <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-10">
@@ -56,7 +56,9 @@ export default function Login() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-xl mb-4">
               <span className="text-3xl">⚽</span>
             </div>
-            <h1 className="text-3xl font-bold text-foreground">FootballHub</h1>
+            <h1 className="text-3xl font-bold text-foreground">
+              UniLeague-Hub
+            </h1>
             <p className="text-muted-foreground mt-2">
               Admin Management System
             </p>
@@ -115,23 +117,6 @@ export default function Login() {
               {isLoading ? "Logging in..." : "Login"}
             </Button>
           </form>
-
-          {/* Demo Credentials */}
-          <div className="mt-6 pt-6 border-t border-border">
-            <p className="text-xs text-muted-foreground text-center mb-3">
-              Demo Credentials
-            </p>
-            <div className="space-y-2 text-xs">
-              <div className="flex gap-2 p-2 bg-muted rounded">
-                <span className="font-medium min-w-20">Super Admin:</span>
-                <code className="text-blue-600">admin@example.com</code>
-              </div>
-              <div className="flex gap-2 p-2 bg-muted rounded">
-                <span className="font-medium min-w-20">Manager:</span>
-                <code className="text-blue-600">manager@example.com</code>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
