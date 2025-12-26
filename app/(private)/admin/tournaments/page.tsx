@@ -2,10 +2,9 @@
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-import { Trash2, Edit, Eye, Plus, Filter } from "lucide-react";
+import { Trash2, Edit, Eye, Plus } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface Tournament {
   id: number;
@@ -17,16 +16,10 @@ interface Tournament {
   startDate: string;
   endDate: string;
 }
-interface Post {
-  id: number;
-  title: string;
-  body: string;
-}
 
 export default function AdminTournaments() {
   const userName = localStorage.getItem("userName") || "Admin";
   const [searchTerm, setSearchTerm] = useState("");
-
   const [statusFilter, setStatusFilter] = useState<
     "all" | "upcoming" | "ongoing" | "finished"
   >("all");
@@ -101,15 +94,17 @@ export default function AdminTournaments() {
   return (
     <Layout role="super_admin" userName={userName}>
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Tournaments</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+            Tournaments
+          </h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Manage all tournaments in the system
           </p>
         </div>
-        <Link href="/admin/tournaments/create">
-          <Button className="bg-primary hover:bg-blue-600 text-white rounded-lg gap-2 h-10">
+        <Link href="/admin/tournaments/create" className="w-full sm:w-auto">
+          <Button className="bg-primary hover:bg-blue-600 text-white rounded-lg gap-2 w-full sm:w-auto">
             <Plus className="w-4 h-4" />
             Create Tournament
           </Button>
@@ -118,9 +113,8 @@ export default function AdminTournaments() {
 
       {/* Filters */}
       <div className="bg-white rounded-lg border border-border p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Search */}
-          <div>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-4">
+          <div className="flex-1">
             <label className="text-sm font-medium text-foreground block mb-2">
               Search
             </label>
@@ -129,12 +123,10 @@ export default function AdminTournaments() {
               placeholder="Search tournaments..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="rounded-lg h-9"
+              className="rounded-lg h-9 w-full"
             />
           </div>
-
-          {/* Status Filter */}
-          <div>
+          <div className="flex-1">
             <label className="text-sm font-medium text-foreground block mb-2">
               Status
             </label>
@@ -149,9 +141,7 @@ export default function AdminTournaments() {
               <option value="finished">Finished</option>
             </select>
           </div>
-
-          {/* Year Filter */}
-          <div>
+          <div className="flex-1">
             <label className="text-sm font-medium text-foreground block mb-2">
               Year
             </label>
@@ -172,67 +162,61 @@ export default function AdminTournaments() {
       {/* Table */}
       <div className="bg-white rounded-lg border border-border overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[600px] md:min-w-full">
             <thead className="bg-muted border-b border-border">
               <tr>
-                <th className="text-left py-3 px-4 font-semibold text-sm text-muted-foreground">
-                  Name
-                </th>
-                <th className="text-left py-3 px-4 font-semibold text-sm text-muted-foreground">
-                  Year
-                </th>
-                <th className="text-left py-3 px-4 font-semibold text-sm text-muted-foreground">
-                  Status
-                </th>
-                <th className="text-left py-3 px-4 font-semibold text-sm text-muted-foreground">
-                  Teams
-                </th>
-                <th className="text-left py-3 px-4 font-semibold text-sm text-muted-foreground">
-                  Managers
-                </th>
-                <th className="text-left py-3 px-4 font-semibold text-sm text-muted-foreground">
-                  Period
-                </th>
-                <th className="text-left py-3 px-4 font-semibold text-sm text-muted-foreground">
-                  Actions
-                </th>
+                {[
+                  "Name",
+                  "Year",
+                  "Status",
+                  "Teams",
+                  "Managers",
+                  "Period",
+                  "Actions",
+                ].map((h) => (
+                  <th
+                    key={h}
+                    className="text-left py-3 px-2 sm:px-4 font-semibold text-sm sm:text-sm text-muted-foreground"
+                  >
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {filteredTournaments.length > 0 ? (
-                filteredTournaments.map((tournament) => (
+                filteredTournaments.map((t) => (
                   <tr
-                    key={tournament.id}
+                    key={t.id}
                     className="border-b border-border hover:bg-muted transition-colors"
                   >
-                    <td className="py-3 px-4 text-sm font-medium text-foreground">
-                      {tournament.name}
+                    <td className="py-2 px-2 sm:px-4 text-sm font-medium text-foreground">
+                      {t.name}
                     </td>
-                    <td className="py-3 px-4 text-sm text-muted-foreground">
-                      {tournament.year}
+                    <td className="py-2 px-2 sm:px-4 text-sm text-muted-foreground">
+                      {t.year}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-2 px-2 sm:px-4">
                       <span
                         className={`text-xs font-semibold ${getStatusBadgeClass(
-                          tournament.status
+                          t.status
                         )}`}
                       >
-                        {tournament.status.charAt(0).toUpperCase() +
-                          tournament.status.slice(1)}
+                        {t.status.charAt(0).toUpperCase() + t.status.slice(1)}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-sm text-muted-foreground">
-                      {tournament.teams}
+                    <td className="py-2 px-2 sm:px-4 text-sm text-muted-foreground">
+                      {t.teams}
                     </td>
-                    <td className="py-3 px-4 text-sm text-muted-foreground">
-                      {tournament.managers}
+                    <td className="py-2 px-2 sm:px-4 text-sm text-muted-foreground">
+                      {t.managers}
                     </td>
-                    <td className="py-3 px-4 text-sm text-muted-foreground">
-                      {tournament.startDate} - {tournament.endDate}
+                    <td className="py-2 px-2 sm:px-4 text-sm text-muted-foreground">
+                      {t.startDate} - {t.endDate}
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="flex gap-2">
-                        <Link href={`/admin/tournaments/${tournament.id}`}>
+                    <td className="py-2 px-2 sm:px-4">
+                      <div className="flex flex-wrap gap-2">
+                        <Link href={`/admin/tournaments/${t.id}`}>
                           <Button
                             variant="outline"
                             size="sm"
@@ -241,7 +225,7 @@ export default function AdminTournaments() {
                             <Eye className="w-4 h-4" />
                           </Button>
                         </Link>
-                        <Link href={`/admin/tournaments/${tournament.id}/edit`}>
+                        <Link href={`/admin/tournaments/${t.id}/edit`}>
                           <Button
                             variant="outline"
                             size="sm"
@@ -254,9 +238,7 @@ export default function AdminTournaments() {
                           variant="outline"
                           size="sm"
                           className="gap-1 h-8 rounded text-destructive hover:bg-red-50"
-                          onClick={() =>
-                            alert("Delete tournament: " + tournament.name)
-                          }
+                          onClick={() => alert("Delete tournament: " + t.name)}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>

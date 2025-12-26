@@ -91,8 +91,8 @@ export default function AdminDashboard() {
   return (
     <Layout role="super_admin" userName={userName}>
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-3xl  font-bold text-foreground">
           Welcome, {userName}!
         </h1>
         <p className="text-muted-foreground mt-2">
@@ -101,14 +101,18 @@ export default function AdminDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8 w-full">
         {quickActions.map((action) => (
-          <Link key={action.path} href={action.path}>
+          <Link key={action.path} href={action.path} className="w-full">
             <Button
-              className={`w-full h-auto py-6 ${action.color} text-white font-medium flex items-center justify-center gap-2 rounded-lg transition-all hover:shadow-lg`}
+              className={`
+          w-full flex-1 min-w-0 py-4 sm:py-5 md:py-6 ${action.color}
+          text-white font-medium flex items-center justify-center gap-2
+          rounded-lg transition-all hover:shadow-lg
+        `}
             >
               {action.icon}
-              {action.label}
+              <span className="truncate">{action.label}</span>
             </Button>
           </Link>
         ))}
@@ -119,7 +123,7 @@ export default function AdminDashboard() {
         {statCards.map((card, index) => (
           <div
             key={index}
-            className="bg-white rounded-lg border border-border p-6 hover:shadow-md transition-shadow"
+            className="bg-white rounded-lg border border-border p-4 md:p-6 hover:shadow-md transition-shadow"
           >
             {/* Icon & Label */}
             <div className="flex items-start justify-between mb-4">

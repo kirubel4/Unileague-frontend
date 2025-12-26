@@ -1,99 +1,52 @@
 @import "tailwindcss";
-@layer base {
-  @theme {
-    /* Base UI colors */
-    --border: #e5e7eb;
-    --input: #f3f4f6;
-    --ring: #3b82f6;
-    --background: #f9fafb;
-    --foreground: #111827;
 
-    /* Semantic colors */
-    --primary: #3b82f6;
-    --primary-foreground: #ffffff;
+@theme {
+  /* Morning Sky Base */
+  --color-background: oklch(0.98 0.008 240);
+  --color-foreground: oklch(0.18 0.03 250);
 
-    --secondary: #8b5cf6;
-    --secondary-foreground: #ffffff;
+  /* Cloud Surfaces */
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(0.18 0.03 250);
 
-    --destructive: #ef4444;
-    --destructive-foreground: #ffffff;
+  --color-popover: oklch(0.99 0.005 240);
+  --color-popover-foreground: oklch(0.18 0.03 250);
 
-    --muted: #f3f4f6;
-    --muted-foreground: #6b7280;
+  /* Vibrant Brand */
+  --color-primary: oklch(0.68 0.18 165);
+  --color-primary-foreground: oklch(0.98 0.008 240);
 
-    --accent: #10b981;
-    --accent-foreground: #ffffff;
+  --color-secondary: oklch(0.94 0.02 240);
+  --color-secondary-foreground: oklch(0.25 0.04 250);
 
-    /* Components */
-    --popover: #ffffff;
-    --popover-foreground: #111827;
+  /* Airy Utility */
+  --color-muted: oklch(0.96 0.01 240);
+  --color-muted-foreground: oklch(0.55 0.03 250);
 
-    --card: #ffffff;
-    --card-foreground: #111827;
+  --color-accent: oklch(0.88 0.12 310);
+  --color-accent-foreground: oklch(0.98 0.008 240);
 
-    /* Sidebar */
-    --sidebar-background: #1f2937;
-    --sidebar-foreground: #f9fafb;
-    --sidebar-primary: #3b82f6;
-    --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #8b5cf6;
-    --sidebar-accent-foreground: #ffffff;
-    --sidebar-border: #374151;
-    --sidebar-ring: #3b82f6;
+  --color-destructive: oklch(0.7 0.22 25);
+  --color-destructive-foreground: oklch(0.98 0.008 240);
 
-    /* Status */
-    --status-active: #10b981;
-    --status-pending: #f59e0b;
-    --status-completed: #3b82f6;
-    --status-finished: #6b7280;
-  }
-}
+  /* Crisp UI Elements */
+  --color-border: oklch(0.88 0.015 240);
+  --color-input: oklch(0.96 0.01 240);
+  --color-ring: oklch(0.68 0.18 165);
 
-/* Optional: mapping theme variables to Tailwind-like classes */
-@layer base {
-  .bg-primary {
-    background-color: var(--primary);
-  }
-  .text-primary {
-    color: var(--primary);
-  }
-  .text-primary-foreground {
-    color: var(--primary-foreground);
-  }
+  /* Sidebar - Light & Airy */
+  --color-sidebar: oklch(0.96 0.01 245);
+  --color-sidebar-foreground: oklch(0.18 0.03 250);
+  --color-sidebar-primary: oklch(0.72 0.16 165);
+  --color-sidebar-primary-foreground: oklch(0.96 0.01 245);
+  --color-sidebar-accent: oklch(0.9 0.1 310);
+  --color-sidebar-accent-foreground: oklch(0.96 0.01 245);
+  --color-sidebar-border: oklch(0.85 0.02 240);
+  --color-sidebar-ring: oklch(0.72 0.16 165);
 
-  .bg-secondary {
-    background-color: var(--secondary);
-  }
-  .text-secondary {
-    color: var(--secondary);
-  }
-  .text-secondary-foreground {
-    color: var(--secondary-foreground);
-  }
-
-  .bg-sidebar-background {
-    background-color: var(--sidebar-background);
-  }
-  .text-sidebar-foreground {
-    color: var(--sidebar-foreground);
-  }
-  .bg-sidebar-primary {
-    background-color: var(--sidebar-primary);
-  }
-  .text-sidebar-primary-foreground {
-    color: var(--sidebar-primary-foreground);
-  }
-
-  .bg-status-active {
-    background-color: var(--status-active);
-  }
-  .bg-status-pending {
-    background-color: var(--status-pending);
-  }
-  .bg-status-completed {
-    background-color: var(--status-completed);
-  }
-  .bg-status-finished {
-    background-color: var(--status-finished);
-  }
+  /* Fresh Status Colors */
+  --color-status-active: oklch(0.72 0.16 165);
+  --color-status-pending: oklch(0.85 0.15 75);
+  --color-status-completed: oklch(0.7 0.12 230);
+  --color-status-finished: oklch(0.68 0.1 180);
 }

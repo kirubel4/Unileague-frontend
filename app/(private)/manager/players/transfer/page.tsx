@@ -58,7 +58,7 @@ export default function ManagerPlayersTransfer() {
       </div>
 
       {/* Transfer Form */}
-      <div className="max-w-2xl">
+      <div className="max-w-7xl">
         <div className="bg-white rounded-lg border border-border p-8">
           {/* Current Info */}
           <div className="mb-8 p-6 bg-muted rounded-lg border border-border">

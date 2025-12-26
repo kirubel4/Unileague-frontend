@@ -6,32 +6,43 @@ import { Label } from "@/components/ui/label";
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Upload } from "lucide-react";
 import Link from "next/link";
+import { GalleryImage } from "@/app/(private)/manager/gallery/page";
 
-export default function AdminNewsCreate() {
-  const userName = localStorage.getItem("userName") || "Admin";
+export default function ManagerNewsCreate() {
+  const [images, setImages] = useState<GalleryImage[]>([]);
+  const userName = localStorage.getItem("userName") || "Manager";
   const navigate = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     excerpt: "",
     content: "",
-    scope: "global",
-    tournamentId: "",
     tags: "",
   });
-
-  const tournaments = [
-    { id: "1", name: "City League Championship" },
-    { id: "2", name: "Regional Cup" },
-    { id: "3", name: "Summer Tournament" },
-  ];
-
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          const newImage: GalleryImage = {
+            id: Math.max(...images.map((img) => img.id), 0) + 1,
+            title: file.name.replace(/\.[^/.]+$/, ""),
+            url: event.target.result as string,
+            uploadedDate: new Date().toLocaleDateString(),
+            uploadedBy: userName,
+            category: "Events",
+          };
+          setImages([newImage, ...images]);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -39,162 +50,171 @@ export default function AdminNewsCreate() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (
+      !formData.title.trim() ||
+      !formData.excerpt.trim() ||
+      !formData.content.trim()
+    ) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
     setIsSubmitting(true);
-    setTimeout(() => {
-      alert(`Article "${formData.title}" published successfully!`);
-      navigate.push("/admin/news");
-    }, 800);
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    alert(`Article "${formData.title}" created successfully!`);
+    navigate.push("/manager/news");
   };
 
   return (
-    <Layout role="super_admin" userName={userName}>
+    <Layout role="manager" userName={userName}>
       {/* Header */}
       <div className="mb-8">
-        <Link href="/admin/news">
-          <Button variant="ghost" size="sm" className="mb-4">
-            <ChevronLeft className="w-4 h-4 mr-2" />
-            Back to News
+        <Link href="/manager/news">
+          <Button
+            variant="ghost"
+            className="gap-2 px-0 h-8 text-muted-foreground hover:text-foreground mb-4"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            Back to Articles
           </Button>
         </Link>
-        <h1 className="text-3xl font-bold text-foreground">Publish News</h1>
+        <h1 className="text-3xl font-bold text-foreground">Create Article</h1>
         <p className="text-muted-foreground mt-2">
-          Create and publish a new news article
+          Write and publish a new article for your tournament
         </p>
       </div>
 
       {/* Form */}
-      <div className="max-w-4xl">
-        <div className="bg-white rounded-lg border border-border p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-white rounded-lg border border-border p-6">
+          <div className="space-y-6">
             {/* Title */}
-            <div className="space-y-2">
-              <Label htmlFor="title" className="font-medium">
-                Title *
+            <div>
+              <Label
+                htmlFor="title"
+                className="text-foreground font-semibold mb-2 block"
+              >
+                Article Title *
               </Label>
               <Input
                 id="title"
                 name="title"
-                placeholder="Article title"
+                type="text"
+                placeholder="Enter article title"
                 value={formData.title}
                 onChange={handleChange}
-                required
-                className="h-10 rounded-lg"
+                className="rounded-lg h-10"
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                The main heading of your article
+              </p>
             </div>
 
             {/* Excerpt */}
-            <div className="space-y-2">
-              <Label htmlFor="excerpt" className="font-medium">
+            <div>
+              <Label
+                htmlFor="excerpt"
+                className="text-foreground font-semibold mb-2 block"
+              >
                 Excerpt *
               </Label>
               <textarea
                 id="excerpt"
                 name="excerpt"
-                placeholder="Brief summary of the article..."
+                placeholder="Enter a brief summary of the article (will appear in article list)"
                 value={formData.excerpt}
                 onChange={handleChange}
                 rows={2}
-                required
-                className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none resize-none"
+                className="w-full px-3 py-2 rounded-lg border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                Brief summary that appears in the article list
+              </p>
             </div>
 
             {/* Content */}
-            <div className="space-y-2">
-              <Label htmlFor="content" className="font-medium">
-                Content *
+            <div>
+              <Label
+                htmlFor="content"
+                className="text-foreground font-semibold mb-2 block"
+              >
+                Article Content *
               </Label>
               <textarea
                 id="content"
                 name="content"
-                placeholder="Article content..."
+                placeholder="Write your full article content here..."
                 value={formData.content}
                 onChange={handleChange}
-                rows={8}
-                required
-                className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none resize-vertical font-mono"
+                rows={10}
+                className="w-full px-3 py-2 rounded-lg border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
               />
-              <p className="text-xs text-muted-foreground">
-                Markdown formatting supported
+              <p className="text-xs text-muted-foreground mt-1">
+                The main content of your article
               </p>
             </div>
 
-            {/* Scope */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="scope" className="font-medium">
-                  Scope *
-                </Label>
-                <select
-                  id="scope"
-                  name="scope"
-                  value={formData.scope}
-                  onChange={handleChange}
-                  className="w-full h-10 px-3 border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
-                >
-                  <option value="global">Global</option>
-                  <option value="tournament">Tournament Specific</option>
-                </select>
-              </div>
-
-              {/* Tournament Selection */}
-              {formData.scope === "tournament" && (
-                <div className="space-y-2">
-                  <Label htmlFor="tournamentId" className="font-medium">
-                    Tournament *
-                  </Label>
-                  <select
-                    id="tournamentId"
-                    name="tournamentId"
-                    value={formData.tournamentId}
-                    onChange={handleChange}
-                    required={formData.scope === "tournament"}
-                    className="w-full h-10 px-3 border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
-                  >
-                    <option value="">Select a tournament...</option>
-                    {tournaments.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.name}
-                      </option>
-                    ))}
-                  </select>
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-2 border-dashed border-blue-300 p-8 mb-8 text-center">
+              <div className="flex flex-col items-center gap-4">
+                <div className="p-3 bg-blue-100 rounded-full">
+                  <Upload className="w-6 h-6 text-blue-600" />
                 </div>
-              )}
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground mb-1">
+                    Upload News Banner
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Drag and drop images here or click to select files
+                  </p>
+                </div>
+                <input
+                  type="file"
+                  id="image-upload"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                <label htmlFor="image-upload">
+                  <Button
+                    asChild
+                    className="bg-primary hover:bg-blue-600 text-white rounded-lg gap-2 cursor-pointer"
+                  >
+                    <span>
+                      <Upload className="w-4 h-4" />
+                      Choose Image
+                    </span>
+                  </Button>
+                </label>
+              </div>
             </div>
-
-            {/* Tags */}
-            <div className="space-y-2">
-              <Label htmlFor="tags" className="font-medium">
-                Tags
-              </Label>
-              <Input
-                id="tags"
-                name="tags"
-                placeholder="Separate tags with commas"
-                value={formData.tags}
-                onChange={handleChange}
-                className="h-10 rounded-lg"
-              />
-            </div>
-
-            {/* Actions */}
-            <div className="flex gap-3 pt-4">
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="bg-primary hover:bg-blue-600 text-white rounded-lg h-10"
-              >
-                {isSubmitting ? "Publishing..." : "Publish Article"}
-              </Button>
-              <Link href="/admin/news">
-                <Button variant="outline" className="rounded-lg h-10">
-                  Cancel
-                </Button>
-              </Link>
-            </div>
-          </form>
+          </div>
         </div>
-      </div>
+
+        {/* Info Box */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm text-blue-900">
+            <span className="font-semibold">Tip:</span> You can save this as a
+            draft and publish it later. Articles will be visible to all
+            tournament participants once published.
+          </p>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-3 justify-end">
+          <Link href="/manager/news">
+            <Button variant="outline" className="rounded-lg h-10">
+              Cancel
+            </Button>
+          </Link>
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="bg-primary hover:bg-blue-600 text-white rounded-lg h-10"
+          >
+            {isSubmitting ? "Publishing..." : "Create Article"}
+          </Button>
+        </div>
+      </form>
     </Layout>
   );
 }

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Upload, Trash2, Search } from "lucide-react";
 
-export interface GalleryImage {
+interface GalleryImage {
   id: number;
   title: string;
   url: string;

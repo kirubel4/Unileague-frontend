@@ -65,7 +65,7 @@ export default function ManagerFixturesConfirm({
       </div>
 
       {/* Confirmation Card */}
-      <div className="max-w-2xl">
+      <div className="max-w-7xl">
         <div className="bg-white rounded-lg border border-border p-6 sm:p-8">
           {/* Icon + title */}
           <div className="text-center mb-8">

@@ -64,7 +64,7 @@ export default function ManagerTeamsCreate() {
       </div>
 
       {/* Form */}
-      <div className="max-w-2xl">
+      <div className="max-w-7xl">
         <div className="bg-white rounded-lg border border-border p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Team Name */}

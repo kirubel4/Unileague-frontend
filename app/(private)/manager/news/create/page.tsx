@@ -6,10 +6,12 @@ import { Label } from "@/components/ui/label";
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Upload } from "lucide-react";
 import Link from "next/link";
+import { GalleryImage } from "../../gallery/page";
 
 export default function ManagerNewsCreate() {
+  const [images, setImages] = useState<GalleryImage[]>([]);
   const userName = localStorage.getItem("userName") || "Manager";
   const navigate = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -19,7 +21,26 @@ export default function ManagerNewsCreate() {
     content: "",
     tags: "",
   });
-
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          const newImage: GalleryImage = {
+            id: Math.max(...images.map((img) => img.id), 0) + 1,
+            title: file.name.replace(/\.[^/.]+$/, ""),
+            url: event.target.result as string,
+            uploadedDate: new Date().toLocaleDateString(),
+            uploadedBy: userName,
+            category: "Events",
+          };
+          setImages([newImage, ...images]);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -133,26 +154,38 @@ export default function ManagerNewsCreate() {
               </p>
             </div>
 
-            {/* Tags */}
-            <div>
-              <Label
-                htmlFor="tags"
-                className="text-foreground font-semibold mb-2 block"
-              >
-                Tags (comma-separated)
-              </Label>
-              <Input
-                id="tags"
-                name="tags"
-                type="text"
-                placeholder="e.g., tournament, schedule, important"
-                value={formData.tags}
-                onChange={handleChange}
-                className="rounded-lg h-10"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Help categorize your article with relevant tags
-              </p>
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-2 border-dashed border-blue-300 p-8 mb-8 text-center">
+              <div className="flex flex-col items-center gap-4">
+                <div className="p-3 bg-blue-100 rounded-full">
+                  <Upload className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground mb-1">
+                    Upload News Banner
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Drag and drop images here or click to select files
+                  </p>
+                </div>
+                <input
+                  type="file"
+                  id="image-upload"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                <label htmlFor="image-upload">
+                  <Button
+                    asChild
+                    className="bg-primary hover:bg-blue-600 text-white rounded-lg gap-2 cursor-pointer"
+                  >
+                    <span>
+                      <Upload className="w-4 h-4" />
+                      Choose Image
+                    </span>
+                  </Button>
+                </label>
+              </div>
             </div>
           </div>
         </div>

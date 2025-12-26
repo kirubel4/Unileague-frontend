@@ -80,7 +80,7 @@ export function Sidebar({ role = "super_admin" }: SidebarProps) {
         variant="outline"
         size="icon"
         onClick={toggleMobileSidebar}
-        className="lg:hidden fixed top-20 left-4 z-50 rounded-lg bg-white shadow-md border-gray-200 hover:bg-gray-50"
+        className="lg:hidden fixed top-20 right-4 z-50 rounded-lg bg-white shadow-md border-gray-200 hover:bg-gray-50"
       >
         {isMobileOpen ? (
           <X className="w-5 h-5" />
@@ -98,28 +98,6 @@ export function Sidebar({ role = "super_admin" }: SidebarProps) {
       >
         <div className="flex flex-col w-full h-full">
           {/* Sidebar Header */}
-          <div
-            className={cn(
-              "p-4 border-b border-gray-100 flex-shrink-0",
-              !isOpen && "px-3 py-4"
-            )}
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
-                <span className="text-white font-bold">⚽</span>
-              </div>
-              {isOpen && (
-                <div className="overflow-hidden">
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    FootballHub
-                  </h2>
-                  <p className="text-xs text-gray-500">
-                    {role === "super_admin" ? "Super Admin" : "Team Manager"}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
 
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
@@ -147,7 +125,7 @@ export function Sidebar({ role = "super_admin" }: SidebarProps) {
                   className={cn(
                     "flex items-center gap-3 rounded-lg transition-all duration-200 group",
                     active
-                      ? "bg-primary/10 text-primary"
+                      ? "bg-primary/10  text-primary"
                       : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
                     isOpen ? "px-3 py-2.5" : "px-2.5 py-2.5 justify-center"
                   )}

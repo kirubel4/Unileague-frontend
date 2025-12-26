@@ -20,12 +20,12 @@ export function TopBar({
   const handleLogout = () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("userRole");
-    navigate.push("/login");
+    navigate.replace("/auth");
   };
-
+  const route = userRole === "Manager" ? "/manager" : "/admin";
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-gray-100 shadow-sm">
-      <div className="h-16 px-6 flex items-center justify-between">
+    <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur supports-[backdrop-filter] border-b border-gray-100 shadow-sm">
+      <div className="h-16 px-4 md:px-6 flex items-center justify-between max-w-full">
         {/* Left - Logo */}
         <Link
           href="/"
@@ -37,7 +37,7 @@ export function TopBar({
           </div>
           <div className="flex flex-col">
             <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-              FootballHub
+              UniLeague-Hub
             </span>
             <span className="text-xs text-gray-500 font-medium tracking-wide">
               ADMIN PANEL
@@ -51,7 +51,7 @@ export function TopBar({
           <Button
             variant="ghost"
             size="icon"
-            className="relative rounded-full w-9 h-9 hover:bg-gray-50 transition-colors"
+            className="relative rounded-full hidden lg:flex w-9 h-9 hover:bg-gray-200 transition-colors"
             onClick={() => console.log("Notifications")}
           >
             <Bell className="w-5 h-5 text-gray-600" />
@@ -64,8 +64,10 @@ export function TopBar({
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-full w-9 h-9 hover:bg-gray-50 transition-colors"
-            onClick={() => console.log("Settings")}
+            className="rounded-full hidden lg:flex w-9 h-9 hover:bg-gray-200 transition-colors"
+            onClick={() => {
+              navigate.push(`${route}/settings`);
+            }}
           >
             <Settings className="w-5 h-5 text-gray-600" />
           </Button>
@@ -119,14 +121,16 @@ export function TopBar({
                       <User className="w-4 h-4" />
                       My Profile
                     </Link>
-                    <Link
-                      href="/settings"
+                    <div
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                      onClick={() => setShowUserMenu(false)}
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        navigate.push(`${route}/settings`);
+                      }}
                     >
                       <Settings className="w-4 h-4" />
                       Settings
-                    </Link>
+                    </div>
                   </div>
 
                   <div className="border-t border-gray-100 pt-2">

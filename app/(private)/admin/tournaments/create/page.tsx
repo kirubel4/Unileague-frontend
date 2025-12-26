@@ -45,12 +45,6 @@ export default function AdminTournamentsCreate() {
     <Layout role="super_admin" userName={userName}>
       {/* Header */}
       <div className="mb-8">
-        <Link href="/admin/tournaments">
-          <Button variant="ghost" size="sm" className="mb-4">
-            <ChevronLeft className="w-4 h-4 mr-2" />
-            Back to Tournaments
-          </Button>
-        </Link>
         <h1 className="text-3xl font-bold text-foreground">
           Create Tournament
         </h1>
@@ -60,7 +54,7 @@ export default function AdminTournamentsCreate() {
       </div>
 
       {/* Form */}
-      <div className="lg:max-w-6xl">
+      <div className="lg:max-w-6xl ">
         <div className="bg-white rounded-lg border border-border p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Tournament Name */}
