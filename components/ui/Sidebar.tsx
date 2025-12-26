@@ -178,8 +178,8 @@ export function Sidebar({ role = "super_admin" }: SidebarProps) {
             size="icon"
             onClick={toggleSidebar}
             className={cn(
-              "absolute -right-3 top-1/2 transform -translate-y-1/2 bg-white border border-gray-200 shadow-sm rounded-full w-6 h-6 hover:bg-gray-50 z-50",
-              !isOpen && "rotate-180"
+              "absolute -right-3 top-1/2 rotate-180 transform -translate-y-1/2 bg-white border border-gray-200 shadow-sm rounded-full w-6 h-6 hover:bg-gray-50 z-50",
+              !isOpen && "rotate-360"
             )}
           >
             <ChevronRight className="w-3 h-3" />

@@ -24,8 +24,8 @@ export function TopBar({
   };
   const route = userRole === "Manager" ? "/manager" : "/admin";
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur supports-[backdrop-filter] border-b border-gray-100 shadow-sm">
-      <div className="h-16 px-4 md:px-6 flex items-center justify-between max-w-full">
+    <header className="fixed mb-10 top-0 left-0 right-0 z-50 w-full bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
+      <div className="h-16  px-4 md:px-6 flex items-center justify-between max-w-full">
         {/* Left - Logo */}
         <Link
           href="/"

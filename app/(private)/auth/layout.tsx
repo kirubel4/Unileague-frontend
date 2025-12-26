@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tournament Manager",
+  title: "Login - UniLeague Manager",
   description: "manage your tournaments efficiently",
 };
 

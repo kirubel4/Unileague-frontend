@@ -22,7 +22,7 @@ export function Layout({
         <TopBar userRole={userRoleDisplay} userName={userName} />
       </div>
 
-      <div className="flex flex-1">
+      <div className="flex pt-16 flex-1">
         <Sidebar role={role} />
         <main className={cn("flex-1 transition-all duration-300", "lg:ml-64")}>
           <div className="p-6 md:p-8">{children}</div>{" "}
