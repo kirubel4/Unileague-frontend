@@ -12,8 +12,8 @@ import useSWR from "swr";
 interface Team {
   id: string;
   name: string;
-  coach: string;
-  email: string;
+  coachName: string;
+  coachEmail: string;
   playerCount: number;
   registrationKey: string;
   joinDate: string;
@@ -33,9 +33,9 @@ export default function ManagerTeams() {
     data?.data?.map((t: any) => ({
       id: t.id,
       name: t.teamName || "Unknown Team",
-      coach: t.coach || "Coach Unknown",
-      email:
-        t.email ||
+      coachName: t.coachName || "Coach Unknown",
+      coachEmail:
+        t.coachEmail ||
         `${t.teamName?.toLowerCase().replace(/\s/g, "")}@example.com`,
       playerCount: t.playerCount ?? Math.floor(Math.random() * 20), // random if missing
       registrationKey:
@@ -51,7 +51,7 @@ export default function ManagerTeams() {
   const filteredTeams = teams.filter(
     (t) =>
       t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.coach.toLowerCase().includes(searchTerm.toLowerCase())
+      t.coachName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -130,10 +130,10 @@ export default function ManagerTeams() {
                         {team.name}
                       </td>
                       <td className="py-3 px-4 text-sm text-muted-foreground">
-                        {team.coach}
+                        {team.coachName}
                       </td>
                       <td className="py-3 px-4 text-sm text-muted-foreground">
-                        {team.email}
+                        {team.coachEmail}
                       </td>
                       <td className="py-3 px-4 text-sm text-muted-foreground flex items-center gap-2">
                         <Users className="w-4 h-4" />

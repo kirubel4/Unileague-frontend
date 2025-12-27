@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/button";
 
 import { ChevronLeft, CheckCircle } from "lucide-react";
 import { useState } from "react";
-import { Match, TournamentFormat } from "./ManagerFixturesSetup";
+import { Match, Team, TournamentFormat } from "./ManagerFixturesSetup";
 import { useRouter } from "next/navigation";
+import { MatchWeekPreview } from "@/app/(private)/manager/fixtures/setup/page";
 
 type Props = {
   format: TournamentFormat;
-  selectedTeams: number[];
-  matches: Match[];
+  selectedTeams: Team[];
+  matches: MatchWeekPreview[];
   onBack: () => void;
 };
 
@@ -84,7 +85,9 @@ export default function ManagerFixturesConfirm({
             <DetailRow label="Teams" value={selectedTeams.length.toString()} />
             <DetailRow
               label="Total Matches"
-              value={matches.length.toString()}
+              value={matches
+                .reduce((acc, w) => acc + w.matches.length, 0)
+                .toString()}
             />
           </div>
 

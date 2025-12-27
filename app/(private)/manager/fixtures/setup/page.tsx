@@ -6,60 +6,56 @@ import ManagerFixturesSetup, {
 } from "@/components/pages/ManagerFixturesSetup";
 import { useState } from "react";
 
-export type TournamentFormat = "league" | "knockout";
-
-export type Match = {
-  week: number;
-  homeTeam: string;
-  awayTeam: string;
-  date: string;
-};
-export function generateFixtures(
-  teams: Team[],
-  format: TournamentFormat,
-  selectedTeamIds: number[]
-): Match[] {
-  if (selectedTeamIds.length < 2) return [];
-
-  const selectedTeams = selectedTeamIds
-    .map((id) => teams.find((t) => t.id === id))
-    .filter(Boolean) as Team[];
-
-  const matches: Match[] = [];
-  let week = 1;
-
-  for (let i = 0; i < selectedTeams.length; i++) {
-    for (let j = i + 1; j < selectedTeams.length; j++) {
-      matches.push({
-        week,
-        homeTeam: selectedTeams[i].name,
-        awayTeam: selectedTeams[j].name,
-        date: `Week ${week}`,
-      });
-      week++;
-    }
-  }
-
-  return matches;
+export type TournamentFormat = "League" | "knockout";
+export interface MatchWeekPreview {
+  matchWeek: number;
+  matches: MatchPreview[];
+}
+export interface MatchPreview {
+  homeTeamId: string; // later you can switch to UUID
+  awayTeamId: string;
+  homeTeamName: string;
+  awayTeamName: string;
+  date?: string; // ISO date string (API-safe)
 }
 
-const MOCK_TEAMS: Team[] = [
-  { id: 1, name: "Red Lions FC" },
-  { id: 2, name: "Blue Warriors" },
-  { id: 3, name: "Golden Eagles" },
-  { id: 4, name: "Thunder United" },
-  { id: 5, name: "Phoenix FC" },
-  { id: 6, name: "Black Stars" },
-  { id: 7, name: "City Rangers" },
-  { id: 8, name: "Victory SC" },
-];
+const generateFixture = async (
+  tournamentType: "League" | "knockout",
+  round: number,
+  matchesPerWeek: number,
+  startingDate: string,
+  teams: Team[]
+): Promise<MatchWeekPreview[]> => {
+  try {
+    const res = await fetch("/api/protected/manager/match/generateFixture", {
+      method: "POST",
+      body: JSON.stringify({
+        tournamentType,
+        round,
+        matchesPerWeek,
+        startingDate,
+        teams,
+      }),
+    });
+    if (!res) {
+      console.log("somting went wrong ");
+      return [];
+    }
+    const data = await res.json();
+    return data.data;
+  } catch (error) {
+    console.log("somting went wron gcathced ");
+    return [];
+  }
+};
 
 export default function ManagerFixturesWizard() {
+  const [isGenerating, setIsGenerating] = useState(false);
   const [step, setStep] = useState<"setup" | "preview" | "confirm">("setup");
-  const [teams] = useState<Team[]>(MOCK_TEAMS);
-  const [format, setFormat] = useState<TournamentFormat>("league");
-  const [selectedTeams, setSelectedTeams] = useState<number[]>([]);
-  const [matches, setMatches] = useState<Match[]>([]);
+  const [teams] = useState<Team[]>([]);
+  const [format, setFormat] = useState<TournamentFormat>("League");
+  const [selectedTeams, setSelectedTeams] = useState<Team[]>([]);
+  const [matches, setMatches] = useState<MatchWeekPreview[] | []>([]);
 
   return (
     <>
@@ -70,11 +66,20 @@ export default function ManagerFixturesWizard() {
           setFormat={setFormat}
           selectedTeams={selectedTeams}
           setSelectedTeams={setSelectedTeams}
-          onNext={() => {
-            const generated = generateFixtures(teams, format, selectedTeams);
-
-            setMatches(generated);
+          isLoading={isGenerating}
+          onNext={async () => {
+            setIsGenerating(true);
+            setMatches(
+              await generateFixture(
+                format,
+                2,
+                4,
+                "2025-01-15T00:00:00.000Z",
+                selectedTeams
+              )
+            );
             setStep("preview");
+            setIsGenerating(false);
           }}
         />
       )}

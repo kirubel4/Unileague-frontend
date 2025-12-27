@@ -1,10 +1,9 @@
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 
-import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
-export type TournamentFormat = "league" | "knockout";
+export type TournamentFormat = "League" | "knockout";
 export type Match = {
   week: number;
   homeTeam: string;
@@ -12,28 +11,29 @@ export type Match = {
   date: string;
 };
 export type Team = {
-  id: number;
+  id: string;
   name: string;
 };
 
 const MOCK_TEAMS: Team[] = [
-  { id: 1, name: "Red Lions FC" },
-  { id: 2, name: "Blue Warriors" },
-  { id: 3, name: "Golden Eagles" },
-  { id: 4, name: "Thunder United" },
-  { id: 5, name: "Phoenix FC" },
-  { id: 6, name: "Black Stars" },
-  { id: 7, name: "City Rangers" },
-  { id: 8, name: "Victory SC" },
+  { id: "1", name: "Red Lions FC" },
+  { id: "2", name: "Blue Warriors" },
+  { id: "3", name: "Golden Eagles" },
+  { id: "4", name: "Thunder United" },
+  { id: "5", name: "Phoenix FC" },
+  { id: "6", name: "Black Stars" },
+  { id: "7", name: "City Rangers" },
+  { id: "8", name: "Victory SC" },
 ];
 
 type Props = {
   teams: Team[];
   format: TournamentFormat;
   setFormat: (v: TournamentFormat) => void;
-  selectedTeams: number[];
-  setSelectedTeams: React.Dispatch<React.SetStateAction<number[]>>;
+  selectedTeams: Team[];
+  setSelectedTeams: React.Dispatch<React.SetStateAction<Team[]>>;
   onNext: () => void;
+  isLoading: boolean;
 };
 
 export default function ManagerFixturesSetup({
@@ -43,12 +43,15 @@ export default function ManagerFixturesSetup({
   selectedTeams,
   setSelectedTeams,
   onNext,
+  isLoading,
 }: Props) {
-  const userName = localStorage.getItem("userName") || "Manager";
+  const userName = "Manager";
 
-  const toggleTeam = (id: number) => {
+  const toggleTeam = (team: Team) => {
     setSelectedTeams((prev) =>
-      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
+      prev.some((t) => t.id === team.id)
+        ? prev.filter((t) => t.id !== team.id)
+        : [...prev, team]
     );
   };
 
@@ -63,13 +66,6 @@ export default function ManagerFixturesSetup({
     <Layout role="manager" userName={userName}>
       {/* Header */}
       <div className="mb-6">
-        <Link href="/manager/fixtures">
-          <Button variant="ghost" size="sm" className="mb-4">
-            <ChevronLeft className="w-4 h-4 mr-2" />
-            Back to Fixtures
-          </Button>
-        </Link>
-
         <h1 className="text-2xl md:text-3xl font-bold">Setup Fixtures</h1>
         <p className="text-muted-foreground mt-1">
           Step 1 of 4: Tournament setup
@@ -86,7 +82,7 @@ export default function ManagerFixturesSetup({
             {/* League */}
             <label
               className={`block border-2 rounded-lg p-5 cursor-pointer transition ${
-                format === "league"
+                format === "League"
                   ? "border-primary bg-blue-50"
                   : "border-border hover:border-primary"
               }`}
@@ -94,8 +90,8 @@ export default function ManagerFixturesSetup({
               <div className="flex items-start gap-3">
                 <input
                   type="radio"
-                  checked={format === "league"}
-                  onChange={() => setFormat("league")}
+                  checked={format === "League"}
+                  onChange={() => setFormat("League")}
                   className="mt-1"
                 />
                 <div>
@@ -162,7 +158,14 @@ export default function ManagerFixturesSetup({
               disabled={!canContinue}
               className="w-full h-10"
             >
-              Continue to Preview
+              {isLoading ? (
+                <>
+                  <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                  Generating fixtures...
+                </>
+              ) : (
+                "Continue to Preview"
+              )}
             </Button>
 
             <Link href="/manager/fixtures">
@@ -189,8 +192,8 @@ export default function ManagerFixturesSetup({
               >
                 <input
                   type="checkbox"
-                  checked={selectedTeams.includes(team.id)}
-                  onChange={() => toggleTeam(team.id)}
+                  checked={selectedTeams.includes(team)}
+                  onChange={() => toggleTeam(team)}
                 />
                 <span className="text-sm font-medium">{team.name}</span>
               </label>
