@@ -20,7 +20,6 @@ export default function ManagerNewsCreate() {
     title: "",
     excerpt: "",
     content: "",
-    tags: "",
   });
 
   const handleChange = (
@@ -67,6 +66,7 @@ export default function ManagerNewsCreate() {
     }
 
     setIsSubmitting(true);
+
     await new Promise((resolve) => setTimeout(resolve, 800));
     alert(`Article "${formData.title}" created successfully!`);
     navigate.push("/manager/news");

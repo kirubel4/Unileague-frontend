@@ -1,7 +1,6 @@
 "use client";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,15 +13,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
-  ChevronLeft,
   Clock,
   MapPin,
-  Users,
-  Trophy,
   RotateCw,
   Trash2,
   Plus,
@@ -32,72 +26,62 @@ import {
   User,
   AlertCircle,
 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
+import useSWR from "swr";
+import { fetcher } from "@/lib/utils";
+import { mapMatchDetail, mapPlayerNames } from "./util";
 
 interface Event {
-  id: number;
+  id: string;
   minute: number;
-  type: "goal" | "yellow" | "red" | "substitution";
+  type: "Goal" | "Yellow" | "Red";
   player: string;
   team: string;
 }
-
 export default function ManagerMatchesDetail() {
-  const userName = localStorage.getItem("userName") || "Manager";
+  const userName = "Manager";
+  const params = useParams();
+  const matchId = params.id as string;
 
-  const id = useSearchParams();
+  const { data, isLoading, error } = useSWR(
+    "/api/public/match/detail?id=" + matchId,
+    fetcher,
+    { revalidateOnFocus: false }
+  );
+
+  let homePlayers: string[] = [];
+  let awayPlayers: string[] = [];
+  const matches = mapMatchDetail(data?.data);
   const [refreshing, setRefreshing] = useState(false);
   const [goalHomeTeam, setGoalHomeTeam] = useState(2);
   const [goalAwayTeam, setGoalAwayTeam] = useState(1);
   const [eventPlayer, setEventPlayer] = useState("");
   const [eventTeam, setEventTeam] = useState<"home" | "away">("home");
-  const [eventType, setEventType] = useState<"goal" | "yellow" | "red">("goal");
-  const [events, setEvents] = useState<Event[]>([
-    {
-      id: 1,
-      minute: 12,
-      type: "goal",
-      player: "Alex Johnson",
-      team: "Tigers United",
-    },
-    {
-      id: 2,
-      minute: 28,
-      type: "yellow",
-      player: "Mike Smith",
-      team: "Phoenix FC",
-    },
-    {
-      id: 3,
-      minute: 45,
-      type: "goal",
-      player: "Carlos Rodriguez",
-      team: "Tigers United",
-    },
-    {
-      id: 4,
-      minute: 67,
-      type: "substitution",
-      player: "David Lee",
-      team: "Phoenix FC",
-    },
-  ]);
+  const [eventType, setEventType] = useState<"Goal" | "Yellow" | "Red">("Goal");
+  const [events, setEvents] = useState<Event[]>([]);
+  if (matches.homeTeam && matches.awayTeam) {
+    const {
+      data: homeTeam,
+      isLoading: load,
+      error: er,
+    } = useSWR("/api/public/player/team?id=" + matches?.homeTeam?.id, fetcher, {
+      revalidateOnFocus: false,
+    });
+    homePlayers = mapPlayerNames(homeTeam?.data);
 
-  const homePlayers = [
-    "Alex Johnson",
-    "Carlos Rodriguez",
-    "Michael Brown",
-    "James Wilson",
-  ];
-  const awayPlayers = [
-    "Mike Smith",
-    "David Lee",
-    "Chris Taylor",
-    "Robert Chen",
-  ];
+    const {
+      data: awayTeam,
+      isLoading: loading,
+      error: err,
+    } = useSWR("/api/public/player/team?id=" + matches?.awayTeam?.id, fetcher, {
+      revalidateOnFocus: false,
+    });
+    awayPlayers = mapPlayerNames(awayTeam?.data);
+    console.log(awayPlayers);
+  }
 
   const match = {
-    id: id || "3",
+    id: matchId || "3",
     homeTeam: "Tigers United",
     awayTeam: "Phoenix FC",
     homeScore: goalHomeTeam,
@@ -124,7 +108,7 @@ export default function ManagerMatchesDetail() {
     if (!eventPlayer.trim()) return;
 
     const newEvent: Event = {
-      id: Math.max(...events.map((e) => e.id), 0) + 1,
+      id: "Math.max(...events.map((e) => e.id), 0) + 1",
       minute: match.minute,
       type: eventType,
       player: eventPlayer,
@@ -133,7 +117,7 @@ export default function ManagerMatchesDetail() {
 
     setEvents([newEvent, ...events]);
 
-    if (eventType === "goal") {
+    if (eventType === "Goal") {
       if (eventTeam === "home") {
         setGoalHomeTeam(goalHomeTeam + 1);
       } else {
@@ -142,43 +126,40 @@ export default function ManagerMatchesDetail() {
     }
 
     setEventPlayer("");
-    setEventType("goal");
+    setEventType("Goal");
     setEventTeam("home");
   };
 
-  const removeEvent = (id: number) => {
+  const removeEvent = (id: string) => {
     setEvents(events.filter((event) => event.id !== id));
   };
 
   const getEventIcon = (type: Event["type"]) => {
     switch (type) {
-      case "goal":
+      case "Goal":
         return "⚽";
-      case "yellow":
+      case "Yellow":
         return "🟨";
-      case "red":
+      case "Red":
         return "🟥";
-
-      default:
-        return "•";
     }
   };
 
   const getEventColor = (type: Event["type"]) => {
     switch (type) {
-      case "goal":
+      case "Goal":
         return "border-l-4 border-l-green-500 bg-green-50/50";
-      case "yellow":
+      case "Yellow":
         return "border-l-4 border-l-yellow-500 bg-yellow-50/50";
-      case "red":
+      case "Red":
         return "border-l-4 border-l-red-500 bg-red-50/50";
-      case "substitution":
-        return "border-l-4 border-l-blue-500 bg-blue-50/50";
+
       default:
         return "border-l-4 border-l-gray-500 bg-gray-50/50";
     }
   };
-
+  if (isLoading) return <p>Loading match...</p>;
+  if (!data?.data) return <p>Match not found</p>;
   return (
     <Layout role="manager" userName={userName}>
       {/* Header */}
@@ -194,7 +175,7 @@ export default function ManagerMatchesDetail() {
               </p>
             </div>
           </div>
-          {match.status === "live" && (
+          {matches.status === "LIVE" && (
             <Badge className="px-4 py-1.5 text-sm font-semibold bg-green-500/10 text-green-600 border-green-200">
               <span className="animate-pulse mr-2">●</span>
               LIVE - {match.minute}'
@@ -216,11 +197,8 @@ export default function ManagerMatchesDetail() {
                       </div>
                       <div>
                         <h2 className="text-2xl md:text-3xl font-bold">
-                          {match.homeTeam}
+                          {matches.homeTeam.name}
                         </h2>
-                        <p className="text-primary-foreground/80 text-sm mt-1">
-                          {match.homeFormation}
-                        </p>
                       </div>
                     </div>
                   </div>
@@ -228,16 +206,16 @@ export default function ManagerMatchesDetail() {
                   {/* Score */}
                   <div className="px-8 py-6 bg-white/10 backdrop-blur-sm rounded-2xl">
                     <div className="text-5xl md:text-7xl font-bold text-center mb-2 tracking-tighter">
-                      {match.homeScore}
+                      {matches.score.home}
                       <span className="mx-4 text-3xl md:text-5xl font-light">
                         :
                       </span>
-                      {match.awayScore}
+                      {matches.score.away}
                     </div>
 
                     {match.status === "live" ? (
                       <p className="lg:mt-5 text-white/80 text-center text-sm font-medium">
-                        Minute {match.minute}
+                        Minute {matches.scheduledDate}
                       </p>
                     ) : (
                       <p className="text-white/80 lg:mb-5 text-center text-sm font-medium">
@@ -251,11 +229,8 @@ export default function ManagerMatchesDetail() {
                     <div className="flex items-center justify-center gap-4 mb-3">
                       <div>
                         <h2 className="text-2xl md:text-3xl font-bold">
-                          {match.awayTeam}
+                          {matches.awayTeam.name}
                         </h2>
-                        <p className="text-primary-foreground/80 text-sm mt-1">
-                          {match.awayFormation}
-                        </p>
                       </div>
                       <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
                         <Shield className="w-8 h-8" />
@@ -295,7 +270,7 @@ export default function ManagerMatchesDetail() {
                             Venue
                           </p>
                           <p className="font-semibold text-foreground">
-                            {match.venue}
+                            {matches.venue}
                           </p>
                         </div>
                       </div>
@@ -306,7 +281,7 @@ export default function ManagerMatchesDetail() {
                             Start Time
                           </p>
                           <p className="font-semibold text-foreground">
-                            {match.startTime}
+                            {matches.scheduledDate}
                           </p>
                         </div>
                       </div>
@@ -319,7 +294,7 @@ export default function ManagerMatchesDetail() {
                             Referee
                           </p>
                           <p className="font-semibold text-foreground">
-                            {match.referee}
+                            {/* {matches.} */}Referee
                           </p>
                         </div>
                       </div>
@@ -330,7 +305,7 @@ export default function ManagerMatchesDetail() {
                             Status
                           </p>
                           <p className="font-semibold text-primary capitalize">
-                            {match.status}
+                            {matches.status}
                           </p>
                         </div>
                       </div>
@@ -345,7 +320,7 @@ export default function ManagerMatchesDetail() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <User className="w-5 h-5" />
-                      {match.homeTeam}
+                      {matches.homeTeam.name}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -355,7 +330,7 @@ export default function ManagerMatchesDetail() {
                           Coach
                         </p>
                         <p className="font-semibold text-foreground text-lg">
-                          {match.homeCoach}
+                          {/* {matches} */}Coach Ali
                         </p>
                       </div>
                       <Separator />
@@ -364,7 +339,7 @@ export default function ManagerMatchesDetail() {
                           Current Score
                         </p>
                         <p className="text-4xl font-bold text-primary mt-2">
-                          {match.homeScore}
+                          {matches.score.home}
                         </p>
                       </div>
                     </div>
@@ -375,7 +350,7 @@ export default function ManagerMatchesDetail() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <User className="w-5 h-5" />
-                      {match.awayTeam}
+                      {matches.awayTeam.name}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -385,7 +360,7 @@ export default function ManagerMatchesDetail() {
                           Coach
                         </p>
                         <p className="font-semibold text-foreground text-lg">
-                          {match.awayCoach}
+                          {/* {matches} */}Coach Maria
                         </p>
                       </div>
                       <Separator />
@@ -394,7 +369,7 @@ export default function ManagerMatchesDetail() {
                           Current Score
                         </p>
                         <p className="text-4xl font-bold text-primary mt-2">
-                          {match.awayScore}
+                          {matches.score.away}
                         </p>
                       </div>
                     </div>
@@ -410,14 +385,14 @@ export default function ManagerMatchesDetail() {
                 <div className="flex items-center justify-between">
                   <CardTitle>Match Events Timeline</CardTitle>
                   <Badge variant="outline" className="font-normal">
-                    {events.length} events
+                    {matches.events.length} events
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {events.length > 0 ? (
-                    events.map((event) => (
+                  {matches.events.length > 0 ? (
+                    matches.events.map((event) => (
                       <div
                         key={event.id}
                         className={`p-4 rounded-lg flex items-center justify-between transition-all hover:shadow-sm ${getEventColor(
@@ -431,13 +406,13 @@ export default function ManagerMatchesDetail() {
                           <div>
                             <div className="flex items-center gap-2">
                               <p className="font-semibold text-foreground">
-                                {event.player}
+                                {event?.player?.name}
                               </p>
                               <Badge
                                 variant="secondary"
                                 className="text-xs font-normal"
                               >
-                                {event.team}
+                                {event?.team?.teamName}
                               </Badge>
                             </div>
                             <p className="text-xs text-muted-foreground mt-1 capitalize">
@@ -513,8 +488,12 @@ export default function ManagerMatchesDetail() {
                           <SelectValue placeholder="Select team" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="home">{match.homeTeam}</SelectItem>
-                          <SelectItem value="away">{match.awayTeam}</SelectItem>
+                          <SelectItem value="home">
+                            {matches.homeTeam.name}
+                          </SelectItem>
+                          <SelectItem value="away">
+                            {matches.awayTeam.name}
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -528,7 +507,7 @@ export default function ManagerMatchesDetail() {
                       </Label>
                       <Select
                         value={eventType}
-                        onValueChange={(value: "goal" | "yellow" | "red") =>
+                        onValueChange={(value: "Goal" | "Yellow" | "Red") =>
                           setEventType(value)
                         }
                       >

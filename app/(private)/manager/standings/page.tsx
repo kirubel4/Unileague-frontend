@@ -1,9 +1,19 @@
 "use client";
 import { Layout } from "@/components/Layout";
+import { fetcher } from "@/lib/utils";
+import useSWR from "swr";
+import { mapApiDataToTable } from "./util";
 
 export default function ManagerStandings() {
   const userName = localStorage.getItem("userName") || "Manager";
-
+  const { data, isLoading, error } = useSWR(
+    "/api/public/tournament/standings?id=fb1c80f4-7ffc-4b84-b329-d08511349fa2",
+    fetcher,
+    {
+      revalidateOnFocus: false,
+    }
+  );
+  const standing = mapApiDataToTable(data?.data || []);
   const standings = [
     {
       rank: 1,
@@ -102,7 +112,10 @@ export default function ManagerStandings() {
                   L
                 </th>
                 <th className="text-center py-3 px-4 font-semibold text-sm text-muted-foreground">
-                  GF:GA
+                  GF
+                </th>
+                <th className="text-center py-3 px-4 font-semibold text-sm text-muted-foreground">
+                  GA
                 </th>
                 <th className="text-center py-3 px-4 font-semibold text-sm text-muted-foreground">
                   Pts
@@ -110,7 +123,7 @@ export default function ManagerStandings() {
               </tr>
             </thead>
             <tbody>
-              {standings.map((row, idx) => (
+              {standing.map((row, idx) => (
                 <tr
                   key={idx}
                   className={`border-b border-border ${
@@ -152,7 +165,10 @@ export default function ManagerStandings() {
                     {row.losses}
                   </td>
                   <td className="py-3 px-4 text-center text-sm text-muted-foreground">
-                    {row.goals}
+                    {row.goalsFor}
+                  </td>
+                  <td className="py-3 px-4 text-center text-sm text-muted-foreground">
+                    {row.goalsAgainst}
                   </td>
                   <td className="py-3 px-4 text-center text-sm font-bold text-primary">
                     {row.points}

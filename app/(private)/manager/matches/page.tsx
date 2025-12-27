@@ -1,60 +1,52 @@
 "use client";
 import { Layout } from "@/components/Layout";
-import { Button } from "@/components/ui/button";
+import { fetcher } from "@/lib/utils";
 import Link from "next/link";
-
 import { useState } from "react";
+import useSWR from "swr";
+export type MatchStatus = "SCHEDULED" | "LIVE" | "FINISHED";
+
+export interface ApiMatch {
+  id: string;
+  scheduledDate: string;
+  venue: string;
+  status: MatchStatus;
+  homeScore: number | null;
+  awayScore: number | null;
+  matchWeek: number | null;
+
+  homeTeam: {
+    id: string;
+    teamName: string;
+  };
+
+  awayTeam: {
+    id: string;
+    teamName: string;
+  };
+}
+const formatDateTime = (value: string) => {
+  const [time, date] = value.split(" ");
+  return { time, date };
+};
 
 export default function ManagerMatches() {
-  const userName = localStorage.getItem("userName") || "Manager";
+  const userName = "Manager";
   const [activeTab, setActiveTab] = useState<
     "scheduled" | "live" | "completed"
   >("scheduled");
-
-  const matches = {
-    scheduled: [
-      {
-        id: 1,
-        homeTeam: "Tigers United",
-        awayTeam: "Phoenix FC",
-        date: "Dec 20, 2024",
-        time: "15:00",
-        venue: "Central Stadium",
-      },
-      {
-        id: 2,
-        homeTeam: "Eagles Sports",
-        awayTeam: "Lions Club",
-        date: "Dec 21, 2024",
-        time: "14:00",
-        venue: "North Field",
-      },
-    ],
-    live: [
-      {
-        id: 3,
-        homeTeam: "Champions FC",
-        awayTeam: "Warriors",
-        score: "2 - 1",
-        minute: "67",
-      },
-    ],
-    completed: [
-      {
-        id: 4,
-        homeTeam: "Strikers",
-        awayTeam: "Victory Team",
-        score: "3 - 2",
-        date: "Dec 18, 2024",
-      },
-      {
-        id: 5,
-        homeTeam: "Titans",
-        awayTeam: "Dragons",
-        score: "1 - 1",
-        date: "Dec 17, 2024",
-      },
-    ],
+  const { data, isLoading, error } = useSWR(
+    `/api/public/match?id=fb1c80f4-7ffc-4b84-b329-d08511349fa2`,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+    }
+  );
+  const apiMatches: ApiMatch[] = data?.data ?? [];
+  const matchesByTab = {
+    scheduled: apiMatches.filter((m) => m.status === "SCHEDULED"),
+    live: apiMatches.filter((m) => m.status === "LIVE"),
+    completed: apiMatches.filter((m) => m.status === "FINISHED"),
   };
 
   return (
@@ -80,9 +72,9 @@ export default function ManagerMatches() {
             }`}
           >
             {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            {tab === "scheduled" && ` (${matches.scheduled.length})`}
-            {tab === "live" && ` (${matches.live.length})`}
-            {tab === "completed" && ` (${matches.completed.length})`}
+            {tab === "scheduled" && ` (${matchesByTab.scheduled.length})`}
+            {tab === "live" && ` (${matchesByTab.live.length})`}
+            {tab === "completed" && ` (${matchesByTab.completed.length})`}
           </button>
         ))}
       </div>
@@ -90,81 +82,100 @@ export default function ManagerMatches() {
       {/* Content */}
       <div className="space-y-4">
         {activeTab === "scheduled" &&
-          matches.scheduled.map((match) => (
-            <Link key={match.id} href={`/manager/matches/${match.id}`}>
-              <div className="bg-white rounded-lg border border-border p-4 hover:shadow-md transition-shadow cursor-pointer">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-semibold text-primary">
-                    {match.date} at {match.time}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {match.venue}
-                  </span>
+          matchesByTab.scheduled.map((match) => {
+            const { date, time } = formatDateTime(match.scheduledDate);
+
+            return (
+              <Link key={match.id} href={`/manager/matches/${match.id}`}>
+                <div className="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-semibold text-primary">
+                      {date} at {time}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {match.venue}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium flex-1">
+                      {match.homeTeam.teamName}
+                    </span>
+                    <span className="text-muted-foreground px-3">vs</span>
+                    <span className="font-medium flex-1 text-right">
+                      {match.awayTeam.teamName}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-foreground flex-1">
-                    {match.homeTeam}
-                  </span>
-                  <span className="text-muted-foreground text-sm px-3">vs</span>
-                  <span className="font-medium text-foreground flex-1 text-right">
-                    {match.awayTeam}
-                  </span>
-                </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
 
         {activeTab === "live" &&
-          matches.live.map((match) => (
+          matchesByTab.live.map((match) => (
             <Link key={match.id} href={`/manager/matches/${match.id}`}>
-              <div className="bg-white rounded-lg border-2 border-green-500 p-4 hover:shadow-md transition-shadow cursor-pointer">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-semibold px-3 py-1 bg-green-100 text-green-700 rounded-full">
-                    🔴 LIVE - Min {match.minute}
+              <div className="bg-white rounded-lg border-2 border-green-500 p-4">
+                <span className="text-sm font-semibold bg-green-100 text-green-700 px-3 py-1 rounded-full">
+                  🔴 LIVE
+                </span>
+
+                <div className="flex justify-between mt-3">
+                  <span>{match.homeTeam.teamName}</span>
+                  <span className="font-bold text-lg">
+                    {match.homeScore} - {match.awayScore}
                   </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-foreground flex-1">
-                    {match.homeTeam}
-                  </span>
-                  <span className="text-xl font-bold text-primary px-4">
-                    {match.score}
-                  </span>
-                  <span className="font-medium text-foreground flex-1 text-right">
-                    {match.awayTeam}
-                  </span>
+                  <span>{match.awayTeam.teamName}</span>
                 </div>
               </div>
             </Link>
           ))}
 
         {activeTab === "completed" &&
-          matches.completed.map((match) => (
+          matchesByTab.completed.map((match) => (
             <Link key={match.id} href={`/manager/matches/${match.id}`}>
-              <div className="bg-white rounded-lg border border-border p-4 hover:shadow-md transition-shadow cursor-pointer opacity-75">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-semibold text-muted-foreground">
-                    {match.date}
+              <div
+                className="
+      w-full
+      max-w-2xl
+      bg-white
+      rounded-xl
+      border
+      px-6
+      py-4
+      hover:shadow-md
+      transition
+      opacity-90
+    "
+              >
+                {/* Date */}
+                <div className="text-center mb-3">
+                  <span className="text-xs text-muted-foreground">
+                    {match.scheduledDate}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-foreground flex-1">
-                    {match.homeTeam}
+
+                {/* Teams + Score */}
+                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+                  <span className="text-right font-medium truncate">
+                    {match.homeTeam.teamName}
                   </span>
-                  <span className="text-lg font-bold text-foreground px-4">
-                    {match.score}
+
+                  <span className="text-lg font-bold text-primary">
+                    {match.homeScore} - {match.awayScore}
                   </span>
-                  <span className="font-medium text-foreground flex-1 text-right">
-                    {match.awayTeam}
+
+                  <span className="text-left font-medium truncate">
+                    {match.awayTeam.teamName}
                   </span>
                 </div>
               </div>
             </Link>
           ))}
 
-        {((activeTab === "scheduled" && matches.scheduled.length === 0) ||
-          (activeTab === "live" && matches.live.length === 0) ||
-          (activeTab === "completed" && matches.completed.length === 0)) && (
+        {((activeTab === "scheduled" && matchesByTab.scheduled.length === 0) ||
+          (activeTab === "live" && matchesByTab.live.length === 0) ||
+          (activeTab === "completed" &&
+            matchesByTab.completed.length === 0)) && (
           <div className="text-center py-8 text-muted-foreground">
             <p>No {activeTab} matches</p>
           </div>
