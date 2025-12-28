@@ -3,16 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    // manager id and tournament id form the cookie now we are doing it hardcoded till auth is implemented
-    const managerId = "70cceb22-1547-40c8-8965-dbc68729c885";
-    const tournamentId = "fb1c80f4-7ffc-4b84-b329-d08511349fa2";
-    const body = await request.json();
-    const val = {
-      ...body,
-      tournamentId,
-      managerId,
-    };
-
+    const id = "fb1c80f4-7ffc-4b84-b329-d08511349fa2";
+    const formData = await request.formData();
+    formData.append("tournamentId", id);
     const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backend) {
       return NextResponse.json(
@@ -21,14 +14,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const res = await fetch(`${backend}/manager/player/transfer`, {
+    const res = await fetch(`${backend}/manager/team/create`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(val),
+      body: formData,
     });
 
     const data: ApiResponse = await res.json();
-    console.log("Proxy response data:", data.message);
+    console.log(data);
     return NextResponse.json(data, { status: res.status });
   } catch (error) {
     console.error("Proxy create error:", error);

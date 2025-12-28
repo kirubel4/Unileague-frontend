@@ -1,8 +1,15 @@
+import { mapTeams } from "@/app/(private)/manager/players/transfer/util";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
+import { fetcher } from "@/lib/utils";
 
 import Link from "next/link";
-
+import { useState } from "react";
+import useSWR from "swr";
+export type LeagueConfig = {
+  rounds: number;
+  matchesPerWeek: number;
+};
 export type TournamentFormat = "League" | "knockout";
 export type Match = {
   week: number;
@@ -10,22 +17,11 @@ export type Match = {
   awayTeam: string;
   date: string;
 };
+
 export type Team = {
   id: string;
   name: string;
 };
-
-const MOCK_TEAMS: Team[] = [
-  { id: "1", name: "Red Lions FC" },
-  { id: "2", name: "Blue Warriors" },
-  { id: "3", name: "Golden Eagles" },
-  { id: "4", name: "Thunder United" },
-  { id: "5", name: "Phoenix FC" },
-  { id: "6", name: "Black Stars" },
-  { id: "7", name: "City Rangers" },
-  { id: "8", name: "Victory SC" },
-];
-
 type Props = {
   teams: Team[];
   format: TournamentFormat;
@@ -46,7 +42,18 @@ export default function ManagerFixturesSetup({
   isLoading,
 }: Props) {
   const userName = "Manager";
+  const {
+    data,
+    error,
+    isLoading: load,
+  } = useSWR("/api/public/team/tournament", fetcher, {
+    revalidateOnFocus: false,
+  });
+  const [rounds, setRounds] = useState(1);
+  const [matchesPerWeek, setMatchesPerWeek] = useState(1);
 
+  const Teams: Team[] = mapTeams(data || { data: [] });
+  console.log(Teams);
   const toggleTeam = (team: Team) => {
     setSelectedTeams((prev) =>
       prev.some((t) => t.id === team.id)
@@ -106,6 +113,35 @@ export default function ManagerFixturesSetup({
                   </ul>
                 </div>
               </div>
+              {format === "League" && (
+                <div className="mt-4 grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">Rounds</label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={rounds}
+                      onChange={(e) => setRounds(Number(e.target.value))}
+                      className="mt-1 w-full border rounded px-2 py-1"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">
+                      Matches per week
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={matchesPerWeek}
+                      onChange={(e) =>
+                        setMatchesPerWeek(Number(e.target.value))
+                      }
+                      className="mt-1 w-full border rounded px-2 py-1"
+                    />
+                  </div>
+                </div>
+              )}
             </label>
 
             {/* Knockout */}
@@ -154,7 +190,7 @@ export default function ManagerFixturesSetup({
           {/* Actions */}
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
             <Button
-              onClick={onNext}
+              onClick={() => onNext()}
               disabled={!canContinue}
               className="w-full h-10"
             >
@@ -184,17 +220,18 @@ export default function ManagerFixturesSetup({
             Select teams to include
           </p>
 
-          <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
-            {MOCK_TEAMS.map((team) => (
+          <div className="space-y-2  overflow-y-auto pr-1">
+            {Teams?.map((team) => (
               <label
                 key={team.id}
                 className="flex items-center gap-3 border rounded-md p-2 cursor-pointer hover:bg-muted"
               >
                 <input
                   type="checkbox"
-                  checked={selectedTeams.includes(team)}
+                  checked={selectedTeams.some((t) => t.id === team.id)}
                   onChange={() => toggleTeam(team)}
                 />
+
                 <span className="text-sm font-medium">{team.name}</span>
               </label>
             ))}

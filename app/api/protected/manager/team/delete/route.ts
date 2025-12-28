@@ -1,17 +1,16 @@
 import { ApiResponse } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+export async function DELETE(request: NextRequest) {
   try {
-    // manager id and tournament id form the cookie now we are doing it hardcoded till auth is implemented
-    const managerId = "70cceb22-1547-40c8-8965-dbc68729c885";
-    const tournamentId = "fb1c80f4-7ffc-4b84-b329-d08511349fa2";
-    const body = await request.json();
-    const val = {
-      ...body,
-      tournamentId,
-      managerId,
-    };
+    const id = request.nextUrl.searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json(
+        { message: "team id is required" },
+        { status: 400 }
+      );
+    }
 
     const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backend) {
@@ -21,10 +20,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const res = await fetch(`${backend}/manager/player/transfer`, {
-      method: "POST",
+    const res = await fetch(`${backend}/manager/team/delete/${id}`, {
+      method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(val),
     });
 
     const data: ApiResponse = await res.json();

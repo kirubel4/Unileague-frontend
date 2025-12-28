@@ -96,7 +96,7 @@ export default function ManagerFixturesPreview({
       </div>
 
       {/* Actions */}
-      <div className="flex gap-3">
+      <div className="flex-col gap-3">
         <Button
           onClick={onNext}
           variant="outline"
@@ -104,7 +104,6 @@ export default function ManagerFixturesPreview({
         >
           Continue to Confirm
         </Button>
-
         <Button variant="outline" onClick={onBack}>
           Back
         </Button>

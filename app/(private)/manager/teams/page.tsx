@@ -2,7 +2,7 @@
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { fetcher } from "@/lib/utils";
+import { ApiResponse, fetcher } from "@/lib/utils";
 
 import { Trash2, Edit, Plus, Users } from "lucide-react";
 import Link from "next/link";
@@ -13,21 +13,37 @@ export default function ManagerTeams() {
   const userName = "Manager";
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data, error, isLoading } = useSWR(
-    "/api/public/team/tournament",
-    fetcher,
-    {
-      revalidateOnFocus: false,
-    }
-  );
+  const {
+    data,
+    error,
+    isLoading,
+    mutate: teamMutate,
+  } = useSWR("/api/public/team/tournament", fetcher, {
+    revalidateOnFocus: false,
+  });
 
   const teams: Team[] = mapTeams(data || { data: [] });
 
   const filteredTeams = teams.filter(
     (t) =>
       t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.coachEmail.toLowerCase().includes(searchTerm.toLowerCase())
+      t.coachName.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  async function handleDelete(id: string) {
+    const res = await fetch(`/api/protected/manager/team/delete?id=${id}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    });
+    const response: ApiResponse = await res.json();
+    if (!response.success) {
+      console.log(response.message);
+      return;
+    }
+    console.log("deleted");
+    await teamMutate();
+    return;
+  }
 
   return (
     <Layout role="manager" userName={userName}>
@@ -100,10 +116,10 @@ export default function ManagerTeams() {
                         {team.name}
                       </td>
                       <td className="py-3 px-4 text-sm text-muted-foreground">
-                        {team.coachEmail}
+                        {team.coachName}
                       </td>
                       <td className="py-3 px-4 text-sm text-muted-foreground">
-                        {team.coachName}
+                        {team.coachEmail}
                       </td>
                       <td className="py-3 px-4 text-sm text-muted-foreground flex items-center gap-2">
                         <Users className="w-4 h-4" />
@@ -125,7 +141,7 @@ export default function ManagerTeams() {
                             variant="outline"
                             size="sm"
                             className="gap-1 h-8 rounded text-destructive hover:bg-red-50"
-                            onClick={() => alert("Delete team: " + team.name)}
+                            onClick={() => handleDelete(team.id)}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>

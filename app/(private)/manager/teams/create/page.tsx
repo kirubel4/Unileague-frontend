@@ -4,34 +4,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { useState } from "react";
-import { ChevronLeft, Copy, Check } from "lucide-react";
+import { useRef, useState } from "react";
+import { ChevronLeft, Copy, Check, Upload, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { ApiResponse } from "@/lib/utils";
 
 export default function ManagerTeamsCreate() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const userName = localStorage.getItem("userName") || "Manager";
   const navigate = useRouter();
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
   const [formData, setFormData] = useState({
     teamName: "",
     coachName: "",
     coachEmail: "",
-    registrationKey: "",
   });
-
-  const generateRegistrationKey = () => {
-    const key =
-      "TEAM" + Math.random().toString(36).substring(2, 10).toUpperCase();
-    setFormData((prev) => ({ ...prev, registrationKey: key }));
-  };
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(formData.registrationKey);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -40,23 +31,60 @@ export default function ManagerTeamsCreate() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!imageFile) {
+      alert("Please upload a team logo");
+      return;
+    }
     setIsSubmitting(true);
-    setTimeout(() => {
-      alert(`Team "${formData.teamName}" registered successfully!`);
-      navigate.push("/manager/teams");
-    }, 800);
-  };
+    const fd = new FormData();
+    fd.append("teamName", formData.teamName);
+    fd.append("coachName", formData.coachName);
+    fd.append("coachEmail", formData.coachEmail);
+    fd.append("logo", imageFile);
 
+    const res = await fetch("/api/protected/manager/team/create", {
+      method: "POST",
+      body: fd,
+    });
+    const response: ApiResponse = await res.json();
+    if (!response.success) {
+      console.log(response.message);
+      return;
+    }
+    console.log("team created and registered");
+    navigate.push("/manager/teams");
+  };
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        alert("Please select an image file");
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Image size should be less than 5MB");
+        return;
+      }
+      setImageFile(file);
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setPreviewImage(event.target.result as string);
+          // Auto-generate title from filename
+          const fileName = file.name.replace(/\.[^/.]+$/, "");
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   return (
     <Layout role="manager" userName={userName}>
       {/* Header */}
       <div className="mb-8">
-        <Link href="/manager/teams">
-          <Button variant="ghost" size="sm" className="mb-4">
-            <ChevronLeft className="w-4 h-4 mr-2" />
-            Back to Teams
-          </Button>
-        </Link>
         <h1 className="text-3xl font-bold text-foreground">Register Team</h1>
         <p className="text-muted-foreground mt-2">
           Create a new team for the tournament
@@ -116,55 +144,62 @@ export default function ManagerTeamsCreate() {
               />
             </div>
 
-            {/* Registration Key */}
+            <div className="space-y-4">
+              <Label>Team Logo</Label>
+              {previewImage ? (
+                <div className="relative rounded-lg overflow-hidden border border-border">
+                  <div className="aspect-video bg-muted relative">
+                    <img
+                      src={previewImage}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      onClick={() => setPreviewImage(null)}
+                      className="absolute top-3 right-3 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
+                    >
+                      <X className="w-4 h-4 text-white" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:bg-accent/50 transition-colors"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="p-3 bg-primary/10 rounded-full">
+                      <Upload className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">
+                        Click to select image
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        PNG, JPG, GIF up to 5MB
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="registrationKey" className="font-medium">
                 Team Registration Key
               </Label>
-              <div className="flex gap-2">
-                <Input
-                  id="registrationKey"
-                  name="registrationKey"
-                  value={formData.registrationKey}
-                  readOnly
-                  placeholder="Auto-generated"
-                  className="h-10 rounded-lg flex-1"
-                />
-                <Button
-                  type="button"
-                  onClick={generateRegistrationKey}
-                  variant="outline"
-                  className="rounded-lg h-10"
-                >
-                  Generate
-                </Button>
-              </div>
+
               <p className="text-xs text-muted-foreground">
-                Share this key with team members for registration
+                It will be sent to the coachEmail automatically notify them
               </p>
             </div>
-
-            {/* Copy Key Button */}
-            {formData.registrationKey && (
-              <Button
-                type="button"
-                onClick={copyToClipboard}
-                variant="outline"
-                className="w-full rounded-lg h-10 gap-2"
-              >
-                {copied ? (
-                  <>
-                    <Check className="w-4 h-4" />
-                    Copied!
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4" />
-                    Copy Registration Key
-                  </>
-                )}
-              </Button>
-            )}
 
             {/* Actions */}
             <div className="flex gap-3 pt-4">

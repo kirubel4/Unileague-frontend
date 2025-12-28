@@ -2,67 +2,32 @@
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { fetcher } from "@/lib/utils";
 
 import { Trash2, Edit, Plus, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-
-interface NewsArticle {
-  id: number;
-  title: string;
-  excerpt: string;
-  content: string;
-  author: string;
-  publishedDate: string;
-  status: "published" | "draft";
-  views: number;
-}
+import useSWR from "swr";
+import { mapBroadcastToNewsArticles, NewsArticle } from "./util";
 
 export default function ManagerNews() {
-  const userName = localStorage.getItem("userName") || "Manager";
+  const userName = "Manager";
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<
     "all" | "published" | "draft"
   >("all");
-  const [articles, setArticles] = useState<NewsArticle[]>([
-    {
-      id: 1,
-      title: "Championship Quarter-Finals Schedule Released",
-      excerpt:
-        "The official schedule for the championship quarter-finals has been announced...",
-      content:
-        "The official schedule for the championship quarter-finals has been announced. All matches will be played over two weeks starting next month.",
-      author: "Manager",
-      publishedDate: "Dec 18, 2024",
-      status: "published",
-      views: 245,
-    },
-    {
-      id: 2,
-      title: "Player of the Month: Alex Johnson",
-      excerpt:
-        "Alex Johnson from Tigers United has been awarded Player of the Month...",
-      content:
-        "Alex Johnson from Tigers United has been awarded Player of the Month for his outstanding performances.",
-      author: "Manager",
-      publishedDate: "Dec 16, 2024",
-      status: "published",
-      views: 189,
-    },
-    {
-      id: 3,
-      title: "Important: Registration Key Distribution",
-      excerpt:
-        "All teams must collect their registration keys from the office...",
-      content:
-        "All teams must collect their registration keys from the office by December 25th.",
-      author: "Manager",
-      publishedDate: "Dec 19, 2024",
-      status: "draft",
-      views: 0,
-    },
-  ]);
+  const {
+    data,
+    error,
+    isLoading,
+    mutate: newMutate,
+  } = useSWR("/api/public/news/tournament", fetcher, {
+    revalidateOnFocus: false,
+  });
 
+  const articles: NewsArticle[] = mapBroadcastToNewsArticles(data);
+  console.log(data?.data);
+  console.log(articles);
   const filteredArticles = articles.filter((article) => {
     const matchesSearch = article.title
       .toLowerCase()
@@ -72,28 +37,28 @@ export default function ManagerNews() {
     return matchesSearch && matchesStatus;
   });
 
-  const togglePublish = (id: number) => {
-    setArticles((prevArticles) =>
-      prevArticles.map((article) =>
-        article.id === id
-          ? {
-              ...article,
-              status: article.status === "published" ? "draft" : "published",
-              publishedDate:
-                article.status === "draft"
-                  ? new Date().toLocaleDateString()
-                  : article.publishedDate,
-            }
-          : article
-      )
-    );
-  };
+  // const togglePublish = (id: number) => {
+  //   setArticles((prevArticles) =>
+  //     prevArticles.map((article) =>
+  //       article.id === id
+  //         ? {
+  //             ...article,
+  //             status: article.status === "published" ? "draft" : "published",
+  //             publishedDate:
+  //               article.status === "draft"
+  //                 ? new Date().toLocaleDateString()
+  //                 : article.publishedDate,
+  //           }
+  //         : article
+  //     )
+  //   );
+  // };
 
-  const deleteArticle = (id: number) => {
-    setArticles((prevArticles) =>
-      prevArticles.filter((article) => article.id !== id)
-    );
-  };
+  // const deleteArticle = (id: number) => {
+  //   setArticles((prevArticles) =>
+  //     prevArticles.filter((article) => article.id !== id)
+  //   );
+  // };
 
   return (
     <Layout role="manager" userName={userName}>
@@ -182,7 +147,7 @@ export default function ManagerNews() {
 
               <div className="flex gap-2 justify-end">
                 <Button
-                  onClick={() => togglePublish(article.id)}
+                  // onClick={() => togglePublish(article.id)}
                   variant="outline"
                   size="sm"
                   className={`gap-2 h-8 rounded ${
@@ -216,7 +181,7 @@ export default function ManagerNews() {
                   variant="outline"
                   size="sm"
                   className="gap-2 h-8 rounded text-destructive hover:bg-red-50"
-                  onClick={() => deleteArticle(article.id)}
+                  // onClick={() => deleteArticle(article.id)}
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>

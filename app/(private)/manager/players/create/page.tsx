@@ -137,7 +137,7 @@ export default function ManagerPlayersCreate() {
               />
             </div>
 
-            {/* Age */}
+         
             <div className="space-y-4">
               <Label>Player Image</Label>
               {previewImage ? (

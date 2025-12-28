@@ -6,7 +6,7 @@ import { Calendar, CheckCircle, AlertCircle } from "lucide-react";
 import Link from "next/link";
 
 export default function ManagerFixtures() {
-  const userName = localStorage.getItem("userName") || "Manager";
+  const userName = "Manager";
 
   return (
     <Layout role="manager" userName={userName}>
