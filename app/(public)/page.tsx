@@ -7,85 +7,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-300 via-slate-200 to-slate-50">
       {/* Navigation Header */}
-      <header className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-[1240px]">
-        <nav className="bg-white/95 backdrop-blur-lg rounded-full shadow-2xl border border-white px-7 py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <div className="flex items-center gap-3">
-              <div className="relative w-12 h-12 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 shadow-lg flex items-center justify-center">
-                <img
-                  src="https://api.builder.io/api/v1/image/assets/TEMP/d021fb0ec30af6b2fc0a06de605a5078494a9094?width=118"
-                  alt="ASTU Logo"
-                  width={59}
-                  height={35}
-                  className="object-contain"
-                />
-              </div>
-              <div className="hidden sm:block">
-                <div className="text-sm font-bold text-black">ASTU</div>
-                <div className="text-xs text-black">Football Management</div>
-              </div>
-            </div>
-
-            {/* Navigation Menu */}
-            <div className="hidden lg:flex items-center gap-1">
-              <a
-                href="#"
-                className="px-5 py-2 rounded-full bg-indigo-600 text-white text-sm font-medium transition-colors"
-              >
-                Home
-              </a>
-              <a
-                href="tournaments"
-                className="px-5 py-2 rounded-full text-black text-sm font-medium hover:bg-gray-100 transition-colors"
-              >
-                Tournaments
-              </a>
-              <a
-                href="teams"
-                className="px-5 py-2 rounded-full text-black text-sm font-medium hover:bg-gray-100 transition-colors"
-              >
-                Matches
-              </a>
-              <a
-                href="matches"
-                className="px-5 py-2 rounded-full text-black text-sm font-medium hover:bg-gray-100 transition-colors"
-              >
-                Teams
-              </a>
-              <a
-                href="news"
-                className="px-5 py-2 rounded-full text-black text-sm font-medium hover:bg-gray-100 transition-colors"
-              >
-                News
-              </a>
-              <a
-                href="about"
-                className="px-5 py-2 rounded-full text-black text-sm font-medium hover:bg-gray-100 transition-colors"
-              >
-                About
-              </a>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button className="lg:hidden p-2 rounded-full hover:bg-gray-100">
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            </button>
-          </div>
-        </nav>
-      </header>
 
       {/* Hero Section */}
       <section className="relative pt-28 pb-20 px-4 overflow-hidden">
@@ -102,8 +23,7 @@ export default function Home() {
           {/* Hero Content */}
           <div className="text-center mb-12">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6 px-4">
-              Adama Science and Technology University Football Management
-              System
+              Adama Science and Technology University Football Management System
             </h1>
             <p className="text-lg sm:text-xl text-white/90 max-w-3xl mx-auto mb-8 px-4">
               Experience the future of university football management. Track
@@ -174,7 +94,6 @@ export default function Home() {
                 <img
                   src="https://api.builder.io/api/v1/image/assets/TEMP/b90d5aac6d823eedd008c49158e1a2744e052179?width=1188"
                   alt="Championship Final"
-                  
                   className="object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/0 via-black/0 to-black/60" />
@@ -207,7 +126,6 @@ export default function Home() {
                 <img
                   src="https://api.builder.io/api/v1/image/assets/TEMP/8dd567e0e77ae120f1c13d83a738b00493c57f1a?width=1188"
                   alt="Star Player Joins"
-                  
                   className="object-cover opacity-60"
                 />
                 <Badge className="absolute top-4 left-4 bg-gradient-to-r from-orange-600 to-amber-500 text-white font-bold shadow-lg border-0">
