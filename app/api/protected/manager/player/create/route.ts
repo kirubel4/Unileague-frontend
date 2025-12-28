@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-
+    const formData = await request.formData();
+    console.log(formData);
     const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backend) {
       return NextResponse.json(
@@ -13,12 +13,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const res = await fetch(`${backend}/manager/generate/fixture`, {
+    const res = await fetch(`${backend}/manager/player/create`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: formData,
     });
-
+    console.log(res);
     const data: ApiResponse = await res.json();
 
     return NextResponse.json(data, { status: res.status });

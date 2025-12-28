@@ -2,69 +2,44 @@
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ApiResponse, fetcher } from "@/lib/utils";
 
 import { Trash2, Edit, Plus, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-
-interface Player {
-  id: number;
-  name: string;
-  age: number;
-  position: string;
-  team: string;
-  number: number;
-  joinDate: string;
-}
+import useSWR from "swr";
+import { mapPlayers, Player } from "./util";
 
 export default function ManagerPlayers() {
-  const userName = localStorage.getItem("userName") || "Manager";
+  const userName = "Manager";
   const [searchTerm, setSearchTerm] = useState("");
-
-  const players: Player[] = [
-    {
-      id: 1,
-      name: "Alex Johnson",
-      age: 28,
-      position: "Goalkeeper",
-      team: "Tigers United",
-      number: 1,
-      joinDate: "Jan 10, 2024",
-    },
-    {
-      id: 2,
-      name: "Mike Smith",
-      age: 25,
-      position: "Defender",
-      team: "Tigers United",
-      number: 4,
-      joinDate: "Jan 10, 2024",
-    },
-    {
-      id: 3,
-      name: "David Wilson",
-      age: 26,
-      position: "Midfielder",
-      team: "Phoenix FC",
-      number: 8,
-      joinDate: "Jan 12, 2024",
-    },
-    {
-      id: 4,
-      name: "James Brown",
-      age: 23,
-      position: "Forward",
-      team: "Eagles Sports",
-      number: 9,
-      joinDate: "Jan 15, 2024",
-    },
-  ];
-
+  var players: Player[] = [];
+  const {
+    data,
+    isLoading,
+    error,
+    mutate: mutatePlayer,
+  } = useSWR("/api/public/player/tournament", fetcher, {
+    revalidateOnFocus: false,
+  });
+  players = mapPlayers(data?.data || []);
   const filteredPlayers = players.filter(
     (p) =>
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.team.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  const handleDelete = async (id: string) => {
+    const res = await fetch(`/api/protected/manager/player/delete?id=${id}`, {
+      method: "DELETE",
+    });
+    const result: ApiResponse = await res.json();
+    if (!result.success) {
+      console.log("Delete failed:", result.message);
+      return;
+    }
+    console.log("Delete successful");
+    await mutatePlayer();
+  };
 
   return (
     <Layout role="manager" userName={userName}>
@@ -104,9 +79,7 @@ export default function ManagerPlayers() {
                 <th className="text-left py-3 px-4 font-semibold text-sm text-muted-foreground">
                   Player Name
                 </th>
-                <th className="text-left py-3 px-4 font-semibold text-sm text-muted-foreground">
-                  Age
-                </th>
+
                 <th className="text-left py-3 px-4 font-semibold text-sm text-muted-foreground">
                   Position
                 </th>
@@ -116,9 +89,7 @@ export default function ManagerPlayers() {
                 <th className="text-left py-3 px-4 font-semibold text-sm text-muted-foreground">
                   Number
                 </th>
-                <th className="text-left py-3 px-4 font-semibold text-sm text-muted-foreground">
-                  Join Date
-                </th>
+
                 <th className="text-left py-3 px-4 font-semibold text-sm text-muted-foreground">
                   Actions
                 </th>
@@ -134,9 +105,7 @@ export default function ManagerPlayers() {
                     <td className="py-3 px-4 text-sm font-medium text-foreground">
                       {player.name}
                     </td>
-                    <td className="py-3 px-4 text-sm text-muted-foreground">
-                      {player.age}
-                    </td>
+
                     <td className="py-3 px-4 text-sm text-muted-foreground">
                       {player.position}
                     </td>
@@ -146,9 +115,7 @@ export default function ManagerPlayers() {
                     <td className="py-3 px-4 text-sm font-bold text-primary">
                       #{player.number}
                     </td>
-                    <td className="py-3 px-4 text-sm text-muted-foreground">
-                      {player.joinDate}
-                    </td>
+
                     <td className="py-3 px-4">
                       <div className="flex gap-2">
                         <Link href={`/manager/players/${player.id}/edit`}>
@@ -160,7 +127,13 @@ export default function ManagerPlayers() {
                             <Edit className="w-4 h-4" />
                           </Button>
                         </Link>
-                        <Link href={`/manager/players/${player.id}/transfer`}>
+                        <Link
+                          href={`/manager/players/transfer?id=${
+                            player.id
+                          }&playerName=${encodeURIComponent(
+                            player.name
+                          )}&teamName=${encodeURIComponent(player.team)}`}
+                        >
                           <Button
                             variant="outline"
                             size="sm"
@@ -169,11 +142,12 @@ export default function ManagerPlayers() {
                             <ArrowRight className="w-4 h-4" />
                           </Button>
                         </Link>
+
                         <Button
                           variant="outline"
                           size="sm"
                           className="gap-1 h-8 rounded text-destructive hover:bg-red-50"
-                          onClick={() => alert("Delete player: " + player.name)}
+                          onClick={() => handleDelete(player.id)}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>

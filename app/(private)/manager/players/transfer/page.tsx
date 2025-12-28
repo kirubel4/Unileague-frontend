@@ -7,50 +7,64 @@ import { useState } from "react";
 import { ChevronLeft, ArrowRight } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import useSWR from "swr";
+import { ApiResponse, fetcher } from "@/lib/utils";
+import { mapTeams, Team } from "./util";
+import { Input } from "@/components/ui/input";
 
 export default function ManagerPlayersTransfer() {
-  const userName = localStorage.getItem("userName") || "Manager";
-  const id = useSearchParams();
-  const navigate = useRouter();
+  const userName = "Manager";
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id") ?? "";
+  const currentPlayer = searchParams.get("playerName") ?? "Unknown Player";
+  const currentTeam = searchParams.get("teamName") ?? "Unknown Team";
+  const [number, setNumber] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [destinationTeam, setDestinationTeam] = useState("");
 
-  const currentPlayer = "Alex Johnson";
-  const currentTeam = "Tigers United";
+  const navigate = useRouter();
 
-  const teams = [
-    { id: "2", name: "Phoenix FC" },
-    { id: "3", name: "Eagles Sports" },
-    { id: "4", name: "Lions Club" },
-  ];
+  const { data, error, isLoading } = useSWR(
+    "/api/public/team/tournament",
+    fetcher,
+    {
+      revalidateOnFocus: false,
+    }
+  );
+
+  const teams: Team[] = mapTeams(data || { data: [] });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!destinationTeam) {
-      alert("Please select a destination team");
+    if (!destinationTeam || number <= 0) {
       return;
     }
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      const selectedTeam = teams.find((t) => t.id === destinationTeam)?.name;
-      alert(
-        `Player "${currentPlayer}" transferred from "${currentTeam}" to "${selectedTeam}"!`
-      );
-      navigate.push("/manager/players");
-    }, 800);
+    const data = {
+      playerId: id,
+      newTeamId: destinationTeam,
+      newNumber: number,
+    };
+    console.log("Submitting transfer:", data);
+    const res = await fetch("/api/protected/manager/player/transfer", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+    const result: ApiResponse = await res.json();
+    if (!result.success) {
+      console.log("Transfer failed:", result.message);
+      setIsSubmitting(false);
+      return;
+    }
+    console.log("Transfer successful");
+    navigate.push("/manager/players");
   };
 
   return (
     <Layout role="manager" userName={userName}>
       {/* Header */}
       <div className="mb-8">
-        <Link href="/manager/players">
-          <Button variant="ghost" size="sm" className="mb-4">
-            <ChevronLeft className="w-4 h-4 mr-2" />
-            Back to Players
-          </Button>
-        </Link>
         <h1 className="text-3xl font-bold text-foreground">Transfer Player</h1>
         <p className="text-muted-foreground mt-2">
           Move a player to a different team
@@ -114,6 +128,21 @@ export default function ManagerPlayersTransfer() {
                     </span>
                   </label>
                 ))}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="teamName" className="font-medium">
+                  New Number *
+                </Label>
+                <Input
+                  id="number"
+                  name="number"
+                  max={99}
+                  placeholder="min "
+                  value={number}
+                  onChange={(e) => setNumber(Number(e.target.value))}
+                  required
+                  className="h-10 rounded-lg"
+                />
               </div>
             </div>
 

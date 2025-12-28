@@ -1,10 +1,16 @@
 import { ApiResponse } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+export async function PUT(request: NextRequest) {
   try {
-    const body = await request.json();
+    const matchId = request.nextUrl.searchParams.get("id");
 
+    if (!matchId) {
+      return NextResponse.json(
+        { message: "matchId is required" },
+        { status: 400 }
+      );
+    }
     const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backend) {
       return NextResponse.json(
@@ -13,12 +19,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const res = await fetch(`${backend}/manager/generate/fixture`, {
-      method: "POST",
+    const res = await fetch(`${backend}/manager/match/${matchId}/end`, {
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
     });
-
+    console.log("Response from backend:", res);
     const data: ApiResponse = await res.json();
 
     return NextResponse.json(data, { status: res.status });

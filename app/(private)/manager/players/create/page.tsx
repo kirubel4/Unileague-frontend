@@ -8,27 +8,34 @@ import { useRef, useState } from "react";
 import { ChevronLeft, Upload, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { mapTeams, Team } from "../transfer/util";
+import { ApiResponse, fetcher } from "@/lib/utils";
+import useSWR from "swr";
 
 export default function ManagerPlayersCreate() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const userName = localStorage.getItem("userName") || "Manager";
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
   const navigate = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     playerName: "",
-    age: "",
     position: "Midfielder",
     team: "",
     jerseyNumber: "",
-    nationality: "",
   });
 
-  const teams = [
-    { id: "1", name: "Tigers United" },
-    { id: "2", name: "Phoenix FC" },
-    { id: "3", name: "Eagles Sports" },
-  ];
+  const { data, error, isLoading } = useSWR(
+    "/api/public/team/tournament",
+    fetcher,
+    {
+      revalidateOnFocus: false,
+    }
+  );
+
+  const teams: Team[] = mapTeams(data || { data: [] });
 
   const positions = ["Goalkeeper", "Defender", "Midfielder", "Forward"];
 
@@ -52,6 +59,7 @@ export default function ManagerPlayersCreate() {
         alert("Image size should be less than 5MB");
         return;
       }
+      setImageFile(file);
 
       const reader = new FileReader();
       reader.onload = (event) => {
@@ -66,11 +74,37 @@ export default function ManagerPlayersCreate() {
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!imageFile) {
+      alert("Please upload a player image");
+      return;
+    }
     setIsSubmitting(true);
-    setTimeout(() => {
-      alert(`Player "${formData.playerName}" added successfully!`);
+    try {
+      const fd = new FormData();
+      fd.append("name", formData.playerName);
+      fd.append("position", formData.position);
+      fd.append("teamId", formData.team);
+      fd.append("number", formData.jerseyNumber);
+      fd.append("playerPhoto", imageFile);
+
+      const res = await fetch("/api/protected/manager/player/create", {
+        method: "POST",
+        body: fd,
+      });
+      const result: ApiResponse = await res.json();
+      if (!result.success) {
+        console.log("Player creation failed:", result.message);
+        setIsSubmitting(false);
+        return;
+      }
       navigate.push("/manager/players");
-    }, 800);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add player");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

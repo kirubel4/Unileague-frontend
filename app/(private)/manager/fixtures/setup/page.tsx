@@ -4,6 +4,7 @@ import ManagerFixturesPreview from "@/components/pages/ManagerFixturesPreview";
 import ManagerFixturesSetup, {
   Team,
 } from "@/components/pages/ManagerFixturesSetup";
+import { ApiResponse } from "@/lib/utils";
 import { useState } from "react";
 
 export type TournamentFormat = "League" | "knockout";
@@ -41,7 +42,11 @@ const generateFixture = async (
       console.log("somting went wrong ");
       return [];
     }
-    const data = await res.json();
+    const data: ApiResponse = await res.json();
+    if (!data.success) {
+      console.log("somting went wrong 2");
+      return [];
+    }
     return data.data;
   } catch (error) {
     console.log("somting went wron gcathced ");

@@ -72,10 +72,18 @@ export function mapMatchDetail(apiData: any): MatchDetail {
     // ✅ SAFE ARRAY MAPPING
   };
 }
-export function mapPlayerNames(apiResponse: any): string[] {
-  return Array.isArray(apiResponse)
-    ? apiResponse
-        .map((p: any) => p?.name)
-        .filter((name: any): name is string => typeof name === "string")
-    : [];
+export function mapPlayerNames(
+  apiResponse: any[]
+): { id: string; name: string }[] {
+  if (!Array.isArray(apiResponse)) return [];
+
+  return apiResponse
+    .map((p) => ({
+      id: p?.id,
+      name: p?.name,
+    }))
+    .filter(
+      (p): p is { id: string; name: string } =>
+        typeof p.id === "string" && typeof p.name === "string"
+    );
 }

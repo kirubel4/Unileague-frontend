@@ -1,9 +1,16 @@
 import { ApiResponse } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+export async function DELETE(request: NextRequest) {
   try {
-    const body = await request.json();
+    const id = request.nextUrl.searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json(
+        { message: "Player id is required" },
+        { status: 400 }
+      );
+    }
 
     const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backend) {
@@ -13,14 +20,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const res = await fetch(`${backend}/manager/generate/fixture`, {
-      method: "POST",
+    const res = await fetch(`${backend}/manager/player/delete/${id}`, {
+      method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
     });
 
     const data: ApiResponse = await res.json();
-
+    console.log("Proxy response data:", data.message);
     return NextResponse.json(data, { status: res.status });
   } catch (error) {
     console.error("Proxy create error:", error);

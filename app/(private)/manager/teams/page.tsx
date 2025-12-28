@@ -8,50 +8,25 @@ import { Trash2, Edit, Plus, Users } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import useSWR from "swr";
-
-interface Team {
-  id: string;
-  name: string;
-  coachName: string;
-  coachEmail: string;
-  playerCount: number;
-  registrationKey: string;
-  joinDate: string;
-  logoUrl: string;
-}
-
+import { mapTeams, Team } from "../players/transfer/util";
 export default function ManagerTeams() {
   const userName = "Manager";
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data, error, isLoading } = useSWR("/api/public/team", fetcher, {
-    revalidateOnFocus: false,
-  });
+  const { data, error, isLoading } = useSWR(
+    "/api/public/team/tournament",
+    fetcher,
+    {
+      revalidateOnFocus: false,
+    }
+  );
 
-  // Map API response to Team[] and fill missing fields with defaults
-  const teams: Team[] =
-    data?.data?.map((t: any) => ({
-      id: t.id,
-      name: t.teamName || "Unknown Team",
-      coachName: t.coachName || "Coach Unknown",
-      coachEmail:
-        t.coachEmail ||
-        `${t.teamName?.toLowerCase().replace(/\s/g, "")}@example.com`,
-      playerCount: t.playerCount ?? Math.floor(Math.random() * 20), // random if missing
-      registrationKey:
-        t.registrationKey ||
-        t.teamName?.toUpperCase().slice(0, 8) ||
-        "TEAM1234",
-      joinDate: t.joinDate || new Date().toLocaleDateString(),
-      logoUrl:
-        t.logo?.find((l: any) => l.isPrimary)?.url ||
-        "https://via.placeholder.com/40x40?text=Logo",
-    })) || [];
+  const teams: Team[] = mapTeams(data || { data: [] });
 
   const filteredTeams = teams.filter(
     (t) =>
       t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.coachName.toLowerCase().includes(searchTerm.toLowerCase())
+      t.coachEmail.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -108,12 +83,7 @@ export default function ManagerTeams() {
                   <th className="text-left py-3 px-4 font-semibold text-sm text-muted-foreground">
                     Players
                   </th>
-                  <th className="text-left py-3 px-4 font-semibold text-sm text-muted-foreground">
-                    Registration Key
-                  </th>
-                  <th className="text-left py-3 px-4 font-semibold text-sm text-muted-foreground">
-                    Join Date
-                  </th>
+
                   <th className="text-left py-3 px-4 font-semibold text-sm text-muted-foreground">
                     Actions
                   </th>
@@ -130,21 +100,16 @@ export default function ManagerTeams() {
                         {team.name}
                       </td>
                       <td className="py-3 px-4 text-sm text-muted-foreground">
-                        {team.coachName}
+                        {team.coachEmail}
                       </td>
                       <td className="py-3 px-4 text-sm text-muted-foreground">
-                        {team.coachEmail}
+                        {team.coachName}
                       </td>
                       <td className="py-3 px-4 text-sm text-muted-foreground flex items-center gap-2">
                         <Users className="w-4 h-4" />
                         {team.playerCount}
                       </td>
-                      <td className="py-3 px-4 text-sm font-mono text-muted-foreground">
-                        {team.registrationKey}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-muted-foreground">
-                        {team.joinDate}
-                      </td>
+
                       <td className="py-3 px-4">
                         <div className="flex gap-2">
                           <Link href={`/manager/teams/${team.id}/edit`}>

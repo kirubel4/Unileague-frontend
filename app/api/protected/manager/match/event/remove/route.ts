@@ -1,7 +1,7 @@
 import { ApiResponse } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+export async function DELETE(request: NextRequest) {
   try {
     const body = await request.json();
 
@@ -13,8 +13,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const res = await fetch(`${backend}/manager/generate/fixture`, {
-      method: "POST",
+    const res = await fetch(`${backend}/manager/match/event/create`, {
+      method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });

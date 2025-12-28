@@ -64,6 +64,10 @@ export default function ManagerNewsCreate() {
       alert("Please fill in all required fields");
       return;
     }
+    const form = new FormData();
+    form.append("title", formData.title);
+    form.append("excerpt", formData.excerpt);
+    form.append("content", formData.content);
 
     setIsSubmitting(true);
 

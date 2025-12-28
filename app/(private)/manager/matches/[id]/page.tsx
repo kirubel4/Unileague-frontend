@@ -20,16 +20,20 @@ import {
   RotateCw,
   Trash2,
   Plus,
+  ListVideoIcon,
+  StopCircle,
   TrendingUp,
   Calendar,
   Shield,
   User,
   AlertCircle,
+  PlayCircle,
 } from "lucide-react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import useSWR from "swr";
-import { fetcher } from "@/lib/utils";
+import { ApiResponse, fetcher } from "@/lib/utils";
 import { mapMatchDetail, mapPlayerNames } from "./util";
+import { Input } from "@/components/ui/input";
 
 interface Event {
   id: string;
@@ -43,22 +47,29 @@ export default function ManagerMatchesDetail() {
   const params = useParams();
   const matchId = params.id as string;
 
-  const { data, isLoading, error } = useSWR(
-    "/api/public/match/detail?id=" + matchId,
-    fetcher,
-    { revalidateOnFocus: false }
-  );
-
-  let homePlayers: string[] = [];
-  let awayPlayers: string[] = [];
-  const matches = mapMatchDetail(data?.data);
   const [refreshing, setRefreshing] = useState(false);
-  const [goalHomeTeam, setGoalHomeTeam] = useState(2);
-  const [goalAwayTeam, setGoalAwayTeam] = useState(1);
+
   const [eventPlayer, setEventPlayer] = useState("");
-  const [eventTeam, setEventTeam] = useState<"home" | "away">("home");
+  const [min, setMin] = useState(0);
+  const [eventTeam, setEventTeam] = useState("");
+  const [eventTeamSide, setEventTeamSide] = useState<"home" | "away">("home");
   const [eventType, setEventType] = useState<"Goal" | "Yellow" | "Red">("Goal");
-  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [endLoading, setEndLoading] = useState(false);
+  const [startLoading, setStartLoading] = useState(false);
+  let homePlayers: { name: string; id: string }[] = [];
+  let awayPlayers: { name: string; id: string }[] = [];
+  const {
+    data,
+    isLoading,
+    error,
+    mutate: mutateMatch,
+  } = useSWR("/api/public/match/detail?id=" + matchId, fetcher, {
+    revalidateOnFocus: false,
+  });
+
+  const matches = mapMatchDetail(data?.data);
+
   if (matches.homeTeam && matches.awayTeam) {
     const {
       data: homeTeam,
@@ -77,63 +88,95 @@ export default function ManagerMatchesDetail() {
       revalidateOnFocus: false,
     });
     awayPlayers = mapPlayerNames(awayTeam?.data);
-    console.log(awayPlayers);
   }
-
-  const match = {
-    id: matchId || "3",
-    homeTeam: "Tigers United",
-    awayTeam: "Phoenix FC",
-    homeScore: goalHomeTeam,
-    awayScore: goalAwayTeam,
-    status: "shced",
-    minute: 67,
-    venue: "Central Stadium",
-    startTime: "15:00",
-    referee: "James Wilson",
-    homeFormation: "4-3-3",
-    awayFormation: "4-2-3-1",
-    homeCoach: "Coach Ali",
-    awayCoach: "Coach Maria",
-  };
 
   const refreshScore = async () => {
     setRefreshing(true);
     await new Promise((resolve) => setTimeout(resolve, 500));
+    await mutateMatch();
     setRefreshing(false);
   };
 
-  const addEvent = (e: React.FormEvent) => {
+  const addEvent = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!eventPlayer.trim()) return;
 
-    const newEvent: Event = {
-      id: "Math.max(...events.map((e) => e.id), 0) + 1",
-      minute: match.minute,
-      type: eventType,
-      player: eventPlayer,
-      team: eventTeam === "home" ? match.homeTeam : match.awayTeam,
+    if (!eventPlayer.trim()) return;
+    setLoading(true);
+    const data = {
+      playerId: eventPlayer,
+      matchId: matches.id,
+      teamId: eventTeam,
+      eventType,
+      min: min,
     };
 
-    setEvents([newEvent, ...events]);
+    const res = await fetch("/api/protected/manager/match/event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
 
-    if (eventType === "Goal") {
-      if (eventTeam === "home") {
-        setGoalHomeTeam(goalHomeTeam + 1);
-      } else {
-        setGoalAwayTeam(goalAwayTeam + 1);
-      }
+    if (!res) {
+      console.log("somting went wrong ");
+      setLoading(false);
+      return [];
     }
+    const response: ApiResponse = await res.json();
+    if (!response.success) {
+      console.log(response.message);
+      setLoading(false);
+      return;
+    }
+    console.log(response);
 
+    refreshScore();
     setEventPlayer("");
     setEventType("Goal");
     setEventTeam("home");
+    setLoading(false);
   };
 
-  const removeEvent = (id: string) => {
-    setEvents(events.filter((event) => event.id !== id));
+  const removeEvent = async (id: string) => {
+    const res = await fetch("/api/protected/match/event/remove?id=");
   };
+  const statMatch = async () => {
+    setStartLoading(true);
+    const res = await fetch(
+      "/api/protected/manager/match/start/?id=" + matchId,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    if (!res) {
+      console.log("Network error");
+      return;
+    }
+    const data: ApiResponse = await res.json();
+    if (!data.success) {
+      console.log(data.message || "couldn't start the match");
+    }
+    refreshScore();
 
+    setStartLoading(false);
+  };
+  const endMatch = async () => {
+    setEndLoading(true);
+    const res = await fetch("/api/protected/manager/match/end/?id=" + matchId, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!res) {
+      console.log("Network error");
+      return;
+    }
+    const data: ApiResponse = await res.json();
+    if (!data.success) {
+      console.log(data.message || "couldn't end the match");
+    }
+    refreshScore();
+    setEndLoading(false);
+  };
   const getEventIcon = (type: Event["type"]) => {
     switch (type) {
       case "Goal":
@@ -178,7 +221,7 @@ export default function ManagerMatchesDetail() {
           {matches.status === "LIVE" && (
             <Badge className="px-4 py-1.5 text-sm font-semibold bg-green-500/10 text-green-600 border-green-200">
               <span className="animate-pulse mr-2">●</span>
-              LIVE - {match.minute}'
+              LIVE - {matches.scheduledDate}'
             </Badge>
           )}
         </div>
@@ -213,7 +256,7 @@ export default function ManagerMatchesDetail() {
                       {matches.score.away}
                     </div>
 
-                    {match.status === "live" ? (
+                    {matches.status === "LIVE" ? (
                       <p className="lg:mt-5 text-white/80 text-center text-sm font-medium">
                         Minute {matches.scheduledDate}
                       </p>
@@ -244,10 +287,16 @@ export default function ManagerMatchesDetail() {
         </Card>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
+          <TabsList
+            className={`grid w-full max-w-md ${
+              matches.status === "LIVE" ? "grid-cols-3" : "grid-cols-2"
+            }`}
+          >
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="events">Match Events</TabsTrigger>
-            <TabsTrigger value="controls">Live Controls</TabsTrigger>
+            {matches.status === "LIVE" && (
+              <TabsTrigger value="controls">Live Controls</TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -309,6 +358,37 @@ export default function ManagerMatchesDetail() {
                           </p>
                         </div>
                       </div>
+                    </div>
+                    <Separator className="my-6 col-span-full" />
+                    <div className="flex items-center justify-between flex-col rounded-lg gap-4 border bg-muted/40 p-4">
+                      <div className="flex items-center gap-3">
+                        <div>
+                          <p className="text-sm font-medium">Match Control</p>
+                        </div>
+                      </div>
+
+                      {matches.status === "LIVE" ? (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={endMatch}
+                          disabled={endLoading || refreshing}
+                          className="gap-2"
+                        >
+                          <StopCircle className="w-4 h-4" />
+                          End Match
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          onClick={statMatch}
+                          disabled={startLoading || refreshing}
+                          className="gap-2 bg-primary"
+                        >
+                          <PlayCircle className="w-4 h-4" />
+                          Start Match
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -480,18 +560,24 @@ export default function ManagerMatchesDetail() {
                       </Label>
                       <Select
                         value={eventTeam}
-                        onValueChange={(value: "home" | "away") =>
-                          setEventTeam(value)
-                        }
+                        onValueChange={(value) => {
+                          setEventTeam(value);
+                          if (value === matches.homeTeam.id) {
+                            setEventTeamSide("home");
+                          } else if (value === matches.awayTeam.id) {
+                            setEventTeamSide("away");
+                            setEventPlayer("");
+                          }
+                        }}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select team" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="home">
+                          <SelectItem value={matches.homeTeam.id}>
                             {matches.homeTeam.name}
                           </SelectItem>
-                          <SelectItem value="away">
+                          <SelectItem value={matches.awayTeam.id}>
                             {matches.awayTeam.name}
                           </SelectItem>
                         </SelectContent>
@@ -515,19 +601,19 @@ export default function ManagerMatchesDetail() {
                           <SelectValue placeholder="Select event" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="goal">
+                          <SelectItem value="Goal">
                             <div className="flex items-center gap-2">
                               <span>⚽</span>
                               <span>Goal</span>
                             </div>
                           </SelectItem>
-                          <SelectItem value="yellow">
+                          <SelectItem value="Yellow">
                             <div className="flex items-center gap-2">
                               <span>🟨</span>
                               <span>Yellow Card</span>
                             </div>
                           </SelectItem>
-                          <SelectItem value="red">
+                          <SelectItem value="Red">
                             <div className="flex items-center gap-2">
                               <span>🟥</span>
                               <span>Red Card</span>
@@ -552,19 +638,34 @@ export default function ManagerMatchesDetail() {
                           <SelectValue placeholder="Select player" />
                         </SelectTrigger>
                         <SelectContent>
-                          {eventTeam === "home"
+                          {eventTeamSide === "home"
                             ? homePlayers.map((player) => (
-                                <SelectItem key={player} value={player}>
-                                  {player}
+                                <SelectItem key={player.id} value={player.id}>
+                                  {player.name}
                                 </SelectItem>
                               ))
                             : awayPlayers.map((player) => (
-                                <SelectItem key={player} value={player}>
-                                  {player}
+                                <SelectItem key={player.id} value={player.id}>
+                                  {player.name}
                                 </SelectItem>
                               ))}
                         </SelectContent>
                       </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="teamName" className="font-medium">
+                        Min
+                      </Label>
+                      <Input
+                        id="min"
+                        name="min"
+                        max={120}
+                        placeholder="min "
+                        value={min}
+                        onChange={(e) => setMin(Number(e.target.value))}
+                        required
+                        className="h-10 rounded-lg"
+                      />
                     </div>
                   </div>
 
@@ -572,10 +673,10 @@ export default function ManagerMatchesDetail() {
                     <Button
                       type="submit"
                       className="flex-1 gap-2 bg-primary"
-                      disabled={!eventPlayer}
+                      disabled={!eventPlayer || refreshing}
                     >
                       <Plus className="w-4 h-4" />
-                      Add Event
+                      {loading ? "Adding Event Please Wait" : "Add Event"}
                     </Button>
                   </div>
                 </form>
