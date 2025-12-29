@@ -4,6 +4,7 @@ import { LogOut, User, ChevronDown, Settings, Bell } from "lucide-react";
 import { Button } from "./button";
 import Link from "next/link";
 import { useState } from "react";
+import ConfirmModal from "../comfirm";
 
 interface TopBarProps {
   userRole?: string;
@@ -16,6 +17,7 @@ export function TopBar({
 }: TopBarProps) {
   const navigate = useRouter();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [openModalId, setOpenModalId] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
@@ -135,7 +137,7 @@ export function TopBar({
 
                   <div className="border-t border-gray-100 pt-2">
                     <button
-                      onClick={handleLogout}
+                      onClick={() => setOpenModalId(true)}
                       className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors rounded-lg mx-2"
                     >
                       <LogOut className="w-4 h-4" />
@@ -147,6 +149,12 @@ export function TopBar({
             )}
           </div>
         </div>
+        <ConfirmModal
+          isOpen={openModalId}
+          onConfirm={() => handleLogout()}
+          onCancel={() => setOpenModalId(false)}
+          message="Do you want to logout"
+        />
       </div>
     </header>
   );
