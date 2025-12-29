@@ -13,18 +13,8 @@ export async function POST(request: NextRequest) {
     } else {
       tid = "fb1c80f4-7ffc-4b84-b329-d08511349fa2";
     }
-
     const body = await request.json();
-    if (Array.isArray(body)) {
-      // Iterate over each item in the array and add tournamentId
-      body.forEach((item) => {
-        item.tournamentId = tid;
-      });
-    } else {
-      // If body is not an array, you might want to handle it differently
-      // For example, if it's a single object, just add tournamentId directly
-      body.tournamentId = tid;
-    }
+    body.tournamentId = tid;
 
     const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backend) {
@@ -34,7 +24,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const res = await fetch(`${backend}/manager/matches/create`, {
+    const res = await fetch(`${backend}/manager/match/create`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
