@@ -3,9 +3,15 @@ import { Button } from "@/components/ui/button";
 
 import { ChevronLeft, CheckCircle } from "lucide-react";
 import { useState } from "react";
-import { Match, Team, TournamentFormat } from "./ManagerFixturesSetup";
+import {
+  Match,
+  Team,
+  TournamentFormat,
+} from "../../../../../components/pages/ManagerFixturesSetup";
 import { useRouter } from "next/navigation";
 import { MatchWeekPreview } from "@/app/(private)/manager/fixtures/setup/page";
+import { ApiResponse } from "@/lib/utils";
+import { mapPreviewToMatches } from "@/app/(private)/manager/fixtures/setup/util";
 
 type Props = {
   format: TournamentFormat;
@@ -20,7 +26,24 @@ export default function ManagerFixturesConfirm({
   matches,
   onBack,
 }: Props) {
-  const userName = localStorage.getItem("userName") || "Manager";
+  const createMatches = async (weeks: MatchWeekPreview[]) => {
+    try {
+      const payload = mapPreviewToMatches(weeks);
+      const res = await fetch("/api/protected/manager/match/create", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      const response: ApiResponse = await res.json();
+      if (!response.success) {
+        console.log(response.message);
+        return;
+      }
+      console.log("match created");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const userName = "Manager";
   const navigate = useRouter();
   const [isConfirming, setIsConfirming] = useState(false);
 
@@ -40,14 +63,8 @@ export default function ManagerFixturesConfirm({
 
   const handleConfirm = async () => {
     setIsConfirming(true);
-
-    // fake API delay
-    setTimeout(() => {
-      alert(
-        `Fixtures created successfully! ${matches.length} matches have been generated.`
-      );
-      navigate.push("/manager/fixtures");
-    }, 800);
+    await createMatches(matches);
+    navigate.push("/manager/fixtures");
   };
 
   return (
@@ -100,7 +117,7 @@ export default function ManagerFixturesConfirm({
           </div>
 
           {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col  gap-3">
             <Button
               onClick={handleConfirm}
               disabled={isConfirming}

@@ -24,7 +24,7 @@ interface ApiResponse {
 }
 
 export interface NewsArticle {
-  id: number;
+  id: string;
   title: string;
   excerpt: string;
   content: string;
@@ -40,7 +40,7 @@ export function mapBroadcastToNewsArticles(
   if (!apiResponse?.data) return [];
 
   return apiResponse.data.map((item) => ({
-    id: Number(item.id) || NaN, // convert string ID to number, fallback NaN
+    id: item.id || "NaN", // convert string ID to number, fallback NaN
     title: item.meta?.title ?? "No Title",
     excerpt: item.meta?.excerpt ?? "",
     content: item.meta?.content ?? "",

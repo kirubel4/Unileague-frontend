@@ -1,16 +1,14 @@
 import { ApiResponse } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function PUT(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const matchId = request.nextUrl.searchParams.get("id");
-
-    if (!matchId) {
-      return NextResponse.json(
-        { message: "matchId is required" },
-        { status: 400 }
-      );
+    const id = "fb1c80f4-7ffc-4b84-b329-d08511349fa2";
+    const formData = await request.formData();
+    if (formData.get("ownerId") === "fill") {
+      formData.set("ownerId", id);
     }
+    console.log(formData);
     const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backend) {
       return NextResponse.json(
@@ -19,9 +17,9 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const res = await fetch(`${backend}/manager/match/${matchId}/end`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
+    const res = await fetch(`${backend}/manager/gallery/post`, {
+      method: "POST",
+      body: formData,
     });
 
     const data: ApiResponse = await res.json();

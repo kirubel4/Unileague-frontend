@@ -1,11 +1,12 @@
 "use client";
-import ManagerFixturesConfirm from "@/components/pages/ManagerFixturesConfirm";
+import ManagerFixturesConfirm from "@/app/(private)/manager/fixtures/setup/ManagerFixturesConfirm";
 import ManagerFixturesPreview from "@/components/pages/ManagerFixturesPreview";
 import ManagerFixturesSetup, {
   Team,
 } from "@/components/pages/ManagerFixturesSetup";
 import { ApiResponse } from "@/lib/utils";
 import { useState } from "react";
+import { mapPreviewToMatches } from "./util";
 
 export type TournamentFormat = "League" | "knockout";
 export interface MatchWeekPreview {

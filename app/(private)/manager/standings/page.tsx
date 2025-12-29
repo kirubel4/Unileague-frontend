@@ -14,68 +14,6 @@ export default function ManagerStandings() {
     }
   );
   const standing = mapApiDataToTable(data?.data || []);
-  const standings = [
-    {
-      rank: 1,
-      team: "Tigers United",
-      matches: 7,
-      wins: 6,
-      draws: 1,
-      losses: 0,
-      goals: "18-2",
-      points: 19,
-    },
-    {
-      rank: 2,
-      team: "Eagles Sports",
-      matches: 7,
-      wins: 5,
-      draws: 2,
-      losses: 0,
-      goals: "16-4",
-      points: 17,
-    },
-    {
-      rank: 3,
-      team: "Phoenix FC",
-      matches: 7,
-      wins: 4,
-      draws: 3,
-      losses: 0,
-      goals: "14-6",
-      points: 15,
-    },
-    {
-      rank: 4,
-      team: "Lions Club",
-      matches: 7,
-      wins: 3,
-      draws: 1,
-      losses: 3,
-      goals: "10-10",
-      points: 10,
-    },
-    {
-      rank: 5,
-      team: "Warriors",
-      matches: 7,
-      wins: 2,
-      draws: 2,
-      losses: 3,
-      goals: "8-12",
-      points: 8,
-    },
-    {
-      rank: 6,
-      team: "Strikers",
-      matches: 7,
-      wins: 1,
-      draws: 3,
-      losses: 3,
-      goals: "6-14",
-      points: 6,
-    },
-  ];
 
   return (
     <Layout role="manager" userName={userName}>

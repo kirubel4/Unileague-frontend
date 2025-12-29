@@ -37,29 +37,6 @@ export default function ManagerNews() {
     return matchesSearch && matchesStatus;
   });
 
-  // const togglePublish = (id: number) => {
-  //   setArticles((prevArticles) =>
-  //     prevArticles.map((article) =>
-  //       article.id === id
-  //         ? {
-  //             ...article,
-  //             status: article.status === "published" ? "draft" : "published",
-  //             publishedDate:
-  //               article.status === "draft"
-  //                 ? new Date().toLocaleDateString()
-  //                 : article.publishedDate,
-  //           }
-  //         : article
-  //     )
-  //   );
-  // };
-
-  // const deleteArticle = (id: number) => {
-  //   setArticles((prevArticles) =>
-  //     prevArticles.filter((article) => article.id !== id)
-  //   );
-  // };
-
   return (
     <Layout role="manager" userName={userName}>
       {/* Header */}
@@ -102,8 +79,8 @@ export default function ManagerNews() {
 
       {/* Articles Grid */}
       <div className="space-y-4">
-        {filteredArticles.length > 0 ? (
-          filteredArticles.map((article) => (
+        {filteredArticles?.length > 0 ? (
+          filteredArticles?.map((article) => (
             <div
               key={article.id}
               className="bg-white rounded-lg border border-border p-6 hover:shadow-md transition-shadow"

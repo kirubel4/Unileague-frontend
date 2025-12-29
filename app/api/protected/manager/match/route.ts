@@ -1,16 +1,10 @@
 import { ApiResponse } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function PUT(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const matchId = request.nextUrl.searchParams.get("id");
+    const body = await request.json();
 
-    if (!matchId) {
-      return NextResponse.json(
-        { message: "matchId is required" },
-        { status: 400 }
-      );
-    }
     const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backend) {
       return NextResponse.json(
@@ -19,9 +13,10 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const res = await fetch(`${backend}/manager/match/${matchId}/end`, {
-      method: "PUT",
+    const res = await fetch(`${backend}/manager/match/create`, {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
     });
 
     const data: ApiResponse = await res.json();

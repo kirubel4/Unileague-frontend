@@ -1,16 +1,14 @@
 import { ApiResponse } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function PUT(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const matchId = request.nextUrl.searchParams.get("id");
+    const id = "fb1c80f4-7ffc-4b84-b329-d08511349fa2";
+    const managerId = "70cceb22-1547-40c8-8965-dbc68729c885";
+    const formData = await request.formData();
+    formData.append("tournamentId", id);
+    formData.append("managerId", managerId);
 
-    if (!matchId) {
-      return NextResponse.json(
-        { message: "matchId is required" },
-        { status: 400 }
-      );
-    }
     const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backend) {
       return NextResponse.json(
@@ -19,11 +17,11 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const res = await fetch(`${backend}/manager/match/${matchId}/end`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
+    const res = await fetch(`${backend}/manager/news/create`, {
+      method: "POST",
+      body: formData,
     });
-
+    console.log(res);
     const data: ApiResponse = await res.json();
 
     return NextResponse.json(data, { status: res.status });

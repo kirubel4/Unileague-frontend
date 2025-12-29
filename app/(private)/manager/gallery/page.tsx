@@ -31,103 +31,41 @@ import {
   CheckCircle,
   AlertCircle,
 } from "lucide-react";
-
-export interface GalleryImage {
-  id: number;
-  title: string;
-  url: string;
-  uploadedDate: string;
-  uploadedBy: string;
-  category: "tournament" | "team";
-  teamId?: string;
-  teamName?: string;
-  description?: string;
-}
+import useSWR from "swr";
+import { ApiResponse, fetcher } from "@/lib/utils";
+import { mapTeams, Team } from "../players/transfer/util";
+import { GalleryImg, mapGalleryResponse } from "./util";
 
 export default function ManagerGallery() {
-  const userName = localStorage.getItem("userName") || "Manager";
+  const userName = "Manager";
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { data, error, isLoading } = useSWR(
+    "/api/public/team/tournament",
+    fetcher,
+    {
+      revalidateOnFocus: false,
+    }
+  );
 
-  // Teams data (would come from API)
-  const teams = [
-    { id: "team1", name: "Tigers United", color: "#3B82F6" },
-    { id: "team2", name: "Phoenix FC", color: "#EF4444" },
-    { id: "team3", name: "Dragons FC", color: "#10B981" },
-    { id: "team4", name: "Eagles United", color: "#F59E0B" },
-  ];
+  const teams: Team[] = mapTeams(data || { data: [] });
+  const {
+    data: image,
+    error: err,
+    isLoading: loadImage,
+    mutate: mutateImage,
+  } = useSWR("/api/protected/manager/gallery", fetcher, {
+    revalidateOnFocus: false,
+  });
 
-  // Initial images
-  const [images, setImages] = useState<GalleryImage[]>([
-    {
-      id: 1,
-      title: "Opening Ceremony Crowd",
-      url: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=600&h=400&fit=crop",
-      uploadedDate: "Dec 18, 2024",
-      uploadedBy: "Admin",
-      category: "tournament",
-      description: "Tournament opening ceremony with all teams",
-    },
-    {
-      id: 2,
-      title: "Tigers Training Session",
-      url: "https://images.unsplash.com/photo-1517457373614-b7152f800fd1?w=600&h=400&fit=crop",
-      uploadedDate: "Dec 15, 2024",
-      uploadedBy: "Coach Ali",
-      category: "tournament",
-      teamId: "team1",
-      teamName: "Tigers United",
-      description: "Morning training session at main stadium",
-    },
-    {
-      id: 3,
-      title: "Phoenix Team Photo",
-      url: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&h=400&fit=crop",
-      uploadedDate: "Dec 12, 2024",
-      uploadedBy: "Manager",
-      category: "team",
-      teamId: "team2",
-      teamName: "Phoenix FC",
-      description: "Official team photo before match",
-    },
-    {
-      id: 4,
-      title: "Championship Trophy Display",
-      url: "https://images.unsplash.com/photo-1517457373614-b7152f800fd1?w=600&h=400&fit=crop",
-      uploadedDate: "Dec 10, 2024",
-      uploadedBy: "Manager",
-      category: "tournament",
-      description: "Tournament trophy display",
-    },
-    {
-      id: 5,
-      title: "Dragons FC Practice",
-      url: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&h=400&fit=crop",
-      uploadedDate: "Dec 8, 2024",
-      uploadedBy: "Coach Maria",
-      category: "team",
-      teamId: "team3",
-      teamName: "Dragons FC",
-      description: "Evening practice session",
-    },
-    {
-      id: 6,
-      title: "Eagles Team Huddle",
-      url: "https://images.unsplash.com/photo-1501447586807-f894fbb1dc4d?w=600&h=400&fit=crop",
-      uploadedDate: "Dec 5, 2024",
-      uploadedBy: "Manager",
-      category: "team",
-      teamId: "team4",
-      teamName: "Eagles United",
-      description: "Team huddle before the game",
-    },
-  ]);
+  const images: GalleryImg[] = mapGalleryResponse(image?.data || { data: [] });
 
   // Upload state
   const [uploading, setUploading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+
   const [uploadForm, setUploadForm] = useState({
     title: "",
-    description: "",
+
     category: "tournament" as "tournament" | "team",
     teamId: "",
   });
@@ -136,20 +74,16 @@ export default function ManagerGallery() {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [teamFilter, setTeamFilter] = useState("all");
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   // Filter images
   const filteredImages = images.filter((img) => {
     const matchesSearch =
       searchTerm === "" ||
-      img.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      img.teamName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       img.description?.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesCategory =
-      categoryFilter === "all" || img.category === categoryFilter;
-
-    const matchesTeam = teamFilter === "all" || img.teamId === teamFilter;
-
-    return matchesSearch && matchesCategory && matchesTeam;
+    const matchesTeam = teamFilter === "all" || img.teamName === teamFilter;
+    return matchesTeam && matchesSearch;
   });
 
   // Handle file selection
@@ -167,7 +101,7 @@ export default function ManagerGallery() {
         alert("Image size should be less than 5MB");
         return;
       }
-
+      setImageFile(file);
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
@@ -186,7 +120,7 @@ export default function ManagerGallery() {
 
   // Handle upload
   const handleUpload = async () => {
-    if (!previewImage) {
+    if (!previewImage || !imageFile) {
       alert("Please select an image first");
       return;
     }
@@ -196,41 +130,37 @@ export default function ManagerGallery() {
       return;
     }
 
-    if (!uploadForm.title.trim()) {
-      alert("Please enter a title");
-      return;
-    }
-
     setUploading(true);
 
     // Simulate upload delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
+    const fd = new FormData();
     const selectedTeam = teams.find((t) => t.id === uploadForm.teamId);
-
-    const newImage: GalleryImage = {
-      id: Math.max(...images.map((img) => img.id), 0) + 1,
-      title: uploadForm.title,
-      url: previewImage,
-      uploadedDate: new Date().toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }),
-      uploadedBy: userName,
-      category: uploadForm.category,
-      teamId: uploadForm.teamId || undefined,
-      teamName: selectedTeam?.name,
-      description: uploadForm.description,
-    };
-
-    setImages([newImage, ...images]);
-
-    // Reset form
+    if (selectedTeam?.id) {
+      fd.append("ownerId", selectedTeam?.id);
+    } else if (uploadForm.category === "tournament") {
+      fd.append("ownerId", "fill");
+    }
+    fd.append("banner", imageFile);
+    fd.append("usage", "GALLERY");
+    fd.append(
+      "ownerType",
+      uploadForm.category === "tournament" ? "TOURNAMENT" : "TEAM"
+    );
+    const res = await fetch("/api/protected/manager/gallery/post", {
+      method: "POST",
+      body: fd,
+    });
+    const response: ApiResponse = await res.json();
+    if (!response.success) {
+      console.log(response.message);
+      return;
+    }
+    console.log("posted");
+    await mutateImage();
     setPreviewImage(null);
     setUploadForm({
       title: "",
-      description: "",
+
       category: "tournament",
       teamId: "",
     });
@@ -243,10 +173,10 @@ export default function ManagerGallery() {
   };
 
   // Delete image
-  const deleteImage = (id: number) => {
-    if (confirm("Are you sure you want to delete this image?")) {
-      setImages((prevImages) => prevImages.filter((img) => img.id !== id));
-    }
+  const deleteImage = (id: string) => {
+    // if (confirm("Are you sure you want to delete this image?")) {
+    //   setImages((prevImages) => prevImages.filter((img) => img.id !== id));
+    // }
   };
 
   // Clear filters
@@ -404,10 +334,7 @@ export default function ManagerGallery() {
                           {teams.map((team) => (
                             <SelectItem key={team.id} value={team.id}>
                               <div className="flex items-center gap-2">
-                                <div
-                                  className="w-3 h-3 rounded-full"
-                                  style={{ backgroundColor: team.color }}
-                                />
+                                <div className="w-3 h-3 rounded-full" />
                                 {team.name}
                               </div>
                             </SelectItem>
@@ -418,7 +345,7 @@ export default function ManagerGallery() {
                   )}
                 </div>
 
-                <div className="flex gap-3 pt-4">
+                <div className="flex-col gap-3 pt-4">
                   <Button
                     onClick={handleUpload}
                     disabled={uploading || !previewImage}
@@ -473,7 +400,7 @@ export default function ManagerGallery() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="search" className="text-sm">
                       Search
@@ -491,27 +418,6 @@ export default function ManagerGallery() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="category" className="text-sm">
-                      Category
-                    </Label>
-                    <Select
-                      value={categoryFilter}
-                      onValueChange={setCategoryFilter}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="All categories" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Categories</SelectItem>
-                        <SelectItem value="tournament">Tournament</SelectItem>
-                        <SelectItem value="team">Team</SelectItem>
-                        <SelectItem value="training">Training</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
                     <Label htmlFor="team" className="text-sm">
                       Team
                     </Label>
@@ -524,10 +430,7 @@ export default function ManagerGallery() {
                         {teams.map((team) => (
                           <SelectItem key={team.id} value={team.id}>
                             <div className="flex items-center gap-2">
-                              <div
-                                className="w-2 h-2 rounded-full"
-                                style={{ backgroundColor: team.color }}
-                              />
+                              <div className="w-2 h-2 rounded-full" />
                               {team.name}
                             </div>
                           </SelectItem>
@@ -561,7 +464,7 @@ export default function ManagerGallery() {
                     <div className="relative aspect-video overflow-hidden bg-muted">
                       <img
                         src={image.url}
-                        alt={image.title}
+                        alt={"image.title"}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                       />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -583,13 +486,8 @@ export default function ManagerGallery() {
                       <div className="space-y-3">
                         <div>
                           <h3 className="font-semibold text-foreground line-clamp-2 mb-1">
-                            {image.title}
+                            {image.teamName}
                           </h3>
-                          {image.description && (
-                            <p className="text-sm text-muted-foreground line-clamp-2">
-                              {image.description}
-                            </p>
-                          )}
                         </div>
 
                         <Separator />
@@ -600,14 +498,7 @@ export default function ManagerGallery() {
                             <span className="font-medium text-foreground">
                               {image.teamName ? (
                                 <div className="flex items-center gap-1">
-                                  <div
-                                    className="w-2 h-2 rounded-full"
-                                    style={{
-                                      backgroundColor: teams.find(
-                                        (t) => t.id === image.teamId
-                                      )?.color,
-                                    }}
-                                  />
+                                  <div className="w-2 h-2 rounded-full" />
                                   {image.teamName}
                                 </div>
                               ) : (
@@ -615,18 +506,11 @@ export default function ManagerGallery() {
                               )}
                             </span>
                           </div>
+
                           <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground">
-                              Uploaded
-                            </span>
+                            <span className="text-muted-foreground">Usage</span>
                             <span className="font-medium text-foreground">
-                              {image.uploadedDate}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground">By</span>
-                            <span className="font-medium text-foreground">
-                              {image.uploadedBy}
+                              {image.usage}
                             </span>
                           </div>
                         </div>
@@ -676,7 +560,7 @@ export default function ManagerGallery() {
                   <div>
                     <p className="text-2xl font-bold">
                       {
-                        images.filter((img) => img.category === "tournament")
+                        images?.filter((img) => img.category === "tournament")
                           .length
                       }
                     </p>
@@ -722,10 +606,7 @@ export default function ManagerGallery() {
                       className="flex items-center justify-between p-3 rounded-lg bg-accent/50"
                     >
                       <div className="flex items-center gap-3">
-                        <div
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: team.color }}
-                        />
+                        <div className="w-3 h-3 rounded-full" />
                         <span className="font-medium">{team.name}</span>
                       </div>
                       <div className="flex items-center gap-4">

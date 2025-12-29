@@ -8,12 +8,13 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { ChevronLeft, Upload, X } from "lucide-react";
 import Link from "next/link";
+import { ApiResponse } from "@/lib/utils";
 
 export default function ManagerNewsCreate() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-
-  const userName = localStorage.getItem("userName") || "Manager";
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const userName = "Manager";
   const navigate = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -42,7 +43,7 @@ export default function ManagerNewsCreate() {
         alert("Image size should be less than 5MB");
         return;
       }
-
+      setImageFile(file);
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
@@ -59,20 +60,34 @@ export default function ManagerNewsCreate() {
     if (
       !formData.title.trim() ||
       !formData.excerpt.trim() ||
-      !formData.content.trim()
+      !formData.content.trim() ||
+      !imageFile
     ) {
-      alert("Please fill in all required fields");
       return;
     }
-    const form = new FormData();
-    form.append("title", formData.title);
-    form.append("excerpt", formData.excerpt);
-    form.append("content", formData.content);
-
     setIsSubmitting(true);
+    const content = {
+      title: formData.title,
+      excerpt: formData.excerpt,
+      content: formData.content,
+    };
+    const form = new FormData();
 
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    alert(`Article "${formData.title}" created successfully!`);
+    form.append("content", JSON.stringify(content));
+    form.append("banner", imageFile);
+
+    const res = await fetch("/api/protected/manager/news", {
+      method: "POST",
+      body: form,
+    });
+    const response: ApiResponse = await res.json();
+    if (!response.success) {
+      console.log(response.message);
+      setIsSubmitting(false);
+      return;
+    }
+    console.log("new created");
+    setIsSubmitting(false);
     navigate.push("/manager/news");
   };
 
