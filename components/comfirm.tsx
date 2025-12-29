@@ -1,15 +1,16 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface ConfirmModalProps {
-  title?: string; // Modal title
-  message: string; // Confirmation message
-  isOpen: boolean; // Control visibility
-  onConfirm: () => any; // Yes action
-  onCancel: () => void; // No action
-  confirmText?: string; // Yes button text
-  cancelText?: string; // No button text
+  title?: string;
+  message: string;
+  isOpen: boolean;
+  onConfirm: () => void | Promise<void>;
+  onCancel: () => void;
+  confirmText?: string;
+  cancelText?: string;
 }
 
 const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -21,15 +22,22 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   confirmText = "Yes",
   cancelText = "No",
 }) => {
-  if (!isOpen) return null;
+  const [mounted, setMounted] = useState(false);
 
-  return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+  // Prevent hydration issues in Next.js
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || !isOpen) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40">
       <div className="bg-white rounded-lg shadow-xl p-6 w-80">
         <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
         <p className="text-gray-600 mt-2 text-sm">{message}</p>
 
-        <div className="flex justify-end space-x-3 mt-6">
+        <div className="flex justify-end gap-3 mt-6">
           <button
             onClick={onCancel}
             className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
@@ -45,7 +53,8 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
