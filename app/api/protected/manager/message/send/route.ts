@@ -3,8 +3,24 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData();
+    const cookieMid = request.cookies.get("mid")?.value;
 
+    if (!cookieMid) {
+      return NextResponse.json(
+        { message: "Missing parameters please Re-login" },
+        { status: 400 }
+      );
+    }
+    let body: any = {};
+    try {
+      body = await request.json();
+    } catch (err) {
+      return NextResponse.json(
+        { message: "Invalid request body" },
+        { status: 400 }
+      );
+    }
+    body.senderId = cookieMid;
     const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backend) {
       return NextResponse.json(
@@ -12,14 +28,12 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-
-    const res = await fetch(`${backend}/manager/player/create`, {
+    const res = await fetch(`${backend}/manager/message/send`, {
       method: "POST",
-      body: formData,
+      headers: { "Content-Type": "application/json" }, // important!
+      body: JSON.stringify(body),
     });
-
     const data: ApiResponse = await res.json();
-
     return NextResponse.json(data, { status: res.status });
   } catch (error) {
     console.error("Proxy create error:", error);

@@ -3,8 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData();
-
+    const mid = request.cookies.get("mid")?.value;
+    if (!mid) {
+      return NextResponse.json({ message: "Missing id" }, { status: 400 });
+    }
+    const body = await request.json();
     const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backend) {
       return NextResponse.json(
@@ -12,14 +15,20 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-
-    const res = await fetch(`${backend}/manager/player/create`, {
+    const res = await fetch(`${backend}/auth/user/update`, {
       method: "POST",
-      body: formData,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: mid,
+        data: body, // ✅ MATCHES backend
+      }),
     });
 
     const data: ApiResponse = await res.json();
-
+    if (data.success) {
+    }
     return NextResponse.json(data, { status: res.status });
   } catch (error) {
     console.error("Proxy create error:", error);
