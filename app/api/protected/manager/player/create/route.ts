@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
-    console.log(formData);
+
     const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backend) {
       return NextResponse.json(
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       method: "POST",
       body: formData,
     });
-    console.log(res);
+
     const data: ApiResponse = await res.json();
 
     return NextResponse.json(data, { status: res.status });

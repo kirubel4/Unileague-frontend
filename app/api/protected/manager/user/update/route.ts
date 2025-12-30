@@ -3,18 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieTid = request.cookies.get("tid")?.value;
-    const cookieMid = request.cookies.get("mid")?.value;
-    if (!cookieMid || !cookieTid) {
-      return NextResponse.json(
-        { message: "Missing parameters please Re login " },
-        { status: 400 }
-      );
+    const mid = request.cookies.get("mid")?.value;
+    if (!mid) {
+      return NextResponse.json({ message: "Missing id" }, { status: 400 });
     }
-    const formData = await request.formData();
-    formData.append("tournamentId", cookieTid);
-    formData.append("managerId", cookieMid);
-
+    const body = await request.json();
     const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backend) {
       return NextResponse.json(
@@ -22,14 +15,20 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-
-    const res = await fetch(`${backend}/manager/news/create`, {
+    const res = await fetch(`${backend}/auth/user/update`, {
       method: "POST",
-      body: formData,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: mid,
+        data: body, // ✅ MATCHES backend
+      }),
     });
-    console.log(res);
-    const data: ApiResponse = await res.json();
 
+    const data: ApiResponse = await res.json();
+    if (data.success) {
+    }
     return NextResponse.json(data, { status: res.status });
   } catch (error) {
     console.error("Proxy create error:", error);
