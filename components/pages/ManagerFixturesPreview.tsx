@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 
 import { Team, TournamentFormat } from "./ManagerFixturesSetup";
 import { MatchWeekPreview } from "@/app/(private)/manager/fixtures/setup/page";
+import { getCookie } from "@/lib/utils";
 
 type Props = {
   format: TournamentFormat;
@@ -20,7 +21,7 @@ export default function ManagerFixturesPreview({
   onNext,
   onBack,
 }: Props) {
-  const userName = localStorage.getItem("userName") || "Manager";
+  const userName = getCookie("uName") || "Manager";
 
   // ---- safety guard ----
   if (!matches || matches.length === 0) {

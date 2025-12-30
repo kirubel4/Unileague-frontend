@@ -1,13 +1,14 @@
 "use client";
 import { Layout } from "@/components/Layout";
-import { fetcher } from "@/lib/utils";
+import { fetcher, getCookie } from "@/lib/utils";
 import useSWR from "swr";
 import { mapApiDataToTable } from "./util";
 
 export default function ManagerStandings() {
-  const userName = localStorage.getItem("userName") || "Manager";
+  const userName = getCookie("uName") || "Manager";
+
   const { data, isLoading, error } = useSWR(
-    "/api/public/tournament/standings?id=fb1c80f4-7ffc-4b84-b329-d08511349fa2",
+    "/api/public/tournament/standings",
     fetcher,
     {
       revalidateOnFocus: false,

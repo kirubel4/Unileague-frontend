@@ -32,12 +32,12 @@ import {
   AlertCircle,
 } from "lucide-react";
 import useSWR from "swr";
-import { ApiResponse, fetcher } from "@/lib/utils";
+import { ApiResponse, fetcher, getCookie } from "@/lib/utils";
 import { mapTeams, Team } from "../players/transfer/util";
 import { GalleryImg, mapGalleryResponse } from "./util";
 
 export default function ManagerGallery() {
-  const userName = "Manager";
+  const userName = getCookie("uName") || "Manager";
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data, error, isLoading } = useSWR(
     "/api/public/team/tournament",

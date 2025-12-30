@@ -8,12 +8,12 @@ import { useRef, useState } from "react";
 import { ChevronLeft, Copy, Check, Upload, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ApiResponse } from "@/lib/utils";
+import { ApiResponse, getCookie } from "@/lib/utils";
 
 export default function ManagerTeamsCreate() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const userName = localStorage.getItem("userName") || "Manager";
+  const userName = getCookie("uName") || "Manager";
   const navigate = useRouter();
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);

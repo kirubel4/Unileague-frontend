@@ -16,23 +16,32 @@ export async function POST(req: NextRequest) {
 
     const apiResponse: ApiResponse = await res.json();
 
-    if (res.ok && apiResponse.data?.access_token) {
+    if (apiResponse.success && apiResponse.data) {
       const response = NextResponse.json(apiResponse);
-      response.cookies.set("accessToken", apiResponse.data.access_token, {
+      response.cookies.set("aToken", apiResponse.data.aToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         path: "/",
         maxAge: 60 * 120, // 2 hours
       });
-      response.cookies.set("tid", apiResponse.data.tid, {
+      response.cookies.set("rToken", apiResponse.data.rToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         path: "/",
         maxAge: 60 * 120, // 2 hours
       });
+      if (apiResponse.data.role === "tournamentManager")
+        response.cookies.set("tid", apiResponse.data.tid, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+          path: "/",
+          maxAge: 60 * 120, // 2 hours
+        });
       response.cookies.set("mid", apiResponse.data.id, { path: "/" });
+      response.cookies.set("uName", apiResponse.data.uName, { path: "/" });
       response.cookies.set("role", apiResponse.data.role, { path: "/" });
       return response;
     }
