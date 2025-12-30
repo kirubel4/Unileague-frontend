@@ -331,7 +331,7 @@ export default function ManagerGallery() {
                           <SelectValue placeholder="Choose team" />
                         </SelectTrigger>
                         <SelectContent>
-                          {teams.map((team) => (
+                          {teams?.map((team) => (
                             <SelectItem key={team.id} value={team.id}>
                               <div className="flex items-center gap-2">
                                 <div className="w-3 h-3 rounded-full" />
@@ -427,7 +427,7 @@ export default function ManagerGallery() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All Teams</SelectItem>
-                        {teams.map((team) => (
+                        {teams?.map((team) => (
                           <SelectItem key={team.id} value={team.id}>
                             <div className="flex items-center gap-2">
                               <div className="w-2 h-2 rounded-full" />
@@ -596,7 +596,7 @@ export default function ManagerGallery() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {teams.map((team) => {
+                {teams?.map((team) => {
                   const teamImages = images.filter(
                     (img) => img.teamId === team.id
                   );

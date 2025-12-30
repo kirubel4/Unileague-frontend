@@ -5,11 +5,8 @@ export async function POST(request: NextRequest) {
   try {
     let tid;
     const cookieId = request.cookies.get("tid")?.value;
-    const paramId = request.nextUrl.searchParams.get("id");
     if (cookieId) {
       tid = cookieId;
-    } else if (paramId) {
-      tid = paramId;
     } else {
       tid = "fb1c80f4-7ffc-4b84-b329-d08511349fa2";
     }

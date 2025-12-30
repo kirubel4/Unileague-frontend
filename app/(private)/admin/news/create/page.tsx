@@ -9,7 +9,7 @@ import { useRef, useState } from "react";
 import { ChevronLeft, Upload, X } from "lucide-react";
 import Link from "next/link";
 
-export default function ManagerNewsCreate() {
+export default function AdminNewsCreate() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
@@ -20,7 +20,6 @@ export default function ManagerNewsCreate() {
     title: "",
     excerpt: "",
     content: "",
-    tags: "",
   });
 
   const handleChange = (
@@ -73,7 +72,7 @@ export default function ManagerNewsCreate() {
   };
 
   return (
-    <Layout role="manager" userName={userName}>
+    <Layout role="super_admin" userName={userName}>
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground">Create Article</h1>

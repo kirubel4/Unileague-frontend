@@ -19,7 +19,7 @@ interface NewsArticle {
 }
 
 export default function AdminNews() {
-  const userName = localStorage.getItem("userName") || "Admin";
+  const userName = "Admin";
   const [searchTerm, setSearchTerm] = useState("");
 
   const articles: NewsArticle[] = [
