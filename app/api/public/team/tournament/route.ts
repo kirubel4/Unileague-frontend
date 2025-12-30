@@ -4,18 +4,17 @@ export async function GET(req: NextRequest, res: NextResponse) {
   try {
     // fr manager we get the id form the session fro public we accept id from the params
     let tid;
-    const cookiId = req .cookies.get('tid')?.value;
-    const paramId = req.nextUrl.searchParams.get('tid');
-    console.log(paramId)
+    const cookiId = req.cookies.get("tid")?.value;
+    const paramId = req.nextUrl.searchParams.get("tid");
+    console.log(paramId);
     if (cookiId) {
       tid = cookiId;
     } else if (paramId) {
       tid = paramId;
     } else {
-      tid = '11111111-1111-1111-1111-111111111111';
+      tid = "fb1c80f4-7ffc-4b84-b329-d08511349fa2";
     }
 
-    
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/tournaments/${tid}/teams`,
       {

@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import useSWR from "swr";
-import { ApiResponse, fetcher } from "@/lib/utils";
+import { ApiResponse, fetcher, getCookie } from "@/lib/utils";
 import { mapMatchDetail, mapPlayerNames } from "./util";
 import { Input } from "@/components/ui/input";
 
@@ -43,7 +43,7 @@ interface Event {
   team: string;
 }
 export default function ManagerMatchesDetail() {
-  const userName = "Manager";
+  const userName = getCookie("uName") || "Manager";
   const params = useParams();
   const matchId = params.id as string;
 

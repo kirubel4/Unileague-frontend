@@ -9,13 +9,13 @@ import { ChevronLeft, Upload, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { mapTeams, Team } from "../transfer/util";
-import { ApiResponse, fetcher } from "@/lib/utils";
+import { ApiResponse, fetcher, getCookie } from "@/lib/utils";
 import useSWR from "swr";
 
 export default function ManagerPlayersCreate() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const userName = localStorage.getItem("userName") || "Manager";
+  const userName = getCookie("uName") || "Manager";
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   const navigate = useRouter();
@@ -137,7 +137,6 @@ export default function ManagerPlayersCreate() {
               />
             </div>
 
-         
             <div className="space-y-4">
               <Label>Player Image</Label>
               {previewImage ? (

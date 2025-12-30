@@ -1,15 +1,15 @@
-'use client';
-import { mapTeams, Team } from '@/app/(private)/manager/players/transfer/util';
-import { mapApiDataToTable } from '@/app/(private)/manager/standings/util';
-import { Layout } from '@/components/Layout';
+"use client";
+import { mapTeams, Team } from "@/app/(private)/manager/players/transfer/util";
+import { mapApiDataToTable } from "@/app/(private)/manager/standings/util";
+import { Layout } from "@/components/Layout";
 
-import { Button } from '@/components/ui/button';
-import { fetcher } from '@/lib/utils';
+import { Button } from "@/components/ui/button";
+import { fetcher } from "@/lib/utils";
 
-import { ChevronLeft, Edit, Flag, Users } from 'lucide-react';
-import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import useSWR from 'swr';
+import { ChevronLeft, Edit, Flag, Users } from "lucide-react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import useSWR from "swr";
 
 type TournamentManager = {
   id: string;
@@ -17,7 +17,7 @@ type TournamentManager = {
   email: string;
 };
 
-type Tournament =  {
+type Tournament = {
   id: string;
   tournamentName: string;
   startingDate: string;
@@ -32,19 +32,25 @@ type Tournament =  {
 };
 
 export default function AdminTournamentDetail() {
- const userName =  'Admin';
+  const userName = "Admin";
   const params = useParams();
-  const id = params?.id ?? '';
+  const id = params?.id ?? "";
 
   // Fetch tournament details
-  const { data: tournamentRes } = useSWR(`/api/public/tournament/detail?id=${id}`, fetcher);
- 
+  const { data: tournamentRes } = useSWR(
+    `/api/public/tournament/detail?id=${id}`,
+    fetcher
+  );
+
   const tournament: Tournament | null = tournamentRes?.data?.data ?? null;
 
-  const { data: teamRes } = useSWR(`/api/public/team/tournament?tid=${id}`, fetcher);
+  const { data: teamRes } = useSWR(
+    `/api/public/team/tournament?tid=${id}`,
+    fetcher
+  );
   const teams: Team[] = mapTeams(teamRes || { data: [] });
- const { data, isLoading, error } = useSWR(
-    "/api/public/tournament/standings?id=fb1c80f4-7ffc-4b84-b329-d08511349fa2",
+  const { data, isLoading, error } = useSWR(
+    `/api/public/tournament/standings?id=${id}`,
     fetcher,
     {
       revalidateOnFocus: false,
@@ -52,11 +58,10 @@ export default function AdminTournamentDetail() {
   );
   const standing = mapApiDataToTable(data?.data || []);
 
-
   const standings = [
     {
       rank: 1,
-      team: 'Tigers United',
+      team: "Tigers United",
       wins: 6,
       draws: 1,
       losses: 0,
@@ -64,29 +69,29 @@ export default function AdminTournamentDetail() {
     },
     {
       rank: 2,
-      team: 'Eagles Sports',
+      team: "Eagles Sports",
       wins: 5,
       draws: 2,
       losses: 0,
       points: 17,
     },
-    { rank: 3, team: 'Phoenix FC', wins: 4, draws: 3, losses: 0, points: 15 },
-    { rank: 4, team: 'Lions Club', wins: 3, draws: 1, losses: 3, points: 10 },
+    { rank: 3, team: "Phoenix FC", wins: 4, draws: 3, losses: 0, points: 15 },
+    { rank: 4, team: "Lions Club", wins: 3, draws: 1, losses: 3, points: 10 },
   ];
   const mappedTournament = tournament
-  ? {
-      id: tournament.id,
-      name: tournament.tournamentName,
-      startDate: tournament.startingDate,
-      endDate: tournament.endingDate,
-      location: tournament.venue,
-      description: tournament.description,
-      status: tournament.status,
-      teams: tournament.teamCount,
-      players: tournament.playerCount,
-      managers: tournament.managers || [],
-    }
-  : null;
+    ? {
+        id: tournament.id,
+        name: tournament.tournamentName,
+        startDate: tournament.startingDate,
+        endDate: tournament.endingDate,
+        location: tournament.venue,
+        description: tournament.description,
+        status: tournament.status,
+        teams: tournament.teamCount,
+        players: tournament.playerCount,
+        managers: tournament.managers || [],
+      }
+    : null;
 
   return (
     <Layout role="super_admin" userName={userName}>
@@ -114,7 +119,7 @@ export default function AdminTournamentDetail() {
                 Edit
               </Button>
             </Link>
-            {tournament?.status !== 'finished' && (
+            {tournament?.status !== "finished" && (
               <Link href={`/admin/tournaments/${id}/finish`}>
                 <Button variant="outline" className="rounded-lg gap-2">
                   <Flag className="w-4 h-4" />
@@ -152,7 +157,6 @@ export default function AdminTournamentDetail() {
             {mappedTournament?.players ?? 0}
           </p>
         </div>
-        
       </div>
 
       {/* Details Grid */}
@@ -177,7 +181,9 @@ export default function AdminTournamentDetail() {
                 <p className="text-sm text-muted-foreground font-medium">
                   Description
                 </p>
-                <p className="text-foreground">{mappedTournament?.description}</p>
+                <p className="text-foreground">
+                  {mappedTournament?.description}
+                </p>
               </div>
             </div>
           </div>
@@ -189,7 +195,7 @@ export default function AdminTournamentDetail() {
               Assigned Managers
             </h2>
             <div className="space-y-3">
-              {(mappedTournament?.managers ?? []).map(manager => (
+              {(mappedTournament?.managers ?? []).map((manager) => (
                 <div
                   key={manager.id}
                   className="border border-border rounded-lg p-4 flex items-center justify-between"
@@ -243,7 +249,7 @@ export default function AdminTournamentDetail() {
                   </tr>
                 </thead>
                 <tbody>
-                  {standing?.map(row => (
+                  {standing?.map((row) => (
                     <tr
                       key={row.rank}
                       className="border-b border-border hover:bg-muted"
@@ -280,7 +286,7 @@ export default function AdminTournamentDetail() {
             Registered Teams
           </h2>
           <div className="space-y-3 max-h-96 overflow-y-auto">
-            {teams?.map(team => (
+            {teams?.map((team) => (
               <div
                 key={team.id}
                 className="border border-border rounded-lg p-4 hover:bg-muted transition-colors"

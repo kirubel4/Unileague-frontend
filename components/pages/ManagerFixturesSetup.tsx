@@ -1,7 +1,7 @@
 import { mapTeams } from "@/app/(private)/manager/players/transfer/util";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { fetcher } from "@/lib/utils";
+import { fetcher, getCookie } from "@/lib/utils";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -41,7 +41,7 @@ export default function ManagerFixturesSetup({
   onNext,
   isLoading,
 }: Props) {
-  const userName = "Manager";
+  const userName = getCookie("uName") || "Manager";
   const {
     data,
     error,

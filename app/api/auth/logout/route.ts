@@ -1,19 +1,37 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
+export async function POST() {
   try {
-    const response = NextResponse.json({ message: "Logout successfully" });
+    const response = NextResponse.json({
+      success: true,
+      message: "Logged out successfully",
+    });
 
-    // Clear cookies properly
-    response.cookies.set("token", "", { maxAge: -1, path: "/" });
-    response.cookies.set("id", "", { maxAge: -1, path: "/" });
-    response.cookies.set("role", "", { maxAge: -1, path: "/" });
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: (process.env.NODE_ENV === "production" ? "none" : "lax") as
+        | "none"
+        | "lax",
+      path: "/",
+      maxAge: 0, // 🔑 correct way to delete
+    };
 
-    return response; // ✅ Return this directly
+    // httpOnly cookies
+    response.cookies.set("aToken", "", cookieOptions);
+    response.cookies.set("rToken", "", cookieOptions);
+    response.cookies.set("tid", "", cookieOptions);
+
+    // non-httpOnly cookies
+    response.cookies.set("mid", "", { path: "/", maxAge: 0 });
+    response.cookies.set("uName", "", { path: "/", maxAge: 0 });
+    response.cookies.set("role", "", { path: "/", maxAge: 0 });
+
+    return response;
   } catch (error) {
-    console.error(error);
+    console.error("Logout error:", error);
     return NextResponse.json(
-      { message: "Internal Server Error" },
+      { success: false, message: "Internal Server Error" },
       { status: 500 }
     );
   }

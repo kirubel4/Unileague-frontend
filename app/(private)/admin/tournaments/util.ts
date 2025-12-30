@@ -21,7 +21,7 @@ interface Tournament {
   tournamentName: string;
   startingDate: string;
   endingDate: string;
-  status: 'UPCOMING' | 'ONGOING' | 'COMPLETED';
+  status: "UPCOMING" | "ONGOING" | "COMPLETED";
   teams?: number;
   managers?: number;
   logurl?: string;

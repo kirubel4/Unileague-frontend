@@ -8,13 +8,13 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { ChevronLeft, Upload, X } from "lucide-react";
 import Link from "next/link";
-import { ApiResponse } from "@/lib/utils";
+import { ApiResponse, getCookie } from "@/lib/utils";
 
 export default function ManagerNewsCreate() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const userName = "Manager";
+  const userName = getCookie("uName") || "Manager";
   const navigate = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({

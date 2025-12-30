@@ -8,12 +8,12 @@ import { ChevronLeft, ArrowRight } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import useSWR from "swr";
-import { ApiResponse, fetcher } from "@/lib/utils";
+import { ApiResponse, fetcher, getCookie } from "@/lib/utils";
 import { mapTeams, Team } from "./util";
 import { Input } from "@/components/ui/input";
 
 export default function ManagerPlayersTransfer() {
-  const userName = "Manager";
+  const userName = getCookie("uName") || "Manager";
   const searchParams = useSearchParams();
   const id = searchParams.get("id") ?? "";
   const currentPlayer = searchParams.get("playerName") ?? "Unknown Player";
