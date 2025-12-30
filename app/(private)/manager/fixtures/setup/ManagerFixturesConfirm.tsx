@@ -10,7 +10,7 @@ import {
 } from "../../../../../components/pages/ManagerFixturesSetup";
 import { useRouter } from "next/navigation";
 import { MatchWeekPreview } from "@/app/(private)/manager/fixtures/setup/page";
-import { ApiResponse } from "@/lib/utils";
+import { ApiResponse, getCookie } from "@/lib/utils";
 import { mapPreviewToMatches } from "@/app/(private)/manager/fixtures/setup/util";
 
 type Props = {
@@ -43,7 +43,7 @@ export default function ManagerFixturesConfirm({
       console.log(error);
     }
   };
-  const userName = "Manager";
+  const userName = getCookie("uName") || "Manager";
   const navigate = useRouter();
   const [isConfirming, setIsConfirming] = useState(false);
 

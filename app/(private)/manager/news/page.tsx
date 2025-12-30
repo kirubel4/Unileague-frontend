@@ -2,7 +2,7 @@
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { fetcher } from "@/lib/utils";
+import { fetcher, getCookie } from "@/lib/utils";
 
 import { Trash2, Edit, Plus, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
@@ -11,7 +11,7 @@ import useSWR from "swr";
 import { mapBroadcastToNewsArticles, NewsArticle } from "./util";
 
 export default function ManagerNews() {
-  const userName = "Manager";
+  const userName = getCookie("uName") || "Manager";
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<
     "all" | "published" | "draft"

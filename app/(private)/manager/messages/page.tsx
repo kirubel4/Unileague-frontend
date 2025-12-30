@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Send, AlertCircle, MessageCircle } from "lucide-react";
+import { getCookie } from "@/lib/utils";
 
 interface Message {
   id: number;
@@ -15,7 +16,7 @@ interface Message {
 }
 
 export default function ManagerMessages() {
-  const userName = localStorage.getItem("userName") || "Manager";
+  const userName = getCookie("uName") || "Manager";
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([
     {

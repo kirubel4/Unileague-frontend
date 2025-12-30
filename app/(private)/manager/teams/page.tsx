@@ -2,7 +2,7 @@
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ApiResponse, fetcher } from "@/lib/utils";
+import { ApiResponse, fetcher, getCookie } from "@/lib/utils";
 
 import { Trash2, Edit, Plus, Users } from "lucide-react";
 import Link from "next/link";
@@ -10,7 +10,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import { mapTeams, Team } from "../players/transfer/util";
 export default function ManagerTeams() {
-  const userName = "Manager";
+  const userName = getCookie("uName") || "Manager";
   const [searchTerm, setSearchTerm] = useState("");
 
   const {
