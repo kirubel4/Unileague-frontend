@@ -22,11 +22,11 @@ interface Tournament {
 
 export default function AdminTournaments() {
   const userName = 'Admin';
-
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   // const [error, setError] = useState<string | null>(null);
 
+  
   const [statusFilter, setStatusFilter] = useState<
     'all' | 'upcoming' | 'ongoing' | 'COMPLETED'
   >('all');
@@ -48,7 +48,8 @@ export default function AdminTournaments() {
         (t.status?.toLowerCase() ?? '') === statusFilter;
       const matchesYear =
         yearFilter === 'all' ||
-        new Date(t.startingDate).getFullYear().toString() === yearFilter;
+        (new Date(t.startingDate).getFullYear() <= parseInt(yearFilter) &&
+          new Date(t.endingDate).getFullYear() >= parseInt(yearFilter));
 
       return matchesSearch && matchesStatus && matchesYear;
     });
@@ -167,8 +168,8 @@ export default function AdminTournaments() {
                         {t.status ?? '-'}
                       </span>
                     </td>
-                    <td className="py-2 px-4 text-sm">{t.teams ?? '-'}</td>
-                    <td className="py-2 px-4 text-sm">{t.managers ?? '-'}</td>
+                    <td className="py-2 px-4 text-sm">{t.teams ?? '1'}</td>
+                    <td className="py-2 px-4 text-sm">{t.managers ?? '1'}</td>
                     <td className="py-2 px-4 text-sm">
                       {t.startingDate && t.endingDate
                         ? `${new Date(

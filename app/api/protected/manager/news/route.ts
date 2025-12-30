@@ -3,17 +3,17 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieTid = request.cookies.get("tid")?.value;
-    const cookieMid = request.cookies.get("mid")?.value;
-    if (!cookieMid || !cookieTid) {
+    const mid = request.cookies.get('mid')?.value;
+    const tid = request.cookies.get('tid')?.value;
+    if (!mid || !tid) {
       return NextResponse.json(
-        { message: "Missing parameters please Re login " },
-        { status: 400 }
+        { message: 'Missing parameters' },
+        { status: 500 }
       );
     }
     const formData = await request.formData();
-    formData.append("tournamentId", cookieTid);
-    formData.append("managerId", cookieMid);
+    formData.append("tournamentId", tid);
+    formData.append("managerId", mid);
 
     const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backend) {

@@ -8,7 +8,13 @@ interface ApiTournament {
   venue: string;
   sponsor: string;
   status: string;
+  _count?: {
+    teams?: number;
+    managers?: number;
+  };
+  logo?: string;
 }
+
 
 interface Tournament {
   id: string;
@@ -28,24 +34,22 @@ interface ApiResponse {
   data: ApiTournament[];
 }
 
-export function mapTournaments(apiData: ApiResponse): Tournament[] {
+export function mapTournaments(apiData: ApiResponse & { data: any[] }): Tournament[] {
   if (!apiData?.success || !Array.isArray(apiData?.data)) return [];
 
-  return apiData.data.map((tournament) => ({
-    id: tournament.id,
-    tournamentName: tournament.tournamentName ?? "Unknown Tournament",
-    startingDate: tournament.startingDate,
-    endingDate: tournament.endingDate,
+  return apiData.data.map(t => ({
+    id: t.id,
+    tournamentName: t.tournamentName ?? 'Unknown Tournament',
+    startingDate: t.startingDate,
+    endingDate: t.endingDate,
     status:
-      tournament?.status === undefined
-        ? "COMPLETED"
-        : tournament?.status.toUpperCase() === "ONGOING"
-        ? "ONGOING"
-        : tournament.status.toUpperCase() === "UPCOMING"
-        ? "UPCOMING"
-        : "COMPLETED",
-    teams: 0, // default value if your backend doesn't provide it
-    managers: 0, // default value if your backend doesn't provide it
-    logurl: undefined, // default undefined
+      t.status.toUpperCase() === 'ONGOING'
+        ? 'ONGOING'
+        : t.status.toUpperCase() === 'UPCOMING'
+        ? 'UPCOMING'
+        : 'COMPLETED',
+    teams: t._count?.teams ?? 0,
+    managers: t._count?.managers ?? 0,
+    logurl: t.logo ?? undefined,
   }));
 }
