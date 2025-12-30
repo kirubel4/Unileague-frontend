@@ -20,7 +20,7 @@ export interface Player {
 }
 
 export function mapPlayers(apiData: ApiResponseTeam[]): Player[] {
-  return apiData.flatMap(({ team }) =>
+  return apiData?.flatMap(({ team }) =>
     team.players.map((player) => ({
       id: player.id,
       name: player.name,

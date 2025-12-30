@@ -28,7 +28,7 @@ export interface Team {
 }
 
 export function mapTeams(apiResponse: ApiResponse): Team[] {
-  return apiResponse.data.map((item) => ({
+  return apiResponse?.data?.map((item) => ({
     id: item.team.id,
     name: item.team.teamName,
     coachName: item.team.coachName ?? "",

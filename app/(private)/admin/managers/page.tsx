@@ -1,65 +1,67 @@
-"use client";
-import { Layout } from "@/components/Layout";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-
-import { Trash2, Edit, Plus, RotateCcw } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
-
-interface Manager {
-  id: number;
-  name: string;
-  email: string;
-  assignedTournament: string;
-  status: "active" | "inactive";
-  joinDate: string;
-}
+'use client';
+import { Layout } from '@/components/Layout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Trash2, Edit, Plus, RotateCcw } from 'lucide-react';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import useSWR from 'swr';
+import { ManagerTableRow, mapManagersToTableRows } from './util';
+import { ApiResponse, fetcher } from '@/lib/utils';
 
 export default function AdminManagers() {
-  const userName = localStorage.getItem("userName") || "Admin";
-  const [searchTerm, setSearchTerm] = useState("");
+  const userName = 'Admin';
+  const [searchTerm, setSearchTerm] = useState('');
+  const [managers, setManagers] = useState<ManagerTableRow[]>([]);
 
-  const managers: Manager[] = [
-    {
-      id: 1,
-      name: "John Smith",
-      email: "john.smith@example.com",
-      assignedTournament: "City League Championship",
-      status: "active",
-      joinDate: "Jan 10, 2024",
-    },
-    {
-      id: 2,
-      name: "Sarah Johnson",
-      email: "sarah.johnson@example.com",
-      assignedTournament: "City League Championship",
-      status: "active",
-      joinDate: "Jan 12, 2024",
-    },
-    {
-      id: 3,
-      name: "Michael Brown",
-      email: "michael.brown@example.com",
-      assignedTournament: "Regional Cup",
-      status: "active",
-      joinDate: "Feb 5, 2024",
-    },
-    {
-      id: 4,
-      name: "Emma Wilson",
-      email: "emma.wilson@example.com",
-      assignedTournament: "None",
-      status: "inactive",
-      joinDate: "Dec 20, 2023",
-    },
-  ];
+  const { data, error,mutate:mutateManager } = useSWR('/api/protected/admin/manager', fetcher, {
+    revalidateOnFocus: false,
+  });
+
+  useEffect(() => {
+    if (data?.data) {
+      setManagers(mapManagersToTableRows(data.data));
+    }
+  }, [data]);
 
   const filteredManagers = managers.filter(
-    (m) =>
+    m =>
       m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       m.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  async function handleDeleteAdmin(adminId: string, adminName: string) {
+    if (!confirm(`Are you sure you want to delete admin: ${adminName}?`))
+      return;
+
+    try {
+      const res = await fetch(
+        `/api/protected/admin/manager/delete?id=${adminId}`,
+        {
+          method: 'DELETE',
+        }
+      );
+      const result:ApiResponse = await res.json();
+      if(!result.success){
+          alert(result.data.message );
+      }
+     
+
+      if (result.success) {
+        alert(result.data.message || 'Admin deleted successfully!');
+        setManagers(prev => prev.filter(admin => admin.id !== adminId));
+        await mutateManager();
+      } else {
+        alert(
+          'Failed to delete: ' +
+            (result.data?.message || result.message || 'Unknown error')
+        );
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error deleting admin');
+    }
+  }
 
   return (
     <Layout role="super_admin" userName={userName}>
@@ -73,8 +75,7 @@ export default function AdminManagers() {
         </div>
         <Link href="/admin/managers/create">
           <Button className="bg-primary hover:bg-blue-600 text-white rounded-lg gap-2 h-10">
-            <Plus className="w-4 h-4" />
-            Add Manager
+            <Plus className="w-4 h-4" /> Add Manager
           </Button>
         </Link>
       </div>
@@ -85,7 +86,7 @@ export default function AdminManagers() {
           type="text"
           placeholder="Search by name or email..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={e => setSearchTerm(e.target.value)}
           className="rounded-lg h-9"
         />
       </div>
@@ -118,7 +119,7 @@ export default function AdminManagers() {
             </thead>
             <tbody>
               {filteredManagers.length > 0 ? (
-                filteredManagers.map((manager) => (
+                filteredManagers.map(manager => (
                   <tr
                     key={manager.id}
                     className="border-b border-border hover:bg-muted transition-colors"
@@ -135,9 +136,9 @@ export default function AdminManagers() {
                     <td className="py-3 px-4">
                       <span
                         className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                          manager.status === "active"
-                            ? "status-active"
-                            : "status-finished"
+                          manager.status === 'active'
+                            ? 'status-active'
+                            : 'status-finished'
                         }`}
                       >
                         {manager.status.charAt(0).toUpperCase() +
@@ -161,21 +162,9 @@ export default function AdminManagers() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="gap-1 h-8 rounded"
-                          onClick={() =>
-                            alert(
-                              "Password reset email sent to " + manager.email
-                            )
-                          }
-                        >
-                          <RotateCcw className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
                           className="gap-1 h-8 rounded text-destructive hover:bg-red-50"
                           onClick={() =>
-                            alert("Delete manager: " + manager.name)
+                            handleDeleteAdmin(manager.id, manager.name)
                           }
                         >
                           <Trash2 className="w-4 h-4" />

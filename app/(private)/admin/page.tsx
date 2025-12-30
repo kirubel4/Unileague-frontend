@@ -1,6 +1,7 @@
-'use client";';
-import { Layout } from "@/components/Layout";
-import { Button } from "@/components/ui/button";
+"use client";
+import { Layout } from '@/components/Layout';
+import { Button } from '@/components/ui/button';
+import { useEffect, useState } from 'react';
 import {
   Trophy,
   Users,
@@ -8,8 +9,8 @@ import {
   Plus,
   TrendingUp,
   BarChart3,
-} from "lucide-react";
-import Link from "next/link";
+} from 'lucide-react';
+import Link from 'next/link';
 
 interface StatCard {
   label: string;
@@ -19,72 +20,100 @@ interface StatCard {
   trend?: string;
 }
 
+interface DashboardStats {
+  totalTournaments: number;
+  activeTournaments: number;
+  finishedTournaments: number;
+  totalTeams: number;
+  totalPlayers: number;
+  totalManagers: number;
+}
 export default function AdminDashboard() {
-  const userName = "Admin";
+  const userName = 'Admin';
+  const [status, setStatus] = useState<DashboardStats | null >(null);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const res = await fetch('/api/protected/admin/tournament/');
+        const json = await res.json();
+
+        if (json.ok) {
+          setStatus(json.data);
+        }
+      } catch (error) {
+        console.error('Error fetching tournaments:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+  if (!status) return <p className="p-4">No dashboard data found.</p>;
   const statCards: StatCard[] = [
     {
-      label: "Total Tournaments",
-      value: "24",
+      label: 'Total Tournaments',
+      value: status?.totalTournaments,
       icon: <Trophy className="w-6 h-6" />,
-      color: "bg-blue-50 text-blue-600",
-      trend: "+3 this month",
+      color: 'bg-blue-50 text-blue-600',
+      trend: '+3 this month',
     },
     {
-      label: "Active Tournaments",
-      value: "8",
+      label: 'Active Tournaments',
+      value: status.activeTournaments,
       icon: <TrendingUp className="w-6 h-6" />,
-      color: "bg-green-50 text-green-600",
-      trend: "2 starting soon",
+      color: 'bg-green-50 text-green-600',
+      trend: '2 starting soon',
     },
     {
-      label: "Finished Tournaments",
-      value: "16",
+      label: 'Finished Tournaments',
+      value: status.finishedTournaments,
       icon: <BarChart3 className="w-6 h-6" />,
-      color: "bg-purple-50 text-purple-600",
-      trend: "Completed",
+      color: 'bg-purple-50 text-purple-600',
+      trend: 'Completed',
     },
     {
-      label: "Total Teams",
-      value: "156",
+      label: 'Total Teams',
+      value: status.totalTeams,
       icon: <Users className="w-6 h-6" />,
-      color: "bg-orange-50 text-orange-600",
-      trend: "+12 registered",
+      color: 'bg-orange-50 text-orange-600',
+      trend: '+12 registered',
     },
     {
-      label: "Total Players",
-      value: "2,340",
+      label: 'Total Players',
+      value: status.totalPlayers,
       icon: <Users className="w-6 h-6" />,
-      color: "bg-pink-50 text-pink-600",
-      trend: "+156 this month",
+      color: 'bg-pink-50 text-pink-600',
+      trend: '+156 this month',
     },
     {
-      label: "System Managers",
-      value: "12",
+      label: 'Tournament Managers',
+      value: status.totalManagers,
       icon: <Users className="w-6 h-6" />,
-      color: "bg-indigo-50 text-indigo-600",
-      trend: "All active",
+      color: 'bg-indigo-50 text-indigo-600',
+      trend: 'All active',
     },
   ];
 
   const quickActions = [
     {
-      label: "Create Tournament",
-      path: "/admin/tournaments/create",
+      label: 'Create Tournament',
+      path: '/admin/tournaments/create',
       icon: <Trophy className="w-5 h-5" />,
-      color: "bg-blue-500 hover:bg-blue-600",
+      color: 'bg-blue-500 hover:bg-blue-600',
     },
     {
-      label: "Add Manager",
-      path: "/admin/managers/create",
+      label: 'Add Manager',
+      path: '/admin/managers/create',
       icon: <Users className="w-5 h-5" />,
-      color: "bg-green-500 hover:bg-green-600",
+      color: 'bg-green-500 hover:bg-green-600',
     },
     {
-      label: "Publish News",
-      path: "/admin/news/create",
+      label: 'Publish News',
+      path: '/admin/news/create',
       icon: <Newspaper className="w-5 h-5" />,
-      color: "bg-purple-500 hover:bg-purple-600",
+      color: 'bg-purple-500 hover:bg-purple-600',
     },
   ];
 
@@ -102,7 +131,7 @@ export default function AdminDashboard() {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8 w-full">
-        {quickActions.map((action) => (
+        {quickActions.map(action => (
           <Link key={action.path} href={action.path} className="w-full">
             <Button
               className={`
@@ -179,23 +208,23 @@ export default function AdminDashboard() {
             <tbody>
               {[
                 {
-                  name: "City League Championship",
+                  name: 'City League Championship',
                   year: 2024,
-                  status: "ongoing",
+                  status: 'ongoing',
                   teams: 16,
                   managers: 2,
                 },
                 {
-                  name: "Regional Cup",
+                  name: 'Regional Cup',
                   year: 2024,
-                  status: "scheduled",
+                  status: 'scheduled',
                   teams: 12,
                   managers: 1,
                 },
                 {
-                  name: "Summer Tournament",
+                  name: 'Summer Tournament',
                   year: 2024,
-                  status: "finished",
+                  status: 'finished',
                   teams: 20,
                   managers: 3,
                 },
@@ -213,11 +242,11 @@ export default function AdminDashboard() {
                   <td className="py-3 px-4">
                     <span
                       className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                        tournament.status === "ongoing"
-                          ? "status-ongoing"
-                          : tournament.status === "scheduled"
-                          ? "status-scheduled"
-                          : "status-finished"
+                        tournament.status === 'ongoing'
+                          ? 'status-ongoing'
+                          : tournament.status === 'scheduled'
+                          ? 'status-scheduled'
+                          : 'status-finished'
                       }`}
                     >
                       {tournament.status.charAt(0).toUpperCase() +

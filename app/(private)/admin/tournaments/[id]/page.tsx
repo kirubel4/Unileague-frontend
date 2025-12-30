@@ -1,45 +1,62 @@
-"use client";
-import { Layout } from "@/components/Layout";
-import { Button } from "@/components/ui/button";
+'use client';
+import { mapTeams, Team } from '@/app/(private)/manager/players/transfer/util';
+import { mapApiDataToTable } from '@/app/(private)/manager/standings/util';
+import { Layout } from '@/components/Layout';
 
-import { ChevronLeft, Edit, Flag, Users } from "lucide-react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { Button } from '@/components/ui/button';
+import { fetcher } from '@/lib/utils';
+
+import { ChevronLeft, Edit, Flag, Users } from 'lucide-react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import useSWR from 'swr';
+
+type TournamentManager = {
+  id: string;
+  name: string;
+  email: string;
+};
+
+type Tournament =  {
+  id: string;
+  tournamentName: string;
+  startingDate: string;
+  endingDate: string;
+  description: string;
+  venue: string;
+  sponsor?: string;
+  status: string;
+  teamCount: number;
+  playerCount: number;
+  managers: TournamentManager[];
+};
 
 export default function AdminTournamentDetail() {
-  const userName = localStorage.getItem("userName") || "Admin";
-  const id = useSearchParams();
+ const userName =  'Admin';
+  const params = useParams();
+  const id = params?.id ?? '';
 
-  const tournament = {
-    id,
-    name: "City League Championship",
-    year: 2024,
-    status: "ongoing",
-    startDate: "Jan 15, 2024",
-    endDate: "May 30, 2024",
-    location: "Central Sports Complex",
-    description:
-      "Annual city-wide football tournament featuring the best teams in the region.",
-    teams: 16,
-    players: 240,
-    matches: { total: 32, completed: 18, pending: 14 },
-    managers: [
-      { id: 1, name: "John Smith", email: "john@example.com" },
-      { id: 2, name: "Sarah Johnson", email: "sarah@example.com" },
-    ],
-  };
+  // Fetch tournament details
+  const { data: tournamentRes } = useSWR(`/api/public/tournament/detail?id=${id}`, fetcher);
+ 
+  const tournament: Tournament | null = tournamentRes?.data?.data ?? null;
 
-  const registeredTeams = [
-    { id: 1, name: "Tigers United", coach: "Coach Ali", players: 15 },
-    { id: 2, name: "Phoenix FC", coach: "Coach Maria", players: 16 },
-    { id: 3, name: "Eagles Sports", coach: "Coach James", players: 15 },
-    { id: 4, name: "Lions Club", coach: "Coach Sarah", players: 14 },
-  ];
+  const { data: teamRes } = useSWR(`/api/public/team/tournament?tid=${id}`, fetcher);
+  const teams: Team[] = mapTeams(teamRes || { data: [] });
+ const { data, isLoading, error } = useSWR(
+    "/api/public/tournament/standings?id=fb1c80f4-7ffc-4b84-b329-d08511349fa2",
+    fetcher,
+    {
+      revalidateOnFocus: false,
+    }
+  );
+  const standing = mapApiDataToTable(data?.data || []);
+
 
   const standings = [
     {
       rank: 1,
-      team: "Tigers United",
+      team: 'Tigers United',
       wins: 6,
       draws: 1,
       losses: 0,
@@ -47,15 +64,29 @@ export default function AdminTournamentDetail() {
     },
     {
       rank: 2,
-      team: "Eagles Sports",
+      team: 'Eagles Sports',
       wins: 5,
       draws: 2,
       losses: 0,
       points: 17,
     },
-    { rank: 3, team: "Phoenix FC", wins: 4, draws: 3, losses: 0, points: 15 },
-    { rank: 4, team: "Lions Club", wins: 3, draws: 1, losses: 3, points: 10 },
+    { rank: 3, team: 'Phoenix FC', wins: 4, draws: 3, losses: 0, points: 15 },
+    { rank: 4, team: 'Lions Club', wins: 3, draws: 1, losses: 3, points: 10 },
   ];
+  const mappedTournament = tournament
+  ? {
+      id: tournament.id,
+      name: tournament.tournamentName,
+      startDate: tournament.startingDate,
+      endDate: tournament.endingDate,
+      location: tournament.venue,
+      description: tournament.description,
+      status: tournament.status,
+      teams: tournament.teamCount,
+      players: tournament.playerCount,
+      managers: tournament.managers || [],
+    }
+  : null;
 
   return (
     <Layout role="super_admin" userName={userName}>
@@ -70,10 +101,10 @@ export default function AdminTournamentDetail() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-              {tournament.name}
+              {mappedTournament?.name}
             </h1>
             <p className="text-muted-foreground mt-2 text-sm md:text-base">
-              {tournament.location} • {tournament.year}
+              {mappedTournament?.location} • {mappedTournament?.startDate}
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -83,7 +114,7 @@ export default function AdminTournamentDetail() {
                 Edit
               </Button>
             </Link>
-            {tournament.status !== "finished" && (
+            {tournament?.status !== 'finished' && (
               <Link href={`/admin/tournaments/${id}/finish`}>
                 <Button variant="outline" className="rounded-lg gap-2">
                   <Flag className="w-4 h-4" />
@@ -96,13 +127,13 @@ export default function AdminTournamentDetail() {
       </div>
 
       {/* Tournament Info Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <div className="bg-white rounded-lg border border-border p-4">
           <p className="text-sm text-muted-foreground font-medium mb-2">
             Status
           </p>
           <p className="text-2xl font-bold text-foreground capitalize">
-            {tournament.status}
+            {mappedTournament?.status}
           </p>
         </div>
         <div className="bg-white rounded-lg border border-border p-4">
@@ -110,7 +141,7 @@ export default function AdminTournamentDetail() {
             Teams
           </p>
           <p className="text-2xl font-bold text-foreground">
-            {tournament.teams}
+            {mappedTournament?.teams}
           </p>
         </div>
         <div className="bg-white rounded-lg border border-border p-4">
@@ -118,17 +149,10 @@ export default function AdminTournamentDetail() {
             Players
           </p>
           <p className="text-2xl font-bold text-foreground">
-            {tournament.players}
+            {mappedTournament?.players ?? 0}
           </p>
         </div>
-        <div className="bg-white rounded-lg border border-border p-4">
-          <p className="text-sm text-muted-foreground font-medium mb-2">
-            Matches
-          </p>
-          <p className="text-2xl font-bold text-foreground">
-            {tournament.matches.completed}/{tournament.matches.total}
-          </p>
-        </div>
+        
       </div>
 
       {/* Details Grid */}
@@ -146,14 +170,14 @@ export default function AdminTournamentDetail() {
                   Period
                 </p>
                 <p className="text-foreground">
-                  {tournament.startDate} to {tournament.endDate}
+                  {tournament?.startingDate} to {mappedTournament?.endDate}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground font-medium">
                   Description
                 </p>
-                <p className="text-foreground">{tournament.description}</p>
+                <p className="text-foreground">{mappedTournament?.description}</p>
               </div>
             </div>
           </div>
@@ -165,7 +189,7 @@ export default function AdminTournamentDetail() {
               Assigned Managers
             </h2>
             <div className="space-y-3">
-              {tournament.managers.map((manager) => (
+              {(mappedTournament?.managers ?? []).map(manager => (
                 <div
                   key={manager.id}
                   className="border border-border rounded-lg p-4 flex items-center justify-between"
@@ -219,7 +243,7 @@ export default function AdminTournamentDetail() {
                   </tr>
                 </thead>
                 <tbody>
-                  {standings.map((row) => (
+                  {standing?.map(row => (
                     <tr
                       key={row.rank}
                       className="border-b border-border hover:bg-muted"
@@ -256,17 +280,17 @@ export default function AdminTournamentDetail() {
             Registered Teams
           </h2>
           <div className="space-y-3 max-h-96 overflow-y-auto">
-            {registeredTeams.map((team) => (
+            {teams?.map(team => (
               <div
                 key={team.id}
                 className="border border-border rounded-lg p-4 hover:bg-muted transition-colors"
               >
                 <p className="font-medium text-foreground">{team.name}</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Coach: {team.coach}
+                  Coach: {team.coachName}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {team.players} players
+                  {team.playerCount} players
                 </p>
               </div>
             ))}

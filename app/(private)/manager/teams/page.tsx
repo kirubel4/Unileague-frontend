@@ -24,7 +24,7 @@ export default function ManagerTeams() {
 
   const teams: Team[] = mapTeams(data || { data: [] });
 
-  const filteredTeams = teams.filter(
+  const filteredTeams = teams?.filter(
     (t) =>
       t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.coachName.toLowerCase().includes(searchTerm.toLowerCase())
@@ -106,8 +106,8 @@ export default function ManagerTeams() {
                 </tr>
               </thead>
               <tbody>
-                {filteredTeams.length > 0 ? (
-                  filteredTeams.map((team) => (
+                {filteredTeams?.length > 0 ? (
+                  filteredTeams?.map((team) => (
                     <tr
                       key={team.id}
                       className="border-b border-border hover:bg-muted transition-colors"

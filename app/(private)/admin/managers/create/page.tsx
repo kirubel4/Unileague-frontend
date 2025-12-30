@@ -36,9 +36,6 @@ export default function AdminManagersCreate() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // TODO: Call API here to create manager
-    // API will generate password and send email automatically
-
     setTimeout(() => {
       alert(`Manager "${formData.fullname}" created successfully!`);
       navigate.push("/admin/managers");
