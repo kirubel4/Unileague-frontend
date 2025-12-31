@@ -65,7 +65,7 @@ const TOURNAMENTS = [
 const YEARS = [2023, 2024, 2025];
 
 export default function TournamentsPage() {
-  const [activeYear, setActiveYear] = useState<number>(2024);
+  const [activeYear, setActiveYear] = useState<number>(2023);
 
   const filteredTournaments = TOURNAMENTS.filter(
     (t) => t.year === activeYear
