@@ -2,7 +2,7 @@
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-background">
-      <div className="bg-gradient-to-r from-purple-500 to-purple-600 py-16 px-6 text-center">
+      <div className="bg-linear-to-r from-purple-500 to-purple-600 py-16 px-6 text-center">
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">About</h1>
         <p className="text-lg text-purple-50">Learn more about our football management platform</p>
       </div>

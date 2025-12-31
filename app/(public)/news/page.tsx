@@ -54,7 +54,7 @@ export default function NewsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-       <div className="bg-gradient-to-r from-pink-500 to-pink-600 py-16 px-6 text-center">
+       <div className="bg-linear-to-r from-pink-500 to-pink-600 py-16 px-6 text-center">
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">News</h1>
         <p className="text-lg text-pink-50">Stay updated with the latest football news and announcements</p>
       </div>
