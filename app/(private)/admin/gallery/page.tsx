@@ -107,7 +107,7 @@ export default function ManagerGallery() {
   };
 
   return (
-    <Layout role="manager" userName={userName}>
+    <Layout role="super_admin" userName={userName}>
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground">Gallery</h1>

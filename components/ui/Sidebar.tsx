@@ -39,7 +39,7 @@ const superAdminMenu = [
 
 const managerMenu = [
   { label: "Dashboard", path: "/manager/", icon: LayoutDashboard },
-  { label: "Overview", path: "/manager/overview", icon: BarChart3 },
+
   { label: "Teams", path: "/manager/teams", icon: Users },
   { label: "Players", path: "/manager/players", icon: Shield },
   { label: "Fixtures", path: "/manager/fixtures", icon: Calendar },

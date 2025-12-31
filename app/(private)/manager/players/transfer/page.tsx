@@ -33,7 +33,7 @@ export default function ManagerPlayersTransfer() {
   );
 
   const teams: Team[] = mapTeams(data || { data: [] });
-
+  const filterTeam = teams?.filter((team) => team.name != currentTeam);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!destinationTeam || number <= 0) {
@@ -106,7 +106,7 @@ export default function ManagerPlayersTransfer() {
             <div className="space-y-4">
               <Label className="font-medium text-base">Transfer To *</Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {teams.map((team) => (
+                {filterTeam.map((team) => (
                   <label
                     key={team.id}
                     className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${

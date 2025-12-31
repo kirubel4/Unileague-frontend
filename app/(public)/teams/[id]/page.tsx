@@ -1,42 +1,68 @@
+// app/(private)/manager/teams/[id]/page.tsx
 "use client";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import {
+  mapApiPlayersToPlayers,
+  mapTeamApiToTeamData,
+  mapTeamStats,
+} from "@/app/(private)/manager/teams/[id]/util";
+import { Layout } from "@/components/Layout";
+import {
+  Player,
+  TeamData,
+  TeamDetail,
+  TeamStats,
+} from "@/components/pages/teamDetail";
 
-export default function TeamDetailPage() {
-	return (
-		<div className="max-w-4xl mx-auto py-12 px-4">
-			<h1 className="text-2xl font-bold mb-6">Team Name</h1>
-			<Tabs defaultValue="overview" className="w-full">
-				<TabsList className="mb-4">
-					<TabsTrigger value="overview">Overview</TabsTrigger>
-					<TabsTrigger value="fixtures">Fixtures</TabsTrigger>
-					<TabsTrigger value="standings">Standings</TabsTrigger>
-					<TabsTrigger value="players">Players</TabsTrigger>
-				</TabsList>
-				<TabsContent value="overview">
-					<div className="bg-white rounded-lg p-6 shadow">
-						<h2 className="text-lg font-semibold mb-2">Overview</h2>
-						<p>Team details, history, and summary will appear here.</p>
-					</div>
-				</TabsContent>
-				<TabsContent value="fixtures">
-					<div className="bg-white rounded-lg p-6 shadow">
-						<h2 className="text-lg font-semibold mb-2">Fixtures</h2>
-						<p>Upcoming and past matches for this team will appear here.</p>
-					</div>
-				</TabsContent>
-				<TabsContent value="standings">
-					<div className="bg-white rounded-lg p-6 shadow">
-						<h2 className="text-lg font-semibold mb-2">Standings</h2>
-						<p>Team's position in the league or tournament will appear here.</p>
-					</div>
-				</TabsContent>
-				<TabsContent value="players">
-					<div className="bg-white rounded-lg p-6 shadow">
-						<h2 className="text-lg font-semibold mb-2">Players</h2>
-						<p>List of players in this team will appear here.</p>
-					</div>
-				</TabsContent>
-			</Tabs>
-		</div>
-	);
+import { fetcher, getCookie } from "@/lib/utils";
+import { useParams } from "next/navigation";
+import { useState } from "react";
+import useSWR from "swr";
+export default function AdminTeamDetailPage() {
+  const params = useParams();
+  const id = params.id as string;
+  const userName = getCookie("uName") || "Manager";
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const {
+    data,
+    error: err,
+    isLoading: load,
+  } = useSWR("/api/public/team/detail?id=" + id, fetcher, {
+    revalidateOnFocus: false,
+  });
+  const team: TeamData = mapTeamApiToTeamData(data?.data);
+  const {
+    data: players,
+    error: erro,
+    isLoading: loading,
+  } = useSWR("/api/public/player/team?id=" + id, fetcher, {
+    revalidateOnFocus: false,
+  });
+  const playerz: Player[] = mapApiPlayersToPlayers(players?.data);
+  const {
+    data: status,
+    error: errors,
+    isLoading: loadingsat,
+  } = useSWR("/api/public/team/status?id=" + id, fetcher, {
+    revalidateOnFocus: false,
+  });
+  const stats = mapTeamStats(status?.data);
+
+  return (
+    <div className="max-w-7xl mx-auto py-12 px-4">
+      <TeamDetail
+        mode="public"
+        teamData={team}
+        players={playerz}
+        id={id}
+        stats={stats}
+        isLoading={isLoading}
+        error={error}
+        basePath="/teams"
+        title="View"
+        showBreadcrumb={true}
+        className="mt-8"
+      />
+    </div>
+  );
 }
