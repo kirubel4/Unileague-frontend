@@ -31,7 +31,7 @@ const superAdminMenu = [
   { label: "Tournaments", path: "/admin/tournaments", icon: Trophy },
   { label: "Managers", path: "/admin/managers", icon: Users },
   { label: "News", path: "/admin/news", icon: Newspaper },
-  { label: "Gallery", path: "/admin/gallery", icon: Image },
+
   { label: "System Logs", path: "/admin/system-logs", icon: AlertCircle },
   { label: "Messages", path: "/admin/messages", icon: MessageSquare },
   { label: "Settings", path: "/admin/settings", icon: Settings },
