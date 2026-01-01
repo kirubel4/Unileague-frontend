@@ -23,9 +23,9 @@ import {
   Check,
 } from "lucide-react";
 import useSWR from "swr";
-import { fetcher } from "@/lib/utils";
+import { ApiResponse, fetcher } from "@/lib/utils";
 import { logMapper, SystemLogs } from "./util";
-import { toast } from "sonner";
+import { toast, Toaster } from "sonner";
 
 interface MaintenanceRequest {
   priority: "low" | "medium" | "high" | "critical";
@@ -147,33 +147,22 @@ export default function AdminSystemLogs() {
   };
 
   const handleSubmitMaintenanceRequest = async () => {
-    if (!selectedLog || !maintenanceRequest.description.trim()) {
-      toast.error("Please provide a description for the maintenance request");
+    if (!selectedLog) {
+      toast.error("please select a log first");
       return;
     }
-
     setIsSubmittingRequest(true);
-
     try {
-      // Call your API here
       const response = await fetch("/api/protected/admin/maintenance-request", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          logId: selectedLog.id,
-          logDetails: {
-            message: selectedLog.message,
-            severity: selectedLog.severity,
-            category: selectedLog.category,
-          },
-          request: maintenanceRequest,
+          id: selectedLog.id,
         }),
       });
-
-      const result = await response.json();
-
+      const result: ApiResponse = await response.json();
       if (result.success) {
         toast.success("Maintenance request submitted successfully!");
         setShowMaintenanceForm(false);
@@ -208,6 +197,7 @@ export default function AdminSystemLogs() {
   return (
     <Layout role="super_admin" userName={userName}>
       {/* Header */}
+      <Toaster />
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground">System Logs</h1>
         <p className="text-muted-foreground mt-2">
@@ -402,340 +392,97 @@ export default function AdminSystemLogs() {
 
             {/* Modal Content */}
             <div className="flex-1 overflow-y-auto p-6">
-              {!showMaintenanceForm ? (
-                <>
-                  {/* Log Overview */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-xs text-gray-500 mb-1">
-                        Severity Level
-                      </p>
-                      <div className="flex items-center gap-2">
-                        {getSeverityIcon(selectedLog.severity)}
-                        <span className="font-semibold text-gray-900 capitalize">
-                          {selectedLog.severity}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-xs text-gray-500 mb-1">Category</p>
-                      <div className="flex items-center gap-2">
-                        {getCategoryIcon(selectedLog.category)}
-                        <span className="font-semibold text-gray-900 capitalize">
-                          {selectedLog.category}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-xs text-gray-500 mb-1">Event Type</p>
-                      <p className="font-semibold text-gray-900 capitalize">
-                        {selectedLog.type}
-                      </p>
+              <>
+                {/* Log Overview */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-xs text-gray-500 mb-1">Severity Level</p>
+                    <div className="flex items-center gap-2">
+                      {getSeverityIcon(selectedLog.severity)}
+                      <span className="font-semibold text-gray-900 capitalize">
+                        {selectedLog.severity}
+                      </span>
                     </div>
                   </div>
-
-                  {/* Original Message */}
-                  <div className="mb-6">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        Original Error Message
-                      </h3>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleCopyDetails(selectedLog.message)}
-                        className="h-8 text-xs"
-                      >
-                        <Copy className="w-3 h-3 mr-1" />
-                        Copy
-                      </Button>
-                    </div>
-                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                      <p className="text-gray-700 font-mono text-sm whitespace-pre-wrap">
-                        {selectedLog.message}
-                      </p>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-xs text-gray-500 mb-1">Category</p>
+                    <div className="flex items-center gap-2">
+                      {getCategoryIcon(selectedLog.category)}
+                      <span className="font-semibold text-gray-900 capitalize">
+                        {selectedLog.category}
+                      </span>
                     </div>
                   </div>
-
-                  {/* AI Analysis */}
-                  <div className="mb-6">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          AI Analysis
-                        </h3>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() =>
-                          handleCopyDetails(selectedLog.analyzedMessage)
-                        }
-                        className="h-8 text-xs"
-                      >
-                        <Copy className="w-3 h-3 mr-1" />
-                        Copy
-                      </Button>
-                    </div>
-                    <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                      <p className="text-gray-700">
-                        {selectedLog.analyzedMessage}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Technical Details */}
-                  <div className="mb-6">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        Technical Details
-                      </h3>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleCopyDetails(selectedLog.details)}
-                        className="h-8 text-xs"
-                      >
-                        <Copy className="w-3 h-3 mr-1" />
-                        Copy
-                      </Button>
-                    </div>
-                    <div className="bg-gray-900 rounded-lg p-4 border border-gray-800">
-                      <pre className="text-gray-300 text-sm font-mono whitespace-pre-wrap overflow-x-auto">
-                        {selectedLog.details}
-                      </pre>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex flex-wrap gap-3 pt-6 border-t border-gray-200">
-                    <Button
-                      onClick={() => setShowMaintenanceForm(true)}
-                      className="bg-red-600 hover:bg-red-700 text-white"
-                    >
-                      <Wrench className="w-4 h-4 mr-2" />
-                      Request Maintenance
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        // Mark as resolved logic here
-                        toast.success("Marked as resolved");
-                        setSelectedLog(null);
-                      }}
-                    >
-                      <Check className="w-4 h-4 mr-2" />
-                      Mark as Resolved
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        // View related logs logic here
-                        toast.info("Fetching related logs...");
-                      }}
-                    >
-                      View Related Logs
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                /* Maintenance Request Form */
-                <div>
-                  <div className="flex items-center gap-3 mb-6">
-                    <Button
-                      variant="ghost"
-                      onClick={() => setShowMaintenanceForm(false)}
-                      className="p-2"
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        Create Maintenance Request
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Based on Log #{selectedLog.id}:{" "}
-                        {selectedLog.message.substring(0, 50)}...
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-6">
-                    {/* Priority Selection */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Priority Level
-                      </label>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        {(["critical", "high", "medium", "low"] as const).map(
-                          (priority) => (
-                            <button
-                              key={priority}
-                              type="button"
-                              onClick={() =>
-                                setMaintenanceRequest((prev) => ({
-                                  ...prev,
-                                  priority,
-                                }))
-                              }
-                              className={`
-                              p-3 rounded-lg border text-center transition-all
-                              ${
-                                maintenanceRequest.priority === priority
-                                  ? `${getPriorityColor(
-                                      priority
-                                    )} ring-2 ring-offset-2 ring-current`
-                                  : "border-gray-200 hover:border-gray-300"
-                              }
-                            `}
-                            >
-                              <div className="font-medium capitalize">
-                                {priority}
-                              </div>
-                              {priority === "critical" && (
-                                <div className="text-xs text-red-600 mt-1">
-                                  Immediate attention
-                                </div>
-                              )}
-                              {priority === "high" && (
-                                <div className="text-xs text-orange-600 mt-1">
-                                  Within 4 hours
-                                </div>
-                              )}
-                              {priority === "medium" && (
-                                <div className="text-xs text-yellow-600 mt-1">
-                                  Within 24 hours
-                                </div>
-                              )}
-                              {priority === "low" && (
-                                <div className="text-xs text-blue-600 mt-1">
-                                  Next maintenance cycle
-                                </div>
-                              )}
-                            </button>
-                          )
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Description */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Description & Required Action
-                      </label>
-                      <textarea
-                        value={maintenanceRequest.description}
-                        onChange={(e) =>
-                          setMaintenanceRequest((prev) => ({
-                            ...prev,
-                            description: e.target.value,
-                          }))
-                        }
-                        placeholder="Describe what needs to be fixed, steps to reproduce, and expected resolution..."
-                        className="w-full h-32 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required
-                      />
-                    </div>
-
-                    {/* Estimated Time */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Estimated Resolution Time
-                      </label>
-                      <select
-                        value={maintenanceRequest.estimatedTime}
-                        onChange={(e) =>
-                          setMaintenanceRequest((prev) => ({
-                            ...prev,
-                            estimatedTime: e.target.value,
-                          }))
-                        }
-                        className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      >
-                        <option value="1-2 hours">1-2 hours</option>
-                        <option value="2-4 hours">2-4 hours</option>
-                        <option value="4-8 hours">4-8 hours</option>
-                        <option value="1 day">1 day</option>
-                        <option value="2-3 days">2-3 days</option>
-                        <option value="1 week">1 week</option>
-                      </select>
-                    </div>
-
-                    {/* Additional Notes */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Additional Notes (Optional)
-                      </label>
-                      <textarea
-                        value={maintenanceRequest.additionalNotes}
-                        onChange={(e) =>
-                          setMaintenanceRequest((prev) => ({
-                            ...prev,
-                            additionalNotes: e.target.value,
-                          }))
-                        }
-                        placeholder="Any additional information for the maintenance team..."
-                        className="w-full h-24 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-
-                    {/* Assign to Team */}
-                    <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                      <input
-                        type="checkbox"
-                        id="assignToTeam"
-                        checked={maintenanceRequest.assignToTeam}
-                        onChange={(e) =>
-                          setMaintenanceRequest((prev) => ({
-                            ...prev,
-                            assignToTeam: e.target.checked,
-                          }))
-                        }
-                        className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                      />
-                      <label
-                        htmlFor="assignToTeam"
-                        className="text-sm text-gray-700"
-                      >
-                        Assign to maintenance team immediately and send
-                        notifications
-                      </label>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex gap-3 pt-6 border-t border-gray-200">
-                      <Button
-                        onClick={handleSubmitMaintenanceRequest}
-                        disabled={
-                          isSubmittingRequest ||
-                          !maintenanceRequest.description.trim()
-                        }
-                        className="bg-blue-600 hover:bg-blue-700 text-white flex-1"
-                      >
-                        {isSubmittingRequest ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                            Submitting...
-                          </>
-                        ) : (
-                          <>
-                            <Send className="w-4 h-4 mr-2" />
-                            Submit Maintenance Request
-                          </>
-                        )}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => setShowMaintenanceForm(false)}
-                        className="flex-1"
-                      >
-                        Cancel
-                      </Button>
-                    </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-xs text-gray-500 mb-1">Event Type</p>
+                    <p className="font-semibold text-gray-900 capitalize">
+                      {selectedLog.type}
+                    </p>
                   </div>
                 </div>
-              )}
+
+                {/* Original Message */}
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Original Error Message
+                    </h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleCopyDetails(selectedLog.message)}
+                      className="h-8 text-xs"
+                    >
+                      <Copy className="w-3 h-3 mr-1" />
+                      Copy
+                    </Button>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <p className="text-gray-700 font-mono text-sm whitespace-pre-wrap">
+                      {selectedLog.message}
+                    </p>
+                  </div>
+                </div>
+
+                {/* AI Analysis */}
+
+                {/* Technical Details */}
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Technical Details
+                    </h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleCopyDetails(selectedLog.details)}
+                      className="h-8 text-xs"
+                    >
+                      <Copy className="w-3 h-3 mr-1" />
+                      Copy
+                    </Button>
+                  </div>
+                  <div className="bg-gray-900 rounded-lg p-4 border border-gray-800">
+                    <pre className="text-gray-300 text-sm font-mono whitespace-pre-wrap overflow-x-auto">
+                      {selectedLog.details}
+                    </pre>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap gap-3 pt-6 border-t border-gray-200">
+                  <Button
+                    disabled={isSubmittingRequest}
+                    onClick={() => handleSubmitMaintenanceRequest()}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    <Wrench className="w-4 h-4 mr-2" />
+                    {isSubmittingRequest
+                      ? "Requesting please wait"
+                      : "Request Maintenance"}
+                  </Button>
+                </div>
+              </>
             </div>
           </div>
         </div>
