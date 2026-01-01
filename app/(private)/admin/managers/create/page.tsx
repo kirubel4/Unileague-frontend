@@ -12,7 +12,7 @@ import { mapTournaments } from "../../tournaments/util";
 import useSWR from "swr";
 import { fetcher } from "@/lib/utils";
 import { Tournament } from "../../tournaments/page";
-
+import { toast, Toaster } from "sonner";
 export default function AdminManagersCreate() {
   const userName = localStorage.getItem("userName") || "Admin";
   const navigate = useRouter();
@@ -36,6 +36,7 @@ export default function AdminManagersCreate() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    toast.loading("creating manager");
     setIsSubmitting(true);
 
     setTimeout(() => {
@@ -48,6 +49,7 @@ export default function AdminManagersCreate() {
     <Layout role="super_admin" userName={userName}>
       {/* Header */}
       <div className="mb-8">
+        <Toaster />
         <Link href="/admin/managers">
           <Button variant="ghost" size="sm" className="mb-4 flex items-center">
             <ChevronLeft className="w-4 h-4 mr-2" />

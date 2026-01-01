@@ -11,7 +11,7 @@ import Link from "next/link";
 import { mapTeams, Team } from "../transfer/util";
 import { ApiResponse, fetcher, getCookie } from "@/lib/utils";
 import useSWR from "swr";
-
+import { toast, Toaster } from "sonner";
 export default function ManagerPlayersCreate() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -76,9 +76,10 @@ export default function ManagerPlayersCreate() {
     e.preventDefault();
 
     if (!imageFile) {
-      alert("Please upload a player image");
+      toast.info("please select Image");
       return;
     }
+    toast.loading("creating player please wait ");
     setIsSubmitting(true);
     try {
       const fd = new FormData();
@@ -94,14 +95,14 @@ export default function ManagerPlayersCreate() {
       });
       const result: ApiResponse = await res.json();
       if (!result.success) {
-        console.log("Player creation failed:", result.message);
+        toast.error(result.message);
         setIsSubmitting(false);
         return;
       }
+      toast.success("player created successfully");
       navigate.push("/manager/players");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to add player");
+    } catch (err: any) {
+      toast.error(err);
     } finally {
       setIsSubmitting(false);
     }
@@ -111,6 +112,7 @@ export default function ManagerPlayersCreate() {
     <Layout role="manager" userName={userName}>
       {/* Header */}
       <div className="mb-8">
+        <Toaster />
         <h1 className="text-3xl font-bold text-foreground">Add Player</h1>
         <p className="text-muted-foreground mt-2">
           Register a new player to the tournament

@@ -9,7 +9,7 @@ import { useRef, useState } from "react";
 import { ChevronLeft, Upload, X } from "lucide-react";
 import Link from "next/link";
 import { ApiResponse, getCookie } from "@/lib/utils";
-
+import { toast, Toaster } from "sonner";
 export default function ManagerNewsCreate() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -63,8 +63,10 @@ export default function ManagerNewsCreate() {
       !formData.content.trim() ||
       !imageFile
     ) {
+      toast.info("fill all filed are required bro");
       return;
     }
+    toast.loading("Posting News");
     setIsSubmitting(true);
     const content = {
       title: formData.title,
@@ -82,11 +84,11 @@ export default function ManagerNewsCreate() {
     });
     const response: ApiResponse = await res.json();
     if (!response.success) {
-      console.log(response.message);
+      toast.error(response.message);
       setIsSubmitting(false);
       return;
     }
-    console.log("new created");
+    toast.success("News Posted Successfully");
     setIsSubmitting(false);
     navigate.push("/manager/news");
   };
@@ -95,6 +97,7 @@ export default function ManagerNewsCreate() {
     <Layout role="manager" userName={userName}>
       {/* Header */}
       <div className="mb-8">
+        <Toaster />
         <h1 className="text-3xl font-bold text-foreground">Create Article</h1>
         <p className="text-muted-foreground mt-2">
           Write and publish a new article for your tournament

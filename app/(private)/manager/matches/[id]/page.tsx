@@ -34,7 +34,7 @@ import useSWR from "swr";
 import { ApiResponse, fetcher, getCookie } from "@/lib/utils";
 import { mapMatchDetail, mapPlayerNames } from "./util";
 import { Input } from "@/components/ui/input";
-
+import { toast, Toaster } from "sonner";
 interface Event {
   id: string;
   minute: number;
@@ -94,13 +94,14 @@ export default function ManagerMatchesDetail() {
     setRefreshing(true);
     await new Promise((resolve) => setTimeout(resolve, 500));
     await mutateMatch();
+
     setRefreshing(false);
   };
 
   const addEvent = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!eventPlayer.trim()) return;
+    toast.loading("adding event", { id: "1" });
     setLoading(true);
     const data = {
       playerId: eventPlayer,
@@ -117,18 +118,17 @@ export default function ManagerMatchesDetail() {
     });
 
     if (!res) {
-      console.log("somting went wrong ");
+      toast.error("no network", { id: "1" });
       setLoading(false);
       return [];
     }
     const response: ApiResponse = await res.json();
     if (!response.success) {
-      console.log(response.message);
+      toast.error(response.message, { id: "1" });
       setLoading(false);
       return;
     }
-    console.log(response);
-
+    toast.success("event created", { id: "1" });
     refreshScore();
     setEventPlayer("");
     setEventType("Goal");
@@ -137,9 +137,19 @@ export default function ManagerMatchesDetail() {
   };
 
   const removeEvent = async (id: string) => {
-    const res = await fetch("/api/protected/match/event/remove?id=");
+    toast.loading("removing event", { id: "2" });
+    const res = await fetch(`/api/protected/match/event/remove?id=${id}`, {
+      method: "DELETE",
+    });
+    const resp: ApiResponse = await res.json();
+    if (!resp.success) {
+      toast.error(resp.message, { id: "2" });
+      return;
+    }
+    toast.success("event removed", { id: "2" });
   };
   const statMatch = async () => {
+    toast.loading("staring match");
     setStartLoading(true);
     const res = await fetch(
       "/api/protected/manager/match/start/?id=" + matchId,
@@ -149,31 +159,35 @@ export default function ManagerMatchesDetail() {
       }
     );
     if (!res) {
-      console.log("Network error");
+      toast.error("no network");
       return;
     }
     const data: ApiResponse = await res.json();
     if (!data.success) {
-      console.log(data.message || "couldn't start the match");
+      toast.error(data.message);
+      return;
     }
     refreshScore();
-
+    toast.success("match started");
     setStartLoading(false);
   };
   const endMatch = async () => {
+    toast.loading("ending match");
     setEndLoading(true);
     const res = await fetch("/api/protected/manager/match/end/?id=" + matchId, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
     });
     if (!res) {
-      console.log("Network error");
+      toast.error("no network");
       return;
     }
     const data: ApiResponse = await res.json();
     if (!data.success) {
-      console.log(data.message || "couldn't end the match");
+      toast.error(data.message);
+      return;
     }
+    toast.success("match ended successfully");
     refreshScore();
     setEndLoading(false);
   };
@@ -206,6 +220,7 @@ export default function ManagerMatchesDetail() {
     <Layout role="manager" userName={userName}>
       {/* Header */}
       <div className="mb-8">
+        <Toaster />
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             <div>

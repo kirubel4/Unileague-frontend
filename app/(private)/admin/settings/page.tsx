@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { Eye, EyeOff, Save, Bell, Lock, User } from "lucide-react";
 import { ApiResponse, fetcher, getCookie } from "@/lib/utils";
 import useSWR from "swr";
-
+import { toast, Toaster } from "sonner";
 export default function ManagerSettings() {
   const userName = getCookie("uName") || "Admin";
   const [activeTab, setActiveTab] = useState<
@@ -90,6 +90,7 @@ export default function ManagerSettings() {
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    toast.loading("updating profile");
     setIsSaving(true);
     const res = await fetch("/api/protected/manager/user/update", {
       method: "POST",
@@ -97,11 +98,11 @@ export default function ManagerSettings() {
     });
     const response: ApiResponse = await res.json();
     if (!response.success) {
-      console.log(response.message);
+      toast.error(response.message || "error updating profile");
       setIsSaving(false);
       return;
     }
-    console.log("updated");
+    toast.success("profile updated");
     setIsSaving(false);
   };
 
@@ -145,6 +146,7 @@ export default function ManagerSettings() {
     <Layout role="super_admin" userName={userName}>
       {/* Header */}
       <div className="mb-8">
+        <Toaster />
         <h1 className="text-3xl font-bold text-foreground">Settings</h1>
         <p className="text-muted-foreground mt-2">
           Manage your account and preferences

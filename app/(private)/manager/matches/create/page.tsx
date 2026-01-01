@@ -19,7 +19,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import useSWR from "swr";
 import { mapTeams } from "../../players/transfer/util";
-
+import { toast, Toaster } from "sonner";
 export type Team = {
   id: string;
   name: string;
@@ -162,6 +162,7 @@ export default function CreateMatchPage() {
     <Layout role="manager" userName={userName}>
       {/* Header */}
       <div className="mb-8">
+        <Toaster />
         <div className="flex items-center gap-3 mb-3">
           <div className="p-2 bg-primary/10 rounded-lg">
             <Users className="w-6 h-6 text-primary" />
