@@ -21,7 +21,7 @@ import Link from "next/link";
 import { useState } from "react";
 import useSWR from "swr";
 import { mapBroadcastToNewsArticles, NewsArticle } from "./util";
-
+import { toast, Toaster } from "sonner";
 export default function ManagerNews() {
   const userName = getCookie("uName") || "Manager";
   const [searchTerm, setSearchTerm] = useState("");
@@ -65,21 +65,21 @@ export default function ManagerNews() {
         setDeleteError(
           response.message || "Failed to delete article. Please try again."
         );
-        console.error("Delete failed:", response.message);
+        toast.error("Delete failed");
         return;
       }
 
       // Show success feedback
-      const successMessage = "Article deleted successfully";
-      console.log(successMessage);
+      const successMessage = "News deleted successfully";
+      toast.success(successMessage);
 
       // Refresh the data
       await newMutate();
     } catch (error) {
+      toast.error("Delete failed");
       setDeleteError(
         "Network error occurred. Please check your connection and try again."
       );
-      console.error("Delete error:", error);
     } finally {
       setDeleteLoading(null);
     }
@@ -94,6 +94,7 @@ export default function ManagerNews() {
     <Layout role="manager" userName={userName}>
       {/* Header */}
       <div className="mb-8">
+        <Toaster />
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-foreground">

@@ -274,16 +274,16 @@ export default function ManagerTeams() {
                     <input
                       type="checkbox"
                       checked={
-                        selectedTeams.length === filteredTeams.length &&
-                        filteredTeams.length > 0
+                        selectedTeams?.length === filteredTeams?.length &&
+                        filteredTeams?.length > 0
                       }
                       onChange={handleSelectAll}
                       className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
                     <span className="text-sm font-medium text-foreground">
                       {selectedTeams.length > 0
-                        ? `${selectedTeams.length} selected`
-                        : `${filteredTeams.length} teams`}
+                        ? `${selectedTeams?.length} selected`
+                        : `${filteredTeams?.length} teams`}
                     </span>
                   </div>
                 </div>
@@ -488,7 +488,7 @@ export default function ManagerTeams() {
             </div>
 
             {/* Pagination/Footer */}
-            {filteredTeams.length > 0 && (
+            {filteredTeams?.length > 0 && (
               <div className="px-6 py-4 border-t border-border bg-gray-50">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="text-sm text-muted-foreground">

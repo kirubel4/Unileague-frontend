@@ -17,7 +17,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
 import { mapManagersToTableRows } from "../../../managers/util";
-
+import { toast, Toaster } from "sonner";
 type TournamentManager = {
   id: string;
   name: string;
@@ -156,14 +156,22 @@ export default function AdminTournamentEdit() {
   };
 
   const handleAddManager = async () => {
-    if (!selectedManagerId) return;
-    console.log({ managerId: selectedManagerId, tournamentId: id });
+    if (!selectedManagerId) {
+      toast.info("no manager is selected bro ");
+      return;
+    }
+
     const res = await fetch("/api/protected/admin/manager/assign", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ managerId: selectedManagerId, id }),
     });
-
+    const response: ApiResponse = await res.json();
+    if (!response.success) {
+      toast.error(response.message);
+      return;
+    }
+    toast.success(`Manager assigned to ${formData?.tournamentName} successful`);
     setSelectedManagerId("");
     await mutateManager();
     setShowAddManager(false);
@@ -178,9 +186,12 @@ export default function AdminTournamentEdit() {
     });
     const response: ApiResponse = await res.json();
     if (!response.success) {
-      console.log(response.message);
+      toast.error(response.message);
       return;
     }
+    toast.success(
+      ` removed Manager from  ${formData?.tournamentName} successful`
+    );
     await mutateManager();
   };
 
@@ -253,6 +264,7 @@ export default function AdminTournamentEdit() {
     <Layout role="super_admin" userName={userName}>
       {/* Header */}
       <div className="mb-8">
+        <Toaster />
         <Link href={`/admin/tournaments/${id}`}>
           <Button variant="ghost" size="sm" className="mb-4">
             <ChevronLeft className="w-4 h-4 mr-2" />

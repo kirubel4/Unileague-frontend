@@ -11,7 +11,7 @@ import useSWR from "swr";
 import { ApiResponse, fetcher, getCookie } from "@/lib/utils";
 import { mapTeams, Team } from "./util";
 import { Input } from "@/components/ui/input";
-
+import { toast, Toaster } from "sonner";
 export default function ManagerPlayersTransfer() {
   const userName = getCookie("uName") || "Manager";
   const searchParams = useSearchParams();
@@ -37,6 +37,7 @@ export default function ManagerPlayersTransfer() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!destinationTeam || number <= 0) {
+      toast.info("please select team and number");
       return;
     }
 
@@ -46,18 +47,18 @@ export default function ManagerPlayersTransfer() {
       newTeamId: destinationTeam,
       newNumber: number,
     };
-    console.log("Submitting transfer:", data);
+
     const res = await fetch("/api/protected/manager/player/transfer", {
       method: "POST",
       body: JSON.stringify(data),
     });
     const result: ApiResponse = await res.json();
     if (!result.success) {
-      console.log("Transfer failed:", result.message);
+      toast.error(result.message);
       setIsSubmitting(false);
       return;
     }
-    console.log("Transfer successful");
+    toast.success("player transferred");
     navigate.push("/manager/players");
   };
 
@@ -65,6 +66,7 @@ export default function ManagerPlayersTransfer() {
     <Layout role="manager" userName={userName}>
       {/* Header */}
       <div className="mb-8">
+        <Toaster />
         <h1 className="text-3xl font-bold text-foreground">Transfer Player</h1>
         <p className="text-muted-foreground mt-2">
           Move a player to a different team
