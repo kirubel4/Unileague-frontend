@@ -27,11 +27,31 @@ import {
   Search,
   Loader2,
   AlertCircle,
+  ImageIcon,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { MatchList } from "./MatchList";
+import { TabsContent } from "@radix-ui/react-tabs";
+import { Card, CardContent } from "../ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Separator,
+} from "@radix-ui/react-select";
+import {
+  GalleryImg,
+  mapGalleryResponse,
+} from "@/app/(private)/manager/gallery/util";
+import { fetcher } from "@/lib/utils";
+import useSWR from "swr";
+import { Badge } from "../ui/badge";
+import { Label } from "../ui/label";
 
 // Types
 export interface Player {
@@ -109,10 +129,20 @@ export function TeamDetail({
   className = "",
 }: TeamDetailProps) {
   const [activeTab, setActiveTab] = useState<
-    "overview" | "players" | "matches" | "stats"
+    "overview" | "players" | "matches" | "stats" | "memories"
   >("overview");
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const {
+    data: image,
+    error: err,
+    isLoading: loadImage,
+    mutate: mutateImage,
+  } = useSWR(`/api/public/gallery?id=${id}`, fetcher, {
+    revalidateOnFocus: false,
+  });
+
+  const images: GalleryImg[] = mapGalleryResponse(image?.data || { data: [] });
 
   // Filter players by search
   const filteredPlayers = players.filter(
@@ -230,6 +260,7 @@ export function TeamDetail({
           { id: "players" as const, label: "Players", icon: Users },
           { id: "matches" as const, label: "Matches", icon: CalendarDays },
           { id: "stats" as const, label: "Statistics", icon: Trophy },
+          { id: "memories" as const, label: "Memories", icon: ImageIcon },
         ].map((tab) => {
           const Icon = tab.icon;
           return (
@@ -238,7 +269,7 @@ export function TeamDetail({
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-3 lg:px-4 py-2 lg:py-3 font-medium text-sm rounded-lg transition-all flex-1 justify-center ${
                 activeTab === tab.id
-                  ? "bg-blue-50 border border-blue-200 text-blue-700 shadow-sm"
+                  ? "bg-blue-50 border border-blue-200 text-primary shadow-sm"
                   : "hover:bg-gray-50 text-gray-600"
               }`}
             >
@@ -646,6 +677,91 @@ export function TeamDetail({
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+        {activeTab === "memories" && (
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-lg">
+                  Gallery ({images?.length} images)
+                </h3>
+                <Badge variant="outline" className="font-normal">
+                  {images?.length} of {images.length} showing
+                </Badge>
+              </div>
+
+              {images?.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {images?.map((image) => (
+                    <Card
+                      key={image.id}
+                      className="overflow-hidden group hover:shadow-lg transition-shadow"
+                    >
+                      <div className="relative aspect-video overflow-hidden bg-muted">
+                        <img
+                          src={image.url}
+                          alt={"image.title"}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        />
+
+                        <Badge className="absolute top-3 left-3 capitalize">
+                          {image.category}
+                        </Badge>
+                      </div>
+                      <CardContent className="p-4">
+                        <div className="space-y-3">
+                          <div>
+                            <h3 className="font-semibold text-foreground line-clamp-2 mb-1">
+                              {image.teamName}
+                            </h3>
+                          </div>
+
+                          <Separator />
+
+                          <div className="space-y-2 text-xs">
+                            <div className="flex items-center justify-between">
+                              <span className="text-muted-foreground">
+                                Team
+                              </span>
+                              <span className="font-medium text-foreground">
+                                {image.teamName ? (
+                                  <div className="flex items-center gap-1">
+                                    <div className="w-2 h-2 rounded-full" />
+                                    {image.teamName}
+                                  </div>
+                                ) : (
+                                  "Tournament"
+                                )}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <span className="text-muted-foreground">
+                                Usage
+                              </span>
+                              <span className="font-medium text-foreground">
+                                {image.usage}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">No images found</p>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      No Image is uploaded to this Field
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
         )}

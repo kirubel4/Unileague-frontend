@@ -110,6 +110,3 @@ export default function AdminTeamDetailPage() {
     </Layout>
   );
 }
-function pmapApiMatchesToMatches(data: any): Player[] {
-  throw new Error("Function not implemented.");
-}
