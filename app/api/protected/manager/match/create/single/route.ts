@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     let tid;
+    const token = request.cookies.get("aToken")?.value;
+
     const cookieId = request.cookies.get("tid")?.value;
     if (cookieId) {
       tid = cookieId;
@@ -23,7 +25,10 @@ export async function POST(request: NextRequest) {
 
     const res = await fetch(`${backend}/manager/match/create`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify(body),
     });
 

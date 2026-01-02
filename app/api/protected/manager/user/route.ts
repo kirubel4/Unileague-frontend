@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest, res: NextResponse) {
   try {
     const mid = req.cookies.get("mid")?.value;
+    const token = req.cookies.get("aToken")?.value;
+
     if (!mid) {
       return NextResponse.json("re-login bro", { status: 403 });
     }
@@ -12,6 +14,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
       }
     );

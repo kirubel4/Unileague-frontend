@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest, res: NextResponse) {
   try {
     let tid;
+    const token = req.cookies.get("aToken")?.value;
     const cookieId = req.cookies.get("tid")?.value;
     const paramId = req.nextUrl.searchParams.get("id");
     if (cookieId) {
@@ -19,6 +20,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
       }
     );

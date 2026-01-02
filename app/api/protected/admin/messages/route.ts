@@ -2,12 +2,15 @@ import { ApiResponse, forwardApiResponse } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest, res: NextResponse) {
   try {
+    const token = req.cookies.get("aToken")?.value;
+
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/message/meta`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
       }
     );
