@@ -1,18 +1,16 @@
 import { ApiResponse, forwardApiResponse } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
-export async function GET(req: NextRequest, res: NextResponse) {
+export async function GET(req: NextRequest) {
   try {
     // fr manager we get the id form the session fro public we accept id from the params
     let tid;
     const cookiId = req.cookies.get("tid")?.value;
     const paramId = req.nextUrl.searchParams.get("tid");
 
-    if (cookiId) {
-      tid = cookiId;
-    } else if (paramId) {
+    if (paramId) {
       tid = paramId;
-    } else {
-      tid = "fb1c80f4-7ffc-4b84-b329-d08511349fa2";
+    } else if (cookiId) {
+      tid = cookiId;
     }
 
     const res = await fetch(

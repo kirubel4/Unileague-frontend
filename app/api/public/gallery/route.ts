@@ -1,6 +1,6 @@
 import { ApiResponse, forwardApiResponse } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
-export async function GET(req: NextRequest, res: NextResponse) {
+export async function GET(req: NextRequest) {
   try {
     const tid = req.nextUrl.searchParams.get("id");
     const res = await fetch(

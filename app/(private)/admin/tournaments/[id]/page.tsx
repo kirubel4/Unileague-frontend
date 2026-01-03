@@ -57,7 +57,7 @@ export default function AdminTournamentDetail() {
     }
   }, [manager]);
 
-  const tournament: Tournament | null = tournamentRes?.data?.data ?? null;
+  const tournament: Tournament | null = tournamentRes?.data ?? null;
 
   const { data: teamRes } = useSWR(
     `/api/public/team/tournament?tid=${id}`,

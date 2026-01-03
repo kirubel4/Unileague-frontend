@@ -79,8 +79,8 @@ export default function AdminTournamentEdit() {
   );
 
   useEffect(() => {
-    if (tournamentRes?.data?.data) {
-      const tournament = tournamentRes.data.data;
+    if (tournamentRes?.data) {
+      const tournament = tournamentRes.data;
       setOriginalData(tournament);
       setFormData(tournament);
       const assignedManagerIds = new Set(

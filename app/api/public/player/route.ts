@@ -1,6 +1,6 @@
 import { ApiResponse, forwardApiResponse } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
-export async function GET(req: NextRequest, res: NextResponse) {
+export async function GET(req: NextRequest) {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/players`, {
       method: "GET",

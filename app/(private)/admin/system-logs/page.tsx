@@ -23,7 +23,7 @@ import {
   Check,
 } from "lucide-react";
 import useSWR from "swr";
-import { ApiResponse, fetcher } from "@/lib/utils";
+import { ApiResponse, fetcher, getCookie } from "@/lib/utils";
 import { logMapper, SystemLogs } from "./util";
 import { toast, Toaster } from "sonner";
 
@@ -36,10 +36,7 @@ interface MaintenanceRequest {
 }
 
 export default function AdminSystemLogs() {
-  const userName =
-    typeof window !== "undefined"
-      ? localStorage.getItem("userName") || "Admin"
-      : "Admin";
+  const userName = getCookie("uName") || "Admin";
   const [searchTerm, setSearchTerm] = useState("");
   const [severityFilter, setSeverityFilter] = useState<
     "all" | "critical" | "serious" | "warning" | "error" | "info"

@@ -212,21 +212,22 @@ export function TeamDetail({
       {/* Header with Team Info */}
       <div className="mb-8">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <div className="w-16 h-16 lg:w-20 lg:h-20 bg-gradient-to-br from-red-600 to-red-700 rounded-2xl flex items-center justify-center shadow-lg">
-                <Trophy className="w-8 h-8 lg:w-10 lg:h-10 text-white" />
+          {mode === "admin" && (
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="w-16 h-16 lg:w-20 lg:h-20 bg-gradient-to-br from-red-600 to-red-700 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Trophy className="w-8 h-8 lg:w-10 lg:h-10 text-white" />
+                </div>
+              </div>
+              <div>
+                <div className="flex items-center gap-3">
+                  <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+                    {teamData.name}
+                  </h1>
+                </div>
               </div>
             </div>
-            <div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
-                  {teamData.name}
-                </h1>
-              </div>
-            </div>
-          </div>
-
+          )}
           {/* Admin Actions */}
           {mode === "admin" && (
             <div className="flex gap-2 flex-wrap">
@@ -237,20 +238,6 @@ export function TeamDetail({
             </div>
           )}
         </div>
-
-        {/* Breadcrumb */}
-        {showBreadcrumb && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-            <Link
-              href={basePath}
-              className="hover:text-foreground transition-colors"
-            >
-              {mode === "admin" ? "Teams" : "All Teams"}
-            </Link>
-            <ChevronRight className="w-3 h-3 lg:w-4 lg:h-4" />
-            <span className="text-foreground font-medium">{teamData.name}</span>
-          </div>
-        )}
       </div>
 
       {/* Tabs Navigation */}
