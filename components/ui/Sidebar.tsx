@@ -31,7 +31,7 @@ const superAdminMenu = [
   { label: "Tournaments", path: "/admin/tournaments", icon: Trophy },
   { label: "Managers", path: "/admin/managers", icon: Users },
   { label: "News", path: "/admin/news", icon: Newspaper },
-  { label: "Gallery", path: "/admin/gallery", icon: Image },
+
   { label: "System Logs", path: "/admin/system-logs", icon: AlertCircle },
   { label: "Messages", path: "/admin/messages", icon: MessageSquare },
   { label: "Settings", path: "/admin/settings", icon: Settings },
@@ -39,7 +39,7 @@ const superAdminMenu = [
 
 const managerMenu = [
   { label: "Dashboard", path: "/manager/", icon: LayoutDashboard },
-  { label: "Overview", path: "/manager/overview", icon: BarChart3 },
+
   { label: "Teams", path: "/manager/teams", icon: Users },
   { label: "Players", path: "/manager/players", icon: Shield },
   { label: "Fixtures", path: "/manager/fixtures", icon: Calendar },

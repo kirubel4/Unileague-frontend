@@ -2,224 +2,397 @@
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { Send, AlertCircle, MessageCircle } from "lucide-react";
-
-interface Message {
-  id: number;
-  senderRole: "admin" | "manager";
-  senderName: string;
-  message: string;
-  timestamp: string;
-  isRead: boolean;
-}
+import { useState, useRef, useEffect } from "react";
+import { Send, AlertCircle, MessageCircle, Clock, Loader2 } from "lucide-react";
+import { ApiResponse, fetcher, getCookie } from "@/lib/utils";
+import useSWR from "swr";
+import { mapNotificationsToMessages, Message } from "./util";
 
 export default function ManagerMessages() {
-  const userName = localStorage.getItem("userName") || "Manager";
+  const userName = getCookie("uName") || "Manager";
+  const mid = getCookie("mid") || "Manager";
   const [newMessage, setNewMessage] = useState("");
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 1,
-      senderRole: "manager",
-      senderName: userName,
-      message:
-        "Hi, we're having some issues with player registration. Many teams are reporting errors when trying to upload documents. Can you help?",
-      timestamp: "Dec 19, 2024 14:32",
-      isRead: true,
-    },
-    {
-      id: 2,
-      senderRole: "admin",
-      senderName: "Admin",
-      message:
-        "I'll investigate this immediately. In the meantime, ask teams to try a different browser. This usually resolves upload issues.",
-      timestamp: "Dec 19, 2024 14:45",
-      isRead: true,
-    },
-    {
-      id: 3,
-      senderRole: "manager",
-      senderName: userName,
-      message:
-        "Thanks for the quick response! That fixed the issue for most teams. We're good to proceed with the tournament setup.",
-      timestamp: "Dec 19, 2024 15:10",
-      isRead: true,
-    },
-    {
-      id: 4,
-      senderRole: "admin",
-      senderName: "Admin",
-      message:
-        "Great! Please finalize the fixture schedule ASAP and ensure all teams have their match dates confirmed.",
-      timestamp: "Dec 19, 2024 15:25",
-      isRead: true,
-    },
-    {
-      id: 5,
-      senderRole: "manager",
-      senderName: userName,
-      message:
-        "Will do! The schedule will be finalized by tomorrow morning. All teams have been notified.",
-      timestamp: "Dec 19, 2024 15:40",
-      isRead: true,
-    },
-  ]);
+  const [isSending, setIsSending] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const handleSendMessage = () => {
-    if (!newMessage.trim()) return;
+  const {
+    data,
+    isLoading,
+    error,
+    mutate: mutateMessage,
+  } = useSWR("/api/protected/manager/message", fetcher, {
+    revalidateOnFocus: false,
+    refreshInterval: 10000,
+  });
 
-    const message: Message = {
-      id: Math.max(...messages.map((m) => m.id), 0) + 1,
-      senderRole: "manager",
-      senderName: userName,
-      message: newMessage,
-      timestamp: new Date().toLocaleString(),
-      isRead: true,
+  const messages: Message[] = mapNotificationsToMessages(data?.data, mid);
+
+  // Sort messages by timestamp (oldest first, newest last)
+  const sortedMessages = [...(messages || [])].sort(
+    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+  );
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [sortedMessages]);
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || isSending) return;
+
+    setIsSending(true);
+    const messageText = newMessage.trim();
+    setNewMessage("");
+
+    const data = {
+      message: messageText,
     };
 
-    setMessages([...messages, message]);
-    setNewMessage("");
+    try {
+      const res = await fetch("/api/protected/manager/message/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const response: ApiResponse = await res.json();
+      if (!response.success) {
+        console.error("Failed to send message:", response.message);
+        // Re-add message if failed
+        setNewMessage(messageText);
+      } else {
+        // Refresh messages after successful send
+        await mutateMessage();
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+      // Re-add message if error
+      setNewMessage(messageText);
+    } finally {
+      setIsSending(false);
+    }
   };
 
-  const markAsRead = (id: number) => {
-    setMessages((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, isRead: true } : m))
-    );
+  const formatTime = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+
+    // If today, show time
+    if (date.toDateString() === now.toDateString()) {
+      if (diffMins < 1) return "Just now";
+      if (diffMins < 60) return `${diffMins}m ago`;
+      return date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+
+    // If yesterday
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (date.toDateString() === yesterday.toDateString()) {
+      return (
+        "Yesterday " +
+        date.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      );
+    }
+
+    // If this week
+    const daysDiff = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (daysDiff < 7) {
+      return date.toLocaleDateString("en-US", {
+        weekday: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+
+    // Otherwise show date and time
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   return (
     <Layout role="manager" userName={userName}>
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Messages</h1>
-        <p className="text-muted-foreground mt-2">
-          Communicate with the system administrator
-        </p>
-      </div>
-
-      {/* Info Banner */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex gap-3">
-        <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-        <div>
-          <p className="font-semibold text-blue-900 text-sm">Need Help?</p>
-          <p className="text-sm text-blue-800 mt-1">
-            Use this messaging system to report issues, request support, or
-            communicate important updates about your tournament.
-          </p>
+      <div className="mb-8">
+        <div className="flex items-center justify-between">
+          {!isLoading && sortedMessages.length > 0 && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Clock className="w-4 h-4" />
+              <span>
+                Last message:{" "}
+                {formatTime(
+                  sortedMessages[sortedMessages.length - 1].timestamp
+                )}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="bg-white rounded-lg border border-border overflow-hidden flex flex-col h-auto md:h-[calc(100vh-350px)] min-h-96">
-        {/* Chat Header */}
-        <div className="px-6 py-4 border-b border-border bg-gradient-to-r from-blue-50 to-indigo-50">
+      {/* Info Banner */}
+      <div className="mb-6">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-4">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white">
-              <MessageCircle className="w-5 h-5" />
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <AlertCircle className="w-5 h-5 text-blue-600" />
             </div>
-            <div>
-              <h2 className="text-lg font-semibold text-foreground">
-                System Administrator
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                Always available for support
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <p className="font-semibold text-blue-900">Support Channel</p>
+                {isLoading && (
+                  <div className="flex items-center gap-2 text-sm text-blue-700">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    Updating...
+                  </div>
+                )}
+              </div>
+              <p className="text-sm text-blue-800 mt-1">
+                Use this messaging system to report issues, request support, or
+                communicate important updates.
               </p>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
-          {messages.map((message) => {
-            if (!message.isRead) markAsRead(message.id);
+      {/* Chat Container */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col h-[calc(100vh-320px)] min-h-[500px]">
+        {/* Chat Header */}
+        <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center">
+                  <MessageCircle className="w-6 h-6 text-white" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 w-4 h-4  border-2 border-white rounded-full"></div>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  System Administrator
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Support Team • 24/7 Response
+                </p>
+              </div>
+            </div>
+            {sortedMessages.length > 0 && (
+              <div className="hidden md:block">
+                <span className="text-sm text-gray-500">
+                  {sortedMessages.length} message
+                  {sortedMessages.length !== 1 ? "s" : ""}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
 
-            return (
-              <div
-                key={message.id}
-                className={`flex ${
-                  message.senderRole === "manager"
-                    ? "justify-end"
-                    : "justify-start"
-                }`}
-              >
-                <div
-                  className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
-                    message.senderRole === "manager"
-                      ? "bg-primary text-white rounded-br-none"
-                      : "bg-muted text-foreground rounded-bl-none"
-                  }`}
-                >
-                  {message.senderRole === "admin" && (
-                    <p className="text-xs font-semibold mb-1 opacity-75">
-                      System Administrator
-                    </p>
-                  )}
-                  <p className="text-sm">{message.message}</p>
-                  <p
-                    className={`text-xs mt-2 ${
-                      message.senderRole === "manager"
-                        ? "text-blue-100"
-                        : "text-muted-foreground"
-                    }`}
-                  >
-                    {message.timestamp}
+        {/* Messages Container */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-gradient-to-b from-gray-50/50 to-white">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center space-y-4">
+                <div className="relative">
+                  <div className="w-16 h-16 border-4 border-blue-100 rounded-full"></div>
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+                  </div>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-700">Loading messages</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Fetching your conversation...
                   </p>
                 </div>
               </div>
-            );
-          })}
+            </div>
+          ) : sortedMessages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-center px-4">
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-full flex items-center justify-center mb-6">
+                <MessageCircle className="w-10 h-10 text-blue-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">
+                No messages yet
+              </h3>
+              <p className="text-gray-600 max-w-md mb-6">
+                Start a conversation with the support team. They're here to help
+                with any questions, issues, or requests you may have about the
+                tournament system.
+              </p>
+              <div className="flex flex-wrap gap-2 justify-center">
+                <span className="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full">
+                  Quick Response
+                </span>
+                <span className="px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full">
+                  24/7 Support
+                </span>
+                <span className="px-3 py-1 bg-purple-100 text-purple-700 text-sm rounded-full">
+                  Expert Help
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {sortedMessages.map((message, index) => {
+                const isManager = message.senderRole === "manager";
+                const showDateHeader =
+                  index === 0 ||
+                  new Date(message.timestamp).toDateString() !==
+                    new Date(
+                      sortedMessages[index - 1].timestamp
+                    ).toDateString();
+
+                return (
+                  <div key={message.id}>
+                    {/* Date Separator */}
+                    {showDateHeader && (
+                      <div className="flex items-center justify-center my-6">
+                        <div className="h-px bg-gray-200 flex-1"></div>
+                        <span className="mx-4 text-xs font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                          {new Date(message.timestamp).toLocaleDateString(
+                            "en-US",
+                            {
+                              weekday: "long",
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            }
+                          )}
+                        </span>
+                        <div className="h-px bg-gray-200 flex-1"></div>
+                      </div>
+                    )}
+
+                    {/* Message */}
+                    <div
+                      className={`flex ${
+                        isManager ? "justify-end" : "justify-start"
+                      }`}
+                    >
+                      <div className="max-w-[80%] md:max-w-[70%]">
+                        <div
+                          className={`px-4 py-3 rounded-2xl ${
+                            isManager
+                              ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-br-none"
+                              : "bg-white text-gray-800 border border-gray-200 shadow-sm rounded-bl-none"
+                          }`}
+                        >
+                          {!isManager && (
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-xs font-medium text-gray-700">
+                                Support Team
+                              </span>
+                              <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                              <span className="text-xs text-gray-500">
+                                Staff
+                              </span>
+                            </div>
+                          )}
+                          <p className="text-sm md:text-base leading-relaxed">
+                            {message.message}
+                          </p>
+                          <div
+                            className={`flex items-center gap-2 mt-2 ${
+                              isManager ? "justify-end" : "justify-start"
+                            }`}
+                          >
+                            <Clock className="w-3 h-3" />
+                            <span
+                              className={`text-xs ${
+                                isManager ? "text-blue-100" : "text-gray-500"
+                              }`}
+                            >
+                              {formatTime(message.timestamp)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
         </div>
 
         {/* Message Input */}
-        <div className="px-6 py-4 border-t border-border bg-muted">
-          <div className="flex gap-3">
-            <Input
-              type="text"
-              placeholder="Type your message or report an issue..."
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-              className="rounded-lg h-10"
-            />
-            <Button
-              onClick={handleSendMessage}
-              disabled={!newMessage.trim()}
-              className="bg-primary hover:bg-blue-600 text-white rounded-lg h-10 gap-2 px-4"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
-          </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            Press Enter or click Send to send your message
-          </p>
-        </div>
-      </div>
+        <div className="px-4 md:px-6 py-4 border-t border-gray-200 bg-white">
+          <div className="space-y-3">
+            {/* Sending Indicator */}
+            {isSending && (
+              <div className="flex items-center gap-2 text-sm text-blue-600 animate-pulse">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Sending message...</span>
+              </div>
+            )}
 
-      {/* Quick Tips */}
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg border border-border p-4">
-          <h3 className="font-semibold text-foreground mb-2 text-sm">
-            Report Issues
-          </h3>
-          <p className="text-xs text-muted-foreground">
-            Tell us about any technical problems or system errors you encounter
-          </p>
-        </div>
-        <div className="bg-white rounded-lg border border-border p-4">
-          <h3 className="font-semibold text-foreground mb-2 text-sm">
-            Request Support
-          </h3>
-          <p className="text-xs text-muted-foreground">
-            Ask for help with tournament setup, registration, or any other
-            questions
-          </p>
-        </div>
-        <div className="bg-white rounded-lg border border-border p-4">
-          <h3 className="font-semibold text-foreground mb-2 text-sm">
-            Share Updates
-          </h3>
-          <p className="text-xs text-muted-foreground">
-            Communicate important tournament milestones and status updates
-          </p>
+            <div className="border-t border-border  px-4 py-3">
+              <div className="relative flex items-center">
+                <Input
+                  type="text"
+                  placeholder="Type your message..."
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
+                  disabled={isSending}
+                  className="h-12 rounded-full pr-14 pl-4 bg-white focus-visible:ring-2 focus-visible:ring-primary"
+                />
+
+                <button
+                  onClick={handleSendMessage}
+                  disabled={!newMessage.trim() || isSending}
+                  className={`
+        absolute right-2 flex items-center justify-center
+        w-9 h-9 rounded-full
+        transition-all
+        ${
+          !newMessage.trim() || isSending
+            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+            : "bg-primary text-white hover:bg-primary/90"
+        }
+      `}
+                >
+                  {isSending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-gray-500">
+                Press{" "}
+                <kbd className="px-1.5 py-0.5 bg-gray-100 rounded text-xs font-mono">
+                  Enter
+                </kbd>{" "}
+                to send
+              </p>
+              <p className="text-xs text-gray-500">
+                {newMessage.length}/500 characters
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </Layout>

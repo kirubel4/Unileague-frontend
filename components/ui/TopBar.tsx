@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { LogOut, User, ChevronDown, Settings, Bell } from "lucide-react";
 import { Button } from "./button";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ConfirmModal from "../comfirm";
 
 interface TopBarProps {
@@ -18,16 +18,81 @@ export function TopBar({
   const navigate = useRouter();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [openModalId, setOpenModalId] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [currentUserName, setCurrentUserName] = useState(userName);
 
-  const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("userRole");
-    navigate.replace("/auth");
+  // Update username from cookie after mount
+  useEffect(() => {
+    setMounted(true);
+
+    // Function to get cookie client-side
+    const getCookie = (name: string): string | null => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) {
+        return parts.pop()?.split(";").shift() || null;
+      }
+      return null;
+    };
+
+    const cookieUserName = getCookie("uName");
+    if (cookieUserName) {
+      setCurrentUserName(cookieUserName);
+    }
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } finally {
+      navigate.replace("/auth");
+    }
   };
+
   const route = userRole === "Manager" ? "/manager" : "/admin";
+
+  // Don't render user-specific content until mounted (hydration safe)
+  if (!mounted) {
+    return (
+      <header className="fixed mb-10 top-0 left-0 right-0 z-50 w-full bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
+        <div className="h-16 px-4 md:px-6 flex items-center justify-between max-w-full">
+          {/* Left - Logo */}
+          <Link
+            href="/"
+            className="flex items-center gap-3 group transition-all duration-200"
+          >
+            <div className="relative w-9 h-9 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-200">
+              <span className="text-white font-bold text-lg">⚽</span>
+              <div className="absolute -inset-1 bg-primary/20 rounded-xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                UniLeague-Hub
+              </span>
+              <span className="text-xs text-gray-500 font-medium tracking-wide">
+                ADMIN PANEL
+              </span>
+            </div>
+          </Link>
+
+          {/* Skeleton for user profile while loading */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 pl-3 pr-2 py-1">
+              <div className="text-right">
+                <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-3 w-12 bg-gray-200 rounded animate-pulse mt-1"></div>
+              </div>
+              <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </header>
+    );
+  }
+
   return (
     <header className="fixed mb-10 top-0 left-0 right-0 z-50 w-full bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
-      <div className="h-16  px-4 md:px-6 flex items-center justify-between max-w-full">
+      <div className="h-16 px-4 md:px-6 flex items-center justify-between max-w-full">
         {/* Left - Logo */}
         <Link
           href="/"
@@ -82,7 +147,7 @@ export function TopBar({
             >
               <div className="text-right">
                 <p className="text-sm font-semibold text-gray-900">
-                  {userName}
+                  {currentUserName}
                 </p>
                 <p className="text-xs text-gray-500 font-medium">{userRole}</p>
               </div>
@@ -109,20 +174,12 @@ export function TopBar({
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                   <div className="px-4 py-3 border-b border-gray-100">
                     <p className="text-sm font-semibold text-gray-900">
-                      {userName}
+                      {currentUserName}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">{userRole}</p>
                   </div>
 
                   <div className="py-2">
-                    <Link
-                      href="/profile"
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                      onClick={() => setShowUserMenu(false)}
-                    >
-                      <User className="w-4 h-4" />
-                      My Profile
-                    </Link>
                     <div
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                       onClick={() => {

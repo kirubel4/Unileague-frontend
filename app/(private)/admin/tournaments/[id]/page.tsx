@@ -9,7 +9,9 @@ import { fetcher } from "@/lib/utils";
 import { ChevronLeft, Edit, Flag, Users } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import useSWR from "swr";
+import { ManagerTableRow, mapManagersToTableRows } from "../../managers/util";
 
 type TournamentManager = {
   id: string;
@@ -35,14 +37,27 @@ export default function AdminTournamentDetail() {
   const userName = "Admin";
   const params = useParams();
   const id = params?.id ?? "";
-
+  const [managers, setManagers] = useState<ManagerTableRow[]>([]);
   // Fetch tournament details
   const { data: tournamentRes } = useSWR(
     `/api/public/tournament/detail?id=${id}`,
     fetcher
   );
+  const {
+    data: manager,
+    error: err,
+    mutate: mutateManager,
+  } = useSWR("/api/protected/admin/manager", fetcher, {
+    revalidateOnFocus: false,
+  });
 
-  const tournament: Tournament | null = tournamentRes?.data?.data ?? null;
+  useEffect(() => {
+    if (data?.data) {
+      setManagers(mapManagersToTableRows(manager?.data));
+    }
+  }, [manager]);
+
+  const tournament: Tournament | null = tournamentRes?.data ?? null;
 
   const { data: teamRes } = useSWR(
     `/api/public/team/tournament?tid=${id}`,
@@ -58,26 +73,6 @@ export default function AdminTournamentDetail() {
   );
   const standing = mapApiDataToTable(data?.data || []);
 
-  const standings = [
-    {
-      rank: 1,
-      team: "Tigers United",
-      wins: 6,
-      draws: 1,
-      losses: 0,
-      points: 19,
-    },
-    {
-      rank: 2,
-      team: "Eagles Sports",
-      wins: 5,
-      draws: 2,
-      losses: 0,
-      points: 17,
-    },
-    { rank: 3, team: "Phoenix FC", wins: 4, draws: 3, losses: 0, points: 15 },
-    { rank: 4, team: "Lions Club", wins: 3, draws: 1, losses: 3, points: 10 },
-  ];
   const mappedTournament = tournament
     ? {
         id: tournament.id,
@@ -92,7 +87,7 @@ export default function AdminTournamentDetail() {
         managers: tournament.managers || [],
       }
     : null;
-
+  console.log(tournament);
   return (
     <Layout role="super_admin" userName={userName}>
       {/* Header */}
@@ -195,28 +190,35 @@ export default function AdminTournamentDetail() {
               Assigned Managers
             </h2>
             <div className="space-y-3">
-              {(mappedTournament?.managers ?? []).map((manager) => (
-                <div
-                  key={manager.id}
-                  className="border border-border rounded-lg p-4 flex items-center justify-between"
-                >
-                  <div>
-                    <p className="font-medium text-foreground">
-                      {manager.name}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {manager.email}
-                    </p>
-                  </div>
-                  <Button variant="outline" size="sm" className="rounded">
-                    Remove
+              {mappedTournament?.managers === undefined ||
+              mappedTournament?.managers === null ? (
+                <>
+                  <div>No Assign Managers</div>
+                  <Button variant="outline" className="w-full mt-4 rounded-lg">
+                    Add Manager
                   </Button>
-                </div>
-              ))}
+                </>
+              ) : (
+                (mappedTournament?.managers ?? []).map((manager) => (
+                  <div
+                    key={manager.id}
+                    className="border border-border rounded-lg p-4 flex items-center justify-between"
+                  >
+                    <div>
+                      <p className="font-medium text-foreground">
+                        {manager.name}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {manager.email}
+                      </p>
+                    </div>
+                    <Button variant="outline" size="sm" className="rounded">
+                      Remove
+                    </Button>
+                  </div>
+                ))
+              )}
             </div>
-            <Button variant="outline" className="w-full mt-4 rounded-lg">
-              Add Manager
-            </Button>
           </div>
 
           {/* Standings */}

@@ -8,9 +8,13 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-
+import { mapTournaments } from "../../tournaments/util";
+import useSWR from "swr";
+import { fetcher, getCookie } from "@/lib/utils";
+import { Tournament } from "../../tournaments/page";
+import { toast, Toaster } from "sonner";
 export default function AdminManagersCreate() {
-  const userName = localStorage.getItem("userName") || "Admin";
+  const userName = getCookie("uName") || "Admin";
   const navigate = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -18,12 +22,10 @@ export default function AdminManagersCreate() {
     email: "",
     tournamentId: "",
   });
-
-  const tournaments = [
-    { id: "1", name: "City League Championship" },
-    { id: "2", name: "Regional Cup" },
-    { id: "3", name: "Summer Tournament" },
-  ];
+  const { data, error, isLoading } = useSWR("/api/public/tournament", fetcher, {
+    revalidateOnFocus: false,
+  });
+  const tournaments: Tournament[] = mapTournaments(data);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -34,6 +36,7 @@ export default function AdminManagersCreate() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    toast.loading("creating manager");
     setIsSubmitting(true);
 
     setTimeout(() => {
@@ -46,6 +49,7 @@ export default function AdminManagersCreate() {
     <Layout role="super_admin" userName={userName}>
       {/* Header */}
       <div className="mb-8">
+        <Toaster />
         <Link href="/admin/managers">
           <Button variant="ghost" size="sm" className="mb-4 flex items-center">
             <ChevronLeft className="w-4 h-4 mr-2" />
@@ -110,9 +114,9 @@ export default function AdminManagersCreate() {
                 className="w-full h-10 px-3 border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
               >
                 <option value="">Select a tournament...</option>
-                {tournaments.map((t) => (
+                {tournaments?.map((t) => (
                   <option key={t.id} value={t.id}>
-                    {t.name}
+                    {t.tournamentName}
                   </option>
                 ))}
               </select>

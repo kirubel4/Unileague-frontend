@@ -28,16 +28,15 @@ import {
   Trophy,
   Camera,
   Globe,
-  CheckCircle,
   AlertCircle,
 } from "lucide-react";
 import useSWR from "swr";
-import { ApiResponse, fetcher } from "@/lib/utils";
+import { ApiResponse, fetcher, getCookie } from "@/lib/utils";
 import { mapTeams, Team } from "../players/transfer/util";
 import { GalleryImg, mapGalleryResponse } from "./util";
-
+import { toast, Toaster } from "sonner";
 export default function ManagerGallery() {
-  const userName = "Manager";
+  const userName = getCookie("uName") || "Manager";
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data, error, isLoading } = useSWR(
     "/api/public/team/tournament",
@@ -121,18 +120,18 @@ export default function ManagerGallery() {
   // Handle upload
   const handleUpload = async () => {
     if (!previewImage || !imageFile) {
-      alert("Please select an image first");
+      toast.info("please select image ", { id: "1" });
       return;
     }
 
     if (uploadForm.category === "team" && !uploadForm.teamId) {
-      alert("Please select a team for team images");
+      toast.info("please select team fo an image post ", { id: "1" });
       return;
     }
 
     setUploading(true);
+    toast.loading("Uploading please wait ", { id: "1" });
 
-    // Simulate upload delay
     const fd = new FormData();
     const selectedTeam = teams.find((t) => t.id === uploadForm.teamId);
     if (selectedTeam?.id) {
@@ -152,15 +151,14 @@ export default function ManagerGallery() {
     });
     const response: ApiResponse = await res.json();
     if (!response.success) {
-      console.log(response.message);
+      toast.error(response.message, { id: "1" });
       return;
     }
-    console.log("posted");
+    toast.success("Uploaded", { id: "1" });
     await mutateImage();
     setPreviewImage(null);
     setUploadForm({
       title: "",
-
       category: "tournament",
       teamId: "",
     });
@@ -190,6 +188,7 @@ export default function ManagerGallery() {
     <Layout role="manager" userName={userName}>
       {/* Header */}
       <div className="mb-8">
+        <Toaster />
         <h1 className="text-3xl font-bold text-foreground tracking-tight">
           Gallery Manager
         </h1>

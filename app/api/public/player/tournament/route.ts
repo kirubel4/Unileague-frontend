@@ -1,11 +1,20 @@
 import { ApiResponse, forwardApiResponse } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
-export async function GET(req: NextRequest, res: NextResponse) {
+export async function GET(req: NextRequest) {
   try {
-    //tournament id should be from the session
-    const id = "fb1c80f4-7ffc-4b84-b329-d08511349fa2";
+    let tid;
+    const cookiId = req.cookies.get("tid")?.value;
+    const paramId = req.nextUrl.searchParams.get("tid");
+    console.log(paramId);
+    if (cookiId) {
+      tid = cookiId;
+    } else if (paramId) {
+      tid = paramId;
+    } else {
+      tid = "fb1c80f4-7ffc-4b84-b329-d08511349fa2";
+    }
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/tournaments/${id}/players`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/tournaments/${tid}/players`,
       {
         method: "GET",
         headers: {

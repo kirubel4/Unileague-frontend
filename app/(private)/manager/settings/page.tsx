@@ -3,25 +3,58 @@ import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Eye, EyeOff, Save, Bell, Lock, User } from "lucide-react";
+import { ApiResponse, fetcher, getCookie } from "@/lib/utils";
+import useSWR from "swr";
 
 export default function ManagerSettings() {
-  const userName = localStorage.getItem("userName") || "Manager";
+  const userName = getCookie("uName") || "Manager";
   const [activeTab, setActiveTab] = useState<
     "profile" | "security" | "notifications"
   >("profile");
+  const [initialProfileData, setInitialProfileData] = useState({
+    username: "",
+    fullName: "",
+    email: "",
+  });
+
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const [profileData, setProfileData] = useState({
-    fullname: userName,
-    email: "manager@example.com",
-    phone: "+1 234 567 8900",
-    tournament: "City League Championship 2024",
+    username: "",
+    fullName: "",
+    email: "",
   });
+  const {
+    data,
+    isLoading,
+    error,
+    mutate: mutateMessage,
+  } = useSWR("/api/protected/manager/user", fetcher, {
+    revalidateOnFocus: false,
+  });
+  useEffect(() => {
+    if (data?.data) {
+      setProfileData({
+        username: data?.data.username ?? "",
+        fullName: data?.data.fullName ?? "",
+        email: data?.data.email ?? "",
+      });
+    }
+    setInitialProfileData({
+      username: data?.data.username ?? "",
+      fullName: data?.data.fullName ?? "",
+      email: data?.data.email ?? "",
+    });
+  }, [data]);
+  const hasProfileChanged =
+    profileData.username !== initialProfileData.username ||
+    profileData.fullName !== initialProfileData.fullName ||
+    profileData.email !== initialProfileData.email;
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -58,8 +91,17 @@ export default function ManagerSettings() {
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    alert("Profile updated successfully!");
+    const res = await fetch("/api/protected/manager/user/update", {
+      method: "POST",
+      body: JSON.stringify(profileData),
+    });
+    const response: ApiResponse = await res.json();
+    if (!response.success) {
+      console.log(response.message);
+      setIsSaving(false);
+      return;
+    }
+    console.log("updated");
     setIsSaving(false);
   };
 
@@ -145,13 +187,13 @@ export default function ManagerSettings() {
                   htmlFor="fullname"
                   className="text-foreground font-semibold mb-2 block"
                 >
-                  Full Name
+                  User Name
                 </Label>
                 <Input
-                  id="fullname"
-                  name="fullname"
+                  id="username"
+                  name="username"
                   type="text"
-                  value={profileData.fullname}
+                  value={profileData?.username}
                   onChange={handleProfileChange}
                   className="rounded-lg h-10"
                 />
@@ -169,7 +211,7 @@ export default function ManagerSettings() {
                   id="email"
                   name="email"
                   type="email"
-                  value={profileData.email}
+                  value={profileData?.email}
                   onChange={handleProfileChange}
                   className="rounded-lg h-10"
                 />
@@ -178,16 +220,16 @@ export default function ManagerSettings() {
               {/* Phone */}
               <div>
                 <Label
-                  htmlFor="phone"
+                  htmlFor="fullName"
                   className="text-foreground font-semibold mb-2 block"
                 >
-                  Phone Number
+                  Full Name
                 </Label>
                 <Input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  value={profileData.phone}
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  value={profileData?.fullName}
                   onChange={handleProfileChange}
                   className="rounded-lg h-10"
                 />
@@ -205,7 +247,12 @@ export default function ManagerSettings() {
                   id="tournament"
                   name="tournament"
                   type="text"
-                  value={profileData.tournament}
+                  value={
+                    data?.data.tournaments[0].tournamentName
+                      ? data?.data.tournaments[0].tournamentName
+                      : "not assign to any tournament"
+                  }
+                  onChange={handleProfileChange}
                   disabled
                   className="rounded-lg h-10 bg-muted cursor-not-allowed"
                 />
@@ -215,7 +262,7 @@ export default function ManagerSettings() {
             <div className="flex gap-3 justify-end">
               <Button
                 type="submit"
-                disabled={isSaving}
+                disabled={isSaving || !hasProfileChanged}
                 className="bg-primary hover:bg-blue-600 text-white rounded-lg h-10 gap-2"
               >
                 <Save className="w-4 h-4" />

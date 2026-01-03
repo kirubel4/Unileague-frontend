@@ -1,6 +1,7 @@
 "use client";
 import { Layout } from "@/components/Layout";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import {
   Search,
@@ -8,139 +9,122 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
+  X,
+  Wrench,
+  ExternalLink,
+  Copy,
+  Shield,
+  Server,
+  Database,
+  Network,
+  FileText,
+  Bell,
+  Send,
+  Check,
 } from "lucide-react";
+import useSWR from "swr";
+import { ApiResponse, fetcher, getCookie } from "@/lib/utils";
+import { logMapper, SystemLogs } from "./util";
+import { toast, Toaster } from "sonner";
 
-interface SystemLog {
-  id: number;
-  timestamp: string;
-  type: "error" | "warning" | "info" | "success";
-  category: "api" | "server" | "database" | "auth" | "tournament";
-  message: string;
-  analyzedMessage: string;
-  details: string;
-  severity: "critical" | "high" | "medium" | "low";
+interface MaintenanceRequest {
+  priority: "low" | "medium" | "high" | "critical";
+  description: string;
+  assignToTeam: boolean;
+  estimatedTime?: string;
+  additionalNotes?: string;
 }
 
 export default function AdminSystemLogs() {
-  const userName = localStorage.getItem("userName") || "Admin";
+  const userName = getCookie("uName") || "Admin";
   const [searchTerm, setSearchTerm] = useState("");
   const [severityFilter, setSeverityFilter] = useState<
-    "all" | "critical" | "high" | "medium" | "low"
+    "all" | "critical" | "serious" | "warning" | "error" | "info"
   >("all");
-  const [typeFilter, setTypeFilter] = useState<
-    "all" | "error" | "warning" | "info" | "success"
-  >("all");
-  const [selectedLog, setSelectedLog] = useState<SystemLog | null>(null);
+  const [selectedLog, setSelectedLog] = useState<SystemLogs | null>(null);
+  const [showMaintenanceForm, setShowMaintenanceForm] = useState(false);
+  const [maintenanceRequest, setMaintenanceRequest] =
+    useState<MaintenanceRequest>({
+      priority: "medium",
+      description: "",
+      assignToTeam: true,
+      estimatedTime: "2-4 hours",
+      additionalNotes: "",
+    });
+  const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
 
-  const logs: SystemLog[] = [
-    {
-      id: 1,
-      timestamp: "Dec 19, 2024 14:32:45",
-      type: "error",
-      category: "database",
-      message: "Database connection timeout on tournament queries",
-      analyzedMessage:
-        "The system encountered a database connection timeout while processing tournament data. This indicates potential database server performance issues or network connectivity problems. Maintenance team should check database server status and connection pooling settings.",
-      details:
-        "Connection pool exhausted after 30 seconds waiting for available connection",
-      severity: "critical",
-    },
-    {
-      id: 2,
-      timestamp: "Dec 19, 2024 13:15:22",
-      type: "warning",
-      category: "api",
-      message: "High API response time detected",
-      analyzedMessage:
-        "API endpoints are responding slower than expected (average response time: 2.5s). This could indicate server overload or inefficient database queries. Consider optimizing database queries or scaling server resources.",
-      details:
-        "Average response time exceeded threshold: 2500ms vs expected 500ms",
-      severity: "high",
-    },
-    {
-      id: 3,
-      timestamp: "Dec 19, 2024 12:45:10",
-      type: "error",
-      category: "auth",
-      message: "Multiple failed login attempts detected",
-      analyzedMessage:
-        "System detected 15 failed login attempts from IP 192.168.1.105 in 10 minutes. This could indicate a brute force attack attempt. Security team should review and potentially block this IP address.",
-      details: "Failed attempts for users: admin, manager1, manager2",
-      severity: "high",
-    },
-    {
-      id: 4,
-      timestamp: "Dec 19, 2024 11:20:33",
-      type: "warning",
-      category: "server",
-      message: "Memory usage above 80%",
-      analyzedMessage:
-        "Server memory utilization reached 82%. Consider restarting services or investigating memory leaks in running processes. Monitor memory usage closely to prevent service disruptions.",
-      details:
-        "Current memory: 82% | Recommended action: Restart services or add more RAM",
-      severity: "high",
-    },
-    {
-      id: 5,
-      timestamp: "Dec 19, 2024 10:05:44",
-      type: "info",
-      category: "tournament",
-      message: "Tournament data backup completed",
-      analyzedMessage:
-        "Automatic backup of all tournament data completed successfully. All tournament records have been backed up to the secondary storage system.",
-      details: "Backup size: 2.5GB | Duration: 3 minutes 22 seconds",
-      severity: "low",
-    },
-    {
-      id: 6,
-      timestamp: "Dec 19, 2024 09:30:15",
-      type: "error",
-      category: "server",
-      message: "Service restart due to memory leak",
-      analyzedMessage:
-        "The application service was automatically restarted due to detected memory leak. Memory consumption was growing uncontrollably. Investigation needed to identify and fix the source of the leak.",
-      details:
-        "Service: Tournament Manager API | Uptime before restart: 48 hours",
-      severity: "critical",
-    },
-    {
-      id: 7,
-      timestamp: "Dec 19, 2024 08:45:20",
-      type: "warning",
-      category: "database",
-      message: "Slow query detected",
-      analyzedMessage:
-        "A database query took longer than expected to execute (8.5 seconds). This query should be optimized with proper indexing. Database team should review and optimize this query.",
-      details:
-        "Query: SELECT * FROM tournaments JOIN managers... | Execution time: 8.5s",
-      severity: "medium",
-    },
-    {
-      id: 8,
-      timestamp: "Dec 19, 2024 07:15:05",
-      type: "success",
-      category: "api",
-      message: "System health check passed",
-      analyzedMessage:
-        "Automated system health check completed successfully. All critical components are functioning normally and within expected parameters.",
-      details:
-        "All checks passed: Database ✓ | API ✓ | Cache ✓ | Authentication ✓",
-      severity: "low",
-    },
-  ];
+  const { data, isLoading, error, mutate } = useSWR(
+    "/api/protected/admin/logs",
+    fetcher,
+    { revalidateOnFocus: false, refreshInterval: 30000 }
+  );
 
-  const filteredLogs = logs.filter((log) => {
+  const log: SystemLogs[] = logMapper(data?.data?.data);
+
+  const filteredLogs = log?.filter((log) => {
     const matchesSearch =
       log.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.analyzedMessage.toLowerCase().includes(searchTerm.toLowerCase());
+      log.analyzedMessage.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.category.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSeverity =
       severityFilter === "all" || log.severity === severityFilter;
-    const matchesType = typeFilter === "all" || log.type === typeFilter;
-    return matchesSearch && matchesSeverity && matchesType;
+
+    return matchesSearch && matchesSeverity;
   });
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
+      case "critical":
+        return "bg-red-50 text-red-700 border-red-200";
+      case "serious":
+        return "bg-orange-50 text-orange-700 border-orange-200";
+      case "error":
+        return "bg-red-100 text-red-800 border-red-300";
+      case "warning":
+        return "bg-yellow-50 text-yellow-700 border-yellow-200";
+      case "info":
+        return "bg-blue-50 text-blue-700 border-blue-200";
+      default:
+        return "bg-gray-50 text-gray-700 border-gray-200";
+    }
+  };
+
+  const getSeverityIcon = (severity: string) => {
+    switch (severity) {
+      case "critical":
+        return <AlertTriangle className="w-4 h-4 text-red-600" />;
+      case "serious":
+        return <AlertCircle className="w-4 h-4 text-orange-600" />;
+      case "error":
+        return <AlertCircle className="w-4 h-4 text-red-600" />;
+      case "warning":
+        return <AlertTriangle className="w-4 h-4 text-yellow-600" />;
+      case "info":
+        return <CheckCircle className="w-4 h-4 text-blue-600" />;
+      default:
+        return <Clock className="w-4 h-4 text-gray-600" />;
+    }
+  };
+
+  const getCategoryIcon = (category: string) => {
+    switch (category.toLowerCase()) {
+      case "security":
+        return <Shield className="w-4 h-4" />;
+      case "database":
+        return <Database className="w-4 h-4" />;
+      case "server":
+        return <Server className="w-4 h-4" />;
+      case "network":
+        return <Network className="w-4 h-4" />;
+      case "application":
+        return <FileText className="w-4 h-4" />;
+      default:
+        return <Bell className="w-4 h-4" />;
+    }
+  };
+
+  const getPriorityColor = (priority: MaintenanceRequest["priority"]) => {
+    switch (priority) {
       case "critical":
         return "bg-red-100 text-red-800 border-red-300";
       case "high":
@@ -154,136 +138,211 @@ export default function AdminSystemLogs() {
     }
   };
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case "error":
-        return <AlertTriangle className="w-4 h-4 text-red-600" />;
-      case "warning":
-        return <AlertCircle className="w-4 h-4 text-orange-600" />;
-      case "success":
-        return <CheckCircle className="w-4 h-4 text-green-600" />;
-      case "info":
-        return <Clock className="w-4 h-4 text-blue-600" />;
-      default:
-        return null;
+  const handleCopyDetails = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success("Copied to clipboard!");
+  };
+
+  const handleSubmitMaintenanceRequest = async () => {
+    if (!selectedLog) {
+      toast.error("please select a log first");
+      return;
     }
+    setIsSubmittingRequest(true);
+    try {
+      const response = await fetch("/api/protected/admin/maintenance-request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: selectedLog.id,
+        }),
+      });
+      const result: ApiResponse = await response.json();
+      if (result.success) {
+        toast.success("Maintenance request submitted successfully!");
+        setShowMaintenanceForm(false);
+        setMaintenanceRequest({
+          priority: "medium",
+          description: "",
+          assignToTeam: true,
+          estimatedTime: "2-4 hours",
+          additionalNotes: "",
+        });
+      } else {
+        toast.error(result.message || "Failed to submit request");
+      }
+    } catch (error) {
+      toast.error("Error submitting maintenance request");
+      console.error("Error:", error);
+    } finally {
+      setIsSubmittingRequest(false);
+    }
+  };
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return date.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   return (
     <Layout role="super_admin" userName={userName}>
       {/* Header */}
+      <Toaster />
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground">System Logs</h1>
         <p className="text-muted-foreground mt-2">
-          Monitor system errors, warnings, and events with AI analysis
+          Monitor system health with AI-powered analysis and issue resolution
         </p>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg border border-border p-4 mb-6 space-y-4">
+      <div className="bg-white rounded-lg border border-border p-4 mb-6">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search logs by message or analysis..."
+              placeholder="Search logs by message, analysis, or category..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="rounded-lg h-9 pl-9 flex-1"
+              className="rounded-lg h-10 pl-9 flex-1"
             />
           </div>
           <select
             value={severityFilter}
             onChange={(e) => setSeverityFilter(e.target.value as any)}
-            className="px-3 py-2 rounded-lg border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            className="px-3 py-2 rounded-lg border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary h-10"
           >
             <option value="all">All Severities</option>
             <option value="critical">Critical</option>
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
-          </select>
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value as any)}
-            className="px-3 py-2 rounded-lg border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            <option value="all">All Types</option>
+            <option value="serious">Serious</option>
             <option value="error">Error</option>
             <option value="warning">Warning</option>
             <option value="info">Info</option>
-            <option value="success">Success</option>
           </select>
+          <Button variant="outline" onClick={() => mutate()} className="h-10">
+            Refresh
+          </Button>
         </div>
       </div>
 
       {/* Logs Table */}
       <div className="bg-white rounded-lg border border-border overflow-hidden">
-        <div className="overflow-x-auto -mx-4 md:mx-0">
-          <table className="w-full text-sm md:text-base">
-            <thead className="bg-muted border-b border-border">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b border-border">
               <tr>
-                <th className="text-left py-2 md:py-3 px-2 md:px-4 font-semibold text-xs md:text-sm text-muted-foreground">
-                  Timestamp
+                <th className="text-left py-3 px-4 font-semibold text-xs text-gray-600 uppercase tracking-wider">
+                  Time
                 </th>
-                <th className="text-left py-2 md:py-3 px-2 md:px-4 font-semibold text-xs md:text-sm text-muted-foreground">
+                <th className="text-left py-3 px-4 font-semibold text-xs text-gray-600 uppercase tracking-wider">
                   Type
                 </th>
-                <th className="text-left py-2 md:py-3 px-2 md:px-4 font-semibold text-xs md:text-sm text-muted-foreground hidden md:table-cell">
+                <th className="text-left py-3 px-4 font-semibold text-xs text-gray-600 uppercase tracking-wider">
                   Category
                 </th>
-                <th className="text-left py-2 md:py-3 px-2 md:px-4 font-semibold text-xs md:text-sm text-muted-foreground">
+                <th className="text-left py-3 px-4 font-semibold text-xs text-gray-600 uppercase tracking-wider">
                   Message
                 </th>
-                <th className="text-left py-2 md:py-3 px-2 md:px-4 font-semibold text-xs md:text-sm text-muted-foreground">
+                <th className="text-left py-3 px-4 font-semibold text-xs text-gray-600 uppercase tracking-wider">
                   Severity
+                </th>
+                <th className="text-left py-3 px-4 font-semibold text-xs text-gray-600 uppercase tracking-wider">
+                  Actions
                 </th>
               </tr>
             </thead>
-            <tbody>
-              {filteredLogs.length > 0 ? (
-                filteredLogs.map((log) => (
+            <tbody className="divide-y divide-gray-200">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="py-8 px-4 text-center">
+                    <div className="flex items-center justify-center gap-2 text-gray-500">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
+                      Loading logs...
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredLogs?.length > 0 ? (
+                filteredLogs?.map((log) => (
                   <tr
                     key={log.id}
-                    className="border-b border-border hover:bg-muted transition-colors cursor-pointer"
-                    onClick={() => setSelectedLog(log)}
+                    className="hover:bg-gray-50 transition-colors"
                   >
-                    <td className="py-2 md:py-3 px-2 md:px-4 text-xs font-mono text-muted-foreground whitespace-nowrap">
-                      {log.timestamp.split(" ")[0]}
+                    <td className="py-3 px-4 text-xs font-mono text-gray-600 whitespace-nowrap">
+                      {formatTimestamp(log.timestamp)}
                     </td>
-                    <td className="py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm">
-                      <div className="flex items-center gap-1 md:gap-2">
-                        {getTypeIcon(log.type)}
-                        <span className="capitalize hidden sm:inline">
-                          {log.type}
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2">
+                        {getSeverityIcon(log.severity)}
+                        <span className="capitalize text-sm">{log.type}</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2">
+                        {getCategoryIcon(log.category)}
+                        <span className="text-sm text-gray-700 capitalize">
+                          {log.category}
                         </span>
                       </div>
                     </td>
-                    <td className="py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm text-foreground capitalize hidden md:table-cell">
-                      {log.category}
+                    <td className="py-3 px-4">
+                      <div className="max-w-md">
+                        <p className="text-sm text-gray-900 line-clamp-2">
+                          {log.message}
+                        </p>
+                      </div>
                     </td>
-                    <td className="py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm text-foreground max-w-xs md:max-w-lg truncate">
-                      {log.message}
-                    </td>
-                    <td className="py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm">
+                    <td className="py-3 px-4">
                       <span
-                        className={`inline-block px-2 py-1 rounded-full text-xs font-semibold border ${getSeverityColor(
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border ${getSeverityColor(
                           log.severity
                         )}`}
                       >
+                        {getSeverityIcon(log.severity)}
                         {log.severity.charAt(0).toUpperCase() +
                           log.severity.slice(1)}
                       </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedLog(log)}
+                        className="h-8 text-xs"
+                      >
+                        <ExternalLink className="w-3 h-3 mr-1" />
+                        View Details
+                      </Button>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
                   <td
-                    colSpan={5}
-                    className="py-8 px-4 text-center text-muted-foreground"
+                    colSpan={6}
+                    className="py-12 px-4 text-center text-gray-500"
                   >
-                    No logs found
+                    <div className="flex flex-col items-center gap-3">
+                      <Search className="w-12 h-12 text-gray-300" />
+                      <p>No logs found matching your criteria</p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSearchTerm("");
+                          setSeverityFilter("all");
+                        }}
+                      >
+                        Clear filters
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               )}
@@ -295,90 +354,133 @@ export default function AdminSystemLogs() {
       {/* Log Details Modal */}
       {selectedLog && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
-            <div className="flex items-start justify-between mb-4">
-              <h2 className="text-2xl font-bold text-foreground">
-                Log Details
-              </h2>
-              <button
-                onClick={() => setSelectedLog(null)}
-                className="text-muted-foreground hover:text-foreground text-2xl"
-              >
-                ×
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              {/* Header Info */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Timestamp
-                  </p>
-                  <p className="font-medium text-foreground">
-                    {selectedLog.timestamp}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Severity</p>
-                  <span
-                    className={`inline-block px-3 py-1 rounded-full text-sm font-semibold border ${getSeverityColor(
+          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`p-2 rounded-lg ${getSeverityColor(
                       selectedLog.severity
                     )}`}
                   >
-                    {selectedLog.severity.charAt(0).toUpperCase() +
-                      selectedLog.severity.slice(1)}
-                  </span>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Type</p>
-                  <div className="flex items-center gap-2">
-                    {getTypeIcon(selectedLog.type)}
-                    <span className="font-medium text-foreground capitalize">
-                      {selectedLog.type}
-                    </span>
+                    {getSeverityIcon(selectedLog.severity)}
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900">
+                      Log Analysis Details
+                    </h2>
+                    <p className="text-sm text-gray-600">
+                      ID: {selectedLog.id} • {selectedLog.timestamp}
+                    </p>
                   </div>
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Category</p>
-                  <p className="font-medium text-foreground capitalize">
-                    {selectedLog.category}
-                  </p>
-                </div>
-              </div>
-
-              <div className="border-t border-border pt-4">
-                <p className="text-xs text-muted-foreground mb-2">Message</p>
-                <p className="font-medium text-foreground bg-muted p-3 rounded-lg">
-                  {selectedLog.message}
-                </p>
-              </div>
-
-              <div className="border-t border-border pt-4">
-                <p className="text-xs text-muted-foreground mb-2">
-                  AI Analysis
-                </p>
-                <p className="text-sm text-foreground bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  {selectedLog.analyzedMessage}
-                </p>
-              </div>
-
-              <div className="border-t border-border pt-4">
-                <p className="text-xs text-muted-foreground mb-2">
-                  Technical Details
-                </p>
-                <p className="text-sm text-foreground bg-muted p-3 rounded-lg font-mono">
-                  {selectedLog.details}
-                </p>
+                <button
+                  onClick={() => {
+                    setSelectedLog(null);
+                    setShowMaintenanceForm(false);
+                  }}
+                  className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
             </div>
 
-            <button
-              onClick={() => setSelectedLog(null)}
-              className="w-full mt-6 px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              Close
-            </button>
+            {/* Modal Content */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <>
+                {/* Log Overview */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-xs text-gray-500 mb-1">Severity Level</p>
+                    <div className="flex items-center gap-2">
+                      {getSeverityIcon(selectedLog.severity)}
+                      <span className="font-semibold text-gray-900 capitalize">
+                        {selectedLog.severity}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-xs text-gray-500 mb-1">Category</p>
+                    <div className="flex items-center gap-2">
+                      {getCategoryIcon(selectedLog.category)}
+                      <span className="font-semibold text-gray-900 capitalize">
+                        {selectedLog.category}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-xs text-gray-500 mb-1">Event Type</p>
+                    <p className="font-semibold text-gray-900 capitalize">
+                      {selectedLog.type}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Original Message */}
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Original Error Message
+                    </h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleCopyDetails(selectedLog.message)}
+                      className="h-8 text-xs"
+                    >
+                      <Copy className="w-3 h-3 mr-1" />
+                      Copy
+                    </Button>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <p className="text-gray-700 font-mono text-sm whitespace-pre-wrap">
+                      {selectedLog.message}
+                    </p>
+                  </div>
+                </div>
+
+                {/* AI Analysis */}
+
+                {/* Technical Details */}
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Technical Details
+                    </h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleCopyDetails(selectedLog.details)}
+                      className="h-8 text-xs"
+                    >
+                      <Copy className="w-3 h-3 mr-1" />
+                      Copy
+                    </Button>
+                  </div>
+                  <div className="bg-gray-900 rounded-lg p-4 border border-gray-800">
+                    <pre className="text-gray-300 text-sm font-mono whitespace-pre-wrap overflow-x-auto">
+                      {selectedLog.details}
+                    </pre>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap gap-3 pt-6 border-t border-gray-200">
+                  <Button
+                    disabled={isSubmittingRequest}
+                    onClick={() => handleSubmitMaintenanceRequest()}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    <Wrench className="w-4 h-4 mr-2" />
+                    {isSubmittingRequest
+                      ? "Requesting please wait"
+                      : "Request Maintenance"}
+                  </Button>
+                </div>
+              </>
+            </div>
           </div>
         </div>
       )}

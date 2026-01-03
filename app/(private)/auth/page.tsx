@@ -1,14 +1,16 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { ApiResponse } from "@/lib/utils";
 
 export default function Login() {
   const navigate = useRouter();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -19,27 +21,33 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      // Simulate authentication - in real app, call API endpoint
-      if (!email || !password) {
+      if (!username || !password) {
         setError("Please fill in all fields");
         return;
       }
 
-      // Simulate role detection based on email
-      const role = email.includes("manager") ? "manager" : "super_admin";
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
 
-      // Store auth token and role
-      localStorage.setItem("authToken", "mock-token-" + Date.now());
-      localStorage.setItem("userRole", role);
-      localStorage.setItem("userName", email.split("@")[0]);
+      const response: ApiResponse = await res.json();
 
-      // Redirect based on role
-      if (role === "super_admin") {
-        navigate.replace("/admin/");
-      } else {
-        navigate.replace("/manager/");
+      if (!response.success) {
+        setError(response.message);
+        return;
       }
-    } catch (err) {
+
+      const role = response.data.role;
+
+      if (role === "superAdmin") navigate.replace("/admin/");
+      else if (role === "tournamentManager") navigate.replace("/manager/");
+      else
+        navigate.replace(
+          "/unauthorized?message=u don't have an access to the private pages buddy i don't know how u pass the firs security"
+        );
+    } catch {
       setError("Login failed. Please try again.");
     } finally {
       setIsLoading(false);
@@ -47,76 +55,69 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/20 to-secondary flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Card */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-10">
-          {/* Logo & Title */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-xl mb-4">
-              <span className="text-3xl">⚽</span>
-            </div>
-            <h1 className="text-3xl font-bold text-foreground">
-              UniLeague-Hub
+    <div className="min-h-screen flex items-center justify-center bg-slate-100 px-4">
+      <div className="w-full max-w-sm">
+        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
+          {/* Header */}
+          <div className="mb-8 text-center">
+            <h1 className="text-2xl font-semibold text-slate-900">
+              UniLeague Hub
             </h1>
-            <p className="text-muted-foreground mt-2">
-              Admin Management System
+            <p className="mt-1 text-sm text-slate-500">
+              Sign in to your admin account
             </p>
           </div>
 
           {/* Form */}
           <form onSubmit={handleLogin} className="space-y-5">
-            {/* Email */}
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">
-                Email Address
-              </Label>
+            {/* Username */}
+            <div className="space-y-1.5">
+              <Label className="text-sm text-slate-700">Username</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="admin@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="h-11 rounded-lg border-border focus:ring-2 focus:ring-primary"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter your username"
+                className="h-11 rounded-lg focus-visible:ring-2 focus-visible:ring-primary"
               />
             </div>
 
             {/* Password */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="password" className="text-sm font-medium">
-                  Password
-                </Label>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm text-slate-700">Password</Label>
                 <Link href="#" className="text-xs text-primary hover:underline">
-                  Forgot password?
+                  Forgot?
                 </Link>
               </div>
               <Input
-                id="password"
                 type="password"
-                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="h-11 rounded-lg border-border focus:ring-2 focus:ring-primary"
+                placeholder="••••••••"
+                className="h-11 rounded-lg focus-visible:ring-2 focus-visible:ring-primary"
               />
             </div>
 
-            {/* Error Message */}
+            {/* Error */}
             {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+              <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
                 {error}
               </div>
             )}
 
-            {/* Submit Button */}
+            {/* Button */}
             <Button
-              type="submit"
               disabled={isLoading}
-              className="w-full h-11 bg-primary text-white font-medium rounded-lg hover:bg-blue-600 transition-colors"
+              className="w-full h-11 rounded-lg text-sm font-medium"
             >
-              {isLoading ? "Logging in..." : "Login"}
+              {isLoading ? "Signing in..." : "Sign in"}
             </Button>
           </form>
+
+          {/* Footer */}
+          <p className="mt-6 text-center text-xs text-slate-500">
+            © {new Date().getFullYear()} UniLeague
+          </p>
         </div>
       </div>
     </div>

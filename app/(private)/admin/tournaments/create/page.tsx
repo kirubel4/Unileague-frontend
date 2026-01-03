@@ -1,27 +1,33 @@
-'use client';
-import { Layout } from '@/components/Layout';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+"use client";
+import { Layout } from "@/components/Layout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-import { useRouter } from 'next/navigation';
-import { useRef, useState } from 'react';
-import Link from 'next/link';
-import { Upload, X } from 'lucide-react';
-
+import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
+import Link from "next/link";
+import { Upload, X } from "lucide-react";
+import { toast, Toaster } from "sonner";
+enum TournamentStatus {
+  UPCOMING = "UPCOMING",
+  ONGOING = "ONGOING",
+  COMPLETED = "COMPLETED",
+}
 export default function AdminTournamentsCreate() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const userName = 'Admin';
+  const userName = "Admin";
   const navigate = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    startDate: '',
-    endDate: '',
-    location: '',
+    name: "",
+    description: "",
+    startDate: "",
+    endDate: "",
+    location: "",
+    status: TournamentStatus.UPCOMING,
   });
 
   const handleChange = (
@@ -30,41 +36,16 @@ export default function AdminTournamentsCreate() {
     >
   ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    setIsSubmitting(true);
-
-    const result = await fetch('/api/protected/admin/tournament/create', {
-      method: 'POST',
-      headers: {
-        'content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    });
-
-    if (!result.ok) {
-      alert('Something went wrong!');
-      setIsSubmitting(false);
-      return;
-    }
-
-    alert(`Tournament "${formData.name}" created successfully!`);
-    navigate.push('/admin/tournaments');
-  };
-const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validate file type
       if (!file.type.startsWith("image/")) {
         alert("Please select an image file");
         return;
       }
-
-      // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         alert("Image size should be less than 5MB");
         return;
@@ -75,17 +56,49 @@ const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
       reader.onload = (event) => {
         if (event.target?.result) {
           setPreviewImage(event.target.result as string);
-          // Auto-generate title from filename
           const fileName = file.name.replace(/\.[^/.]+$/, "");
         }
       };
       reader.readAsDataURL(file);
     }
   };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    const payload = new FormData();
+    payload.append("tournamentName", formData.name);
+    payload.append("description", formData.description);
+    payload.append("startingDate", new Date(formData.startDate).toISOString());
+    payload.append("endingDate", new Date(formData.endDate).toISOString());
+    payload.append("venue", formData.location);
+    payload.append("status", formData.status);
+    if (imageFile) {
+      payload.append("logo", imageFile);
+    }
+
+    const result = await fetch("/api/protected/admin/tournament/create", {
+      method: "POST",
+      body: payload,
+    });
+
+    const data = await result.json();
+    if (!result.ok) {
+      console.error("Error creating tournament:", data);
+      toast.error("Error creating tournament");
+      setIsSubmitting(false);
+      return;
+    }
+    toast.success("tournament created");
+    navigate.push("/admin/tournaments");
+  };
+
   return (
     <Layout role="super_admin" userName={userName}>
       {/* Header */}
       <div className="mb-8">
+        <Toaster />
         <h1 className="text-3xl font-bold text-foreground">
           Create Tournament
         </h1>
@@ -162,6 +175,30 @@ const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
               </div>
             </div>
 
+            {/* Status Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="status" className="font-medium">
+                Status *
+              </Label>
+              <select
+                id="status"
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                className="h-10 rounded-lg w-full border border-border focus:ring-2 focus:ring-primary"
+              >
+                <option value={TournamentStatus.UPCOMING}>
+                  {TournamentStatus.UPCOMING}
+                </option>
+                <option value={TournamentStatus.ONGOING}>
+                  {TournamentStatus.ONGOING}
+                </option>
+                <option value={TournamentStatus.COMPLETED}>
+                  {TournamentStatus.COMPLETED}
+                </option>
+              </select>
+            </div>
+
             {/* Location */}
             <div className="space-y-2">
               <Label htmlFor="location" className="font-medium">
@@ -230,7 +267,7 @@ const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
                 disabled={isSubmitting}
                 className="bg-primary hover:bg-blue-600 text-white rounded-lg h-10"
               >
-                {isSubmitting ? 'Creating...' : 'Create Tournament'}
+                {isSubmitting ? "Creating..." : "Create Tournament"}
               </Button>
               <Link href="/admin/tournaments">
                 <Button variant="outline" className="rounded-lg h-10">

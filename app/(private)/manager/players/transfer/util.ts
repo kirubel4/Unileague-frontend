@@ -25,6 +25,7 @@ export interface Team {
   coachEmail: string;
   playerCount: number;
   logoUrl: string;
+  power: number;
 }
 
 export function mapTeams(apiResponse: ApiResponse): Team[] {
@@ -34,6 +35,10 @@ export function mapTeams(apiResponse: ApiResponse): Team[] {
     coachName: item.team.coachName ?? "",
     coachEmail: item.team.coachEmail ?? "",
     playerCount: item.playerCount ?? 0,
-    logoUrl: item.logo && item.logo.length > 0 ? item.logo[0].url : "",
+    logoUrl:
+      item.logo && item.logo.length > 0
+        ? item.logo[0].url
+        : "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&h=400&fit=crop",
+    power: item.team.power ?? 0,
   }));
 }

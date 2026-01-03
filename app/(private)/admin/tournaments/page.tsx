@@ -1,68 +1,68 @@
-'use client';
-import { Layout } from '@/components/Layout';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ApiResponse, fetcher } from '@/lib/utils';
-import { Trash2, Edit, Eye, Plus } from 'lucide-react';
-import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import useSWR from 'swr';
-import { mapTournaments } from './util';
+"use client";
+import { Layout } from "@/components/Layout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ApiResponse, fetcher } from "@/lib/utils";
+import { Trash2, Edit, Eye, Plus } from "lucide-react";
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import useSWR from "swr";
+import { mapTournaments } from "./util";
 
-interface Tournament {
+export interface Tournament {
   id: string;
   tournamentName: string;
   startingDate: string;
   endingDate: string;
-  status: 'UPCOMING' | 'ONGOING' | 'COMPLETED';
+  status: "UPCOMING" | "ONGOING" | "COMPLETED";
   teams?: number;
   managers?: number;
   logurl?: string;
 }
 
 export default function AdminTournaments() {
-  const userName = 'Admin';
-
-  const [searchTerm, setSearchTerm] = useState('');
+  const userName = "Admin";
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   // const [error, setError] = useState<string | null>(null);
 
   const [statusFilter, setStatusFilter] = useState<
-    'all' | 'upcoming' | 'ongoing' | 'COMPLETED'
-  >('all');
+    "all" | "upcoming" | "ongoing" | "COMPLETED"
+  >("all");
 
-  const [yearFilter, setYearFilter] = useState<string>('all');
+  const [yearFilter, setYearFilter] = useState<string>("all");
 
-  const { data, error, isLoading } = useSWR('/api/public/tournament', fetcher, {
+  const { data, error, isLoading } = useSWR("/api/public/tournament", fetcher, {
     revalidateOnFocus: false,
   });
   const tournaments: Tournament[] = mapTournaments(data);
   const filteredTournaments = tournaments
     .filter((t): t is Tournament => t != null)
-    .filter(t => {
-      const matchesSearch = (t.tournamentName?.toLowerCase() ?? '').includes(
+    .filter((t) => {
+      const matchesSearch = (t.tournamentName?.toLowerCase() ?? "").includes(
         searchTerm.toLowerCase()
       );
       const matchesStatus =
-        statusFilter === 'all' ||
-        (t.status?.toLowerCase() ?? '') === statusFilter;
+        statusFilter === "all" ||
+        (t.status?.toLowerCase() ?? "") === statusFilter;
       const matchesYear =
-        yearFilter === 'all' ||
-        new Date(t.startingDate).getFullYear().toString() === yearFilter;
+        yearFilter === "all" ||
+        (new Date(t.startingDate).getFullYear() <= parseInt(yearFilter) &&
+          new Date(t.endingDate).getFullYear() >= parseInt(yearFilter));
 
       return matchesSearch && matchesStatus && matchesYear;
     });
 
   const getStatusBadgeClass = (status?: string) => {
-    switch ((status ?? '').toLowerCase()) {
-      case 'ongoing':
-        return 'status-ongoing';
-      case 'upcoming':
-        return 'status-scheduled';
-      case 'completed':
-        return 'status-finished';
+    switch ((status ?? "").toLowerCase()) {
+      case "ongoing":
+        return "status-ongoing";
+      case "upcoming":
+        return "status-scheduled";
+      case "completed":
+        return "status-finished";
       default:
-        return 'status-pending';
+        return "status-pending";
     }
   };
 
@@ -91,12 +91,12 @@ export default function AdminTournaments() {
         <Input
           placeholder="Search tournaments..."
           value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
+          onChange={(e) => setSearchTerm(e.target.value)}
           className="flex-1 min-w-[200px]"
         />
         <select
           value={statusFilter}
-          onChange={e => setStatusFilter(e.target.value as any)}
+          onChange={(e) => setStatusFilter(e.target.value as any)}
           className="h-9 px-3 border border-border rounded-lg"
         >
           <option value="all">All Status</option>
@@ -106,7 +106,7 @@ export default function AdminTournaments() {
         </select>
         <select
           value={yearFilter}
-          onChange={e => setYearFilter(e.target.value)}
+          onChange={(e) => setYearFilter(e.target.value)}
           className="h-9 px-3 border border-border rounded-lg"
         >
           <option value="all">All Years</option>
@@ -125,14 +125,14 @@ export default function AdminTournaments() {
             <thead className="bg-muted border-b border-border">
               <tr>
                 {[
-                  'Name',
-                  'Year',
-                  'Status',
-                  'Teams',
-                  'Managers',
-                  'Period',
-                  'Actions',
-                ].map(h => (
+                  "Name",
+                  "Year",
+                  "Status",
+                  "Teams",
+                  "Managers",
+                  "Period",
+                  "Actions",
+                ].map((h) => (
                   <th
                     key={h}
                     className="text-left py-3 px-4 font-semibold text-sm text-muted-foreground"
@@ -151,12 +151,12 @@ export default function AdminTournaments() {
                     className="border-b border-border hover:bg-muted transition-colors"
                   >
                     <td className="py-2 px-4 text-sm font-medium">
-                      {t.tournamentName ?? 'N/A'}
+                      {t.tournamentName ?? "N/A"}
                     </td>
                     <td className="py-2 px-4 text-sm text-muted-foreground">
                       {t.startingDate
                         ? new Date(t.startingDate).getFullYear()
-                        : 'N/A'}
+                        : "N/A"}
                     </td>
                     <td className="py-2 px-4">
                       <span
@@ -164,11 +164,11 @@ export default function AdminTournaments() {
                           t.status
                         )}`}
                       >
-                        {t.status ?? '-'}
+                        {t.status ?? "-"}
                       </span>
                     </td>
-                    <td className="py-2 px-4 text-sm">{t.teams ?? '-'}</td>
-                    <td className="py-2 px-4 text-sm">{t.managers ?? '-'}</td>
+                    <td className="py-2 px-4 text-sm">{t.teams ?? "1"}</td>
+                    <td className="py-2 px-4 text-sm">{t.managers ?? "1"}</td>
                     <td className="py-2 px-4 text-sm">
                       {t.startingDate && t.endingDate
                         ? `${new Date(
@@ -176,7 +176,7 @@ export default function AdminTournaments() {
                           ).getFullYear()} - ${new Date(
                             t.endingDate
                           ).getFullYear()}`
-                        : '-'}
+                        : "-"}
                     </td>
                     <td className="py-2 px-4">
                       <div className="flex gap-2">
@@ -197,7 +197,7 @@ export default function AdminTournaments() {
                           size="sm"
                           className="text-destructive"
                           onClick={() =>
-                            alert('Delete tournament: ' + t.tournamentName)
+                            alert("Delete tournament: " + t.tournamentName)
                           }
                         >
                           <Trash2 className="w-4 h-4" />

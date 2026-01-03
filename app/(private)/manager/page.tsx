@@ -1,5 +1,7 @@
+"use client";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
+import { fetcher, getCookie } from "@/lib/utils";
 import {
   Trophy,
   Users,
@@ -10,10 +12,49 @@ import {
   BarChart3,
 } from "lucide-react";
 import Link from "next/link";
+import useSWR from "swr";
+import { mapTeams, Team } from "./players/transfer/util";
+type Tournament = {
+  id: string;
+  tournamentName: string;
+  startingDate: string;
+  endingDate: string;
+  description: string;
+  venue: string;
+  sponsor?: string;
+  status: string;
+  teamCount: number;
+  playerCount: number;
+  managers: TournamentManager[];
+};
+type TournamentManager = {
+  id: string;
+  name: string;
+  email: string;
+};
 
 export default function ManagerDashboard() {
-  const userName = "Manager";
+  const userName = getCookie("uName") || "Manager";
+  const { data: tournamentRes } = useSWR(
+    `/api/public/tournament/detail`,
+    fetcher
+  );
 
+  const tournament: Tournament | null = tournamentRes?.data?.data ?? null;
+  const mappedTournament = tournament
+    ? {
+        id: tournament.id,
+        name: tournament.tournamentName,
+        startDate: tournament.startingDate,
+        endDate: tournament.endingDate,
+        location: tournament.venue,
+        description: tournament.description,
+        status: tournament.status,
+        teams: tournament.teamCount,
+        players: tournament.playerCount,
+        managers: tournament.managers || [],
+      }
+    : null;
   const tournamentInfo = {
     name: "City League Championship 2024",
     logo: "⚽",

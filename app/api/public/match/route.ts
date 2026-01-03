@@ -1,11 +1,19 @@
 import { ApiResponse, forwardApiResponse } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
-export async function GET(req: NextRequest, res: NextResponse) {
+export async function GET(req: NextRequest) {
   try {
-    const id = req.nextUrl.searchParams.get("id");
+    let tid;
+    const cookiId = req.cookies.get("tid")?.value;
+    const paramId = req.nextUrl.searchParams.get("id");
 
+    if (paramId) {
+      tid = paramId;
+    } else if (cookiId) {
+      tid = cookiId;
+    }
+    console.log(tid);
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/matches/all/${id}`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/matches/all/${tid}`,
       {
         method: "GET",
         headers: {

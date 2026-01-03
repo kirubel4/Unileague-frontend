@@ -31,10 +31,10 @@ import {
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import useSWR from "swr";
-import { ApiResponse, fetcher } from "@/lib/utils";
+import { ApiResponse, fetcher, getCookie } from "@/lib/utils";
 import { mapMatchDetail, mapPlayerNames } from "./util";
 import { Input } from "@/components/ui/input";
-
+import { toast, Toaster } from "sonner";
 interface Event {
   id: string;
   minute: number;
@@ -43,7 +43,7 @@ interface Event {
   team: string;
 }
 export default function ManagerMatchesDetail() {
-  const userName = "Manager";
+  const userName = getCookie("uName") || "Manager";
   const params = useParams();
   const matchId = params.id as string;
 
@@ -70,7 +70,7 @@ export default function ManagerMatchesDetail() {
 
   const matches = mapMatchDetail(data?.data);
 
-  if (matches.homeTeam && matches.awayTeam) {
+  if (matches?.homeTeam && matches?.awayTeam) {
     const {
       data: homeTeam,
       isLoading: load,
@@ -94,17 +94,18 @@ export default function ManagerMatchesDetail() {
     setRefreshing(true);
     await new Promise((resolve) => setTimeout(resolve, 500));
     await mutateMatch();
+
     setRefreshing(false);
   };
 
   const addEvent = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!eventPlayer.trim()) return;
+    toast.loading("adding event", { id: "1" });
     setLoading(true);
     const data = {
       playerId: eventPlayer,
-      matchId: matches.id,
+      matchId: matches?.id,
       teamId: eventTeam,
       eventType,
       min: min,
@@ -117,18 +118,17 @@ export default function ManagerMatchesDetail() {
     });
 
     if (!res) {
-      console.log("somting went wrong ");
+      toast.error("no network", { id: "1" });
       setLoading(false);
       return [];
     }
     const response: ApiResponse = await res.json();
     if (!response.success) {
-      console.log(response.message);
+      toast.error(response.message, { id: "1" });
       setLoading(false);
       return;
     }
-    console.log(response);
-
+    toast.success("event created", { id: "1" });
     refreshScore();
     setEventPlayer("");
     setEventType("Goal");
@@ -137,9 +137,19 @@ export default function ManagerMatchesDetail() {
   };
 
   const removeEvent = async (id: string) => {
-    const res = await fetch("/api/protected/match/event/remove?id=");
+    toast.loading("removing event", { id: "2" });
+    const res = await fetch(`/api/protected/match/event/remove?id=${id}`, {
+      method: "DELETE",
+    });
+    const resp: ApiResponse = await res.json();
+    if (!resp.success) {
+      toast.error(resp.message, { id: "2" });
+      return;
+    }
+    toast.success("event removed", { id: "2" });
   };
   const statMatch = async () => {
+    toast.loading("staring match");
     setStartLoading(true);
     const res = await fetch(
       "/api/protected/manager/match/start/?id=" + matchId,
@@ -149,31 +159,35 @@ export default function ManagerMatchesDetail() {
       }
     );
     if (!res) {
-      console.log("Network error");
+      toast.error("no network");
       return;
     }
     const data: ApiResponse = await res.json();
     if (!data.success) {
-      console.log(data.message || "couldn't start the match");
+      toast.error(data.message);
+      return;
     }
     refreshScore();
-
+    toast.success("match started");
     setStartLoading(false);
   };
   const endMatch = async () => {
+    toast.loading("ending match");
     setEndLoading(true);
     const res = await fetch("/api/protected/manager/match/end/?id=" + matchId, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
     });
     if (!res) {
-      console.log("Network error");
+      toast.error("no network");
       return;
     }
     const data: ApiResponse = await res.json();
     if (!data.success) {
-      console.log(data.message || "couldn't end the match");
+      toast.error(data.message);
+      return;
     }
+    toast.success("match ended successfully");
     refreshScore();
     setEndLoading(false);
   };
@@ -201,12 +215,12 @@ export default function ManagerMatchesDetail() {
         return "border-l-4 border-l-gray-500 bg-gray-50/50";
     }
   };
-  if (isLoading) return <p>Loading match...</p>;
-  if (!data?.data) return <p>Match not found</p>;
+
   return (
     <Layout role="manager" userName={userName}>
       {/* Header */}
       <div className="mb-8">
+        <Toaster />
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             <div>
@@ -218,10 +232,10 @@ export default function ManagerMatchesDetail() {
               </p>
             </div>
           </div>
-          {matches.status === "LIVE" && (
+          {matches?.status === "LIVE" && (
             <Badge className="px-4 py-1.5 text-sm font-semibold bg-green-500/10 text-green-600 border-green-200">
               <span className="animate-pulse mr-2">●</span>
-              LIVE - {matches.scheduledDate}'
+              LIVE - {matches?.scheduledDate}'
             </Badge>
           )}
         </div>
@@ -240,7 +254,7 @@ export default function ManagerMatchesDetail() {
                       </div>
                       <div>
                         <h2 className="text-2xl md:text-3xl font-bold">
-                          {matches.homeTeam.name}
+                          {matches?.homeTeam.name}
                         </h2>
                       </div>
                     </div>
@@ -249,16 +263,16 @@ export default function ManagerMatchesDetail() {
                   {/* Score */}
                   <div className="px-8 py-6 bg-white/10 backdrop-blur-sm rounded-2xl">
                     <div className="text-5xl md:text-7xl font-bold text-center mb-2 tracking-tighter">
-                      {matches.score.home}
+                      {matches?.score.home}
                       <span className="mx-4 text-3xl md:text-5xl font-light">
                         :
                       </span>
-                      {matches.score.away}
+                      {matches?.score.away}
                     </div>
 
-                    {matches.status === "LIVE" ? (
+                    {matches?.status === "LIVE" ? (
                       <p className="lg:mt-5 text-white/80 text-center text-sm font-medium">
-                        Minute {matches.scheduledDate}
+                        Minute {matches?.scheduledDate}
                       </p>
                     ) : (
                       <p className="text-white/80 lg:mb-5 text-center text-sm font-medium">
@@ -272,7 +286,7 @@ export default function ManagerMatchesDetail() {
                     <div className="flex items-center justify-center gap-4 mb-3">
                       <div>
                         <h2 className="text-2xl md:text-3xl font-bold">
-                          {matches.awayTeam.name}
+                          {matches?.awayTeam.name}
                         </h2>
                       </div>
                       <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
@@ -289,12 +303,12 @@ export default function ManagerMatchesDetail() {
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList
             className={`grid w-full max-w-md ${
-              matches.status === "LIVE" ? "grid-cols-3" : "grid-cols-2"
+              matches?.status === "LIVE" ? "grid-cols-3" : "grid-cols-2"
             }`}
           >
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="events">Match Events</TabsTrigger>
-            {matches.status === "LIVE" && (
+            {matches?.status === "LIVE" && (
               <TabsTrigger value="controls">Live Controls</TabsTrigger>
             )}
           </TabsList>
@@ -319,7 +333,7 @@ export default function ManagerMatchesDetail() {
                             Venue
                           </p>
                           <p className="font-semibold text-foreground">
-                            {matches.venue}
+                            {matches?.venue}
                           </p>
                         </div>
                       </div>
@@ -330,7 +344,7 @@ export default function ManagerMatchesDetail() {
                             Start Time
                           </p>
                           <p className="font-semibold text-foreground">
-                            {matches.scheduledDate}
+                            {matches?.scheduledDate}
                           </p>
                         </div>
                       </div>
@@ -343,7 +357,7 @@ export default function ManagerMatchesDetail() {
                             Referee
                           </p>
                           <p className="font-semibold text-foreground">
-                            {/* {matches.} */}Referee
+                            {/* {matches?.} */}Referee
                           </p>
                         </div>
                       </div>
@@ -354,7 +368,7 @@ export default function ManagerMatchesDetail() {
                             Status
                           </p>
                           <p className="font-semibold text-primary capitalize">
-                            {matches.status}
+                            {matches?.status}
                           </p>
                         </div>
                       </div>
@@ -367,7 +381,7 @@ export default function ManagerMatchesDetail() {
                         </div>
                       </div>
 
-                      {matches.status === "LIVE" ? (
+                      {matches?.status === "LIVE" ? (
                         <Button
                           variant="destructive"
                           size="sm"
@@ -400,7 +414,7 @@ export default function ManagerMatchesDetail() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <User className="w-5 h-5" />
-                      {matches.homeTeam.name}
+                      {matches?.homeTeam.name}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -410,7 +424,7 @@ export default function ManagerMatchesDetail() {
                           Coach
                         </p>
                         <p className="font-semibold text-foreground text-lg">
-                          {/* {matches} */}Coach Ali
+                          {/* {matches?} */}Coach Ali
                         </p>
                       </div>
                       <Separator />
@@ -419,7 +433,7 @@ export default function ManagerMatchesDetail() {
                           Current Score
                         </p>
                         <p className="text-4xl font-bold text-primary mt-2">
-                          {matches.score.home}
+                          {matches?.score.home}
                         </p>
                       </div>
                     </div>
@@ -430,7 +444,7 @@ export default function ManagerMatchesDetail() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <User className="w-5 h-5" />
-                      {matches.awayTeam.name}
+                      {matches?.awayTeam.name}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -440,7 +454,7 @@ export default function ManagerMatchesDetail() {
                           Coach
                         </p>
                         <p className="font-semibold text-foreground text-lg">
-                          {/* {matches} */}Coach Maria
+                          {/* {matches?} */}Coach Maria
                         </p>
                       </div>
                       <Separator />
@@ -449,7 +463,7 @@ export default function ManagerMatchesDetail() {
                           Current Score
                         </p>
                         <p className="text-4xl font-bold text-primary mt-2">
-                          {matches.score.away}
+                          {matches?.score.away}
                         </p>
                       </div>
                     </div>
@@ -465,14 +479,14 @@ export default function ManagerMatchesDetail() {
                 <div className="flex items-center justify-between">
                   <CardTitle>Match Events Timeline</CardTitle>
                   <Badge variant="outline" className="font-normal">
-                    {matches.events.length} events
+                    {matches?.events.length} events
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {matches.events.length > 0 ? (
-                    matches.events.map((event) => (
+                  {matches?.events.length > 0 ? (
+                    matches?.events.map((event) => (
                       <div
                         key={event.id}
                         className={`p-4 rounded-lg flex items-center justify-between transition-all hover:shadow-sm ${getEventColor(
@@ -562,9 +576,9 @@ export default function ManagerMatchesDetail() {
                         value={eventTeam}
                         onValueChange={(value) => {
                           setEventTeam(value);
-                          if (value === matches.homeTeam.id) {
+                          if (value === matches?.homeTeam.id) {
                             setEventTeamSide("home");
-                          } else if (value === matches.awayTeam.id) {
+                          } else if (value === matches?.awayTeam.id) {
                             setEventTeamSide("away");
                             setEventPlayer("");
                           }
@@ -574,11 +588,11 @@ export default function ManagerMatchesDetail() {
                           <SelectValue placeholder="Select team" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value={matches.homeTeam.id}>
-                            {matches.homeTeam.name}
+                          <SelectItem value={matches?.homeTeam.id}>
+                            {matches?.homeTeam.name}
                           </SelectItem>
-                          <SelectItem value={matches.awayTeam.id}>
-                            {matches.awayTeam.name}
+                          <SelectItem value={matches?.awayTeam.id}>
+                            {matches?.awayTeam.name}
                           </SelectItem>
                         </SelectContent>
                       </Select>

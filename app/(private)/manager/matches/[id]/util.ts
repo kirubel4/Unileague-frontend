@@ -74,16 +74,20 @@ export function mapMatchDetail(apiData: any): MatchDetail {
 }
 export function mapPlayerNames(
   apiResponse: any[]
-): { id: string; name: string }[] {
+): { id: string; name: string; number: number; position: string }[] {
   if (!Array.isArray(apiResponse)) return [];
 
   return apiResponse
     .map((p) => ({
       id: p?.id,
       name: p?.name,
+      number: p?.number,
+      position: p?.position,
     }))
     .filter(
-      (p): p is { id: string; name: string } =>
+      (
+        p
+      ): p is { id: string; name: string; number: number; position: string } =>
         typeof p.id === "string" && typeof p.name === "string"
     );
 }
