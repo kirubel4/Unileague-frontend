@@ -1,8 +1,8 @@
 import { ApiResponse, forwardApiResponse } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
-export async function GET(req: NextRequest, res: NextResponse) {
+export async function GET(req: NextRequest) {
   try {
-     let tid;
+    let tid;
     const cookiId = req.cookies.get("tid")?.value;
     const paramId = req.nextUrl.searchParams.get("tid");
     console.log(paramId);

@@ -8,12 +8,13 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { ChevronLeft, Upload, X } from "lucide-react";
 import Link from "next/link";
+import { getCookie } from "@/lib/utils";
 
 export default function AdminNewsCreate() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-  const userName = localStorage.getItem("userName") || "Manager";
+  const userName = getCookie("uName") || "Admin";
   const navigate = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({

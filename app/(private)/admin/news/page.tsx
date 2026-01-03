@@ -2,6 +2,7 @@
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getCookie } from "@/lib/utils";
 
 import { Trash2, Edit, Plus, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
@@ -19,7 +20,7 @@ interface NewsArticle {
 }
 
 export default function AdminNews() {
-  const userName = "Admin";
+  const userName = getCookie("uName") || "Admin";
   const [searchTerm, setSearchTerm] = useState("");
 
   const articles: NewsArticle[] = [

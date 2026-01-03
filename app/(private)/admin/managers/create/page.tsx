@@ -10,11 +10,11 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { mapTournaments } from "../../tournaments/util";
 import useSWR from "swr";
-import { fetcher } from "@/lib/utils";
+import { fetcher, getCookie } from "@/lib/utils";
 import { Tournament } from "../../tournaments/page";
 import { toast, Toaster } from "sonner";
 export default function AdminManagersCreate() {
-  const userName = localStorage.getItem("userName") || "Admin";
+  const userName = getCookie("uName") || "Admin";
   const navigate = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({

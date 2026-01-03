@@ -1,15 +1,15 @@
 import { ApiResponse, forwardApiResponse } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
-export async function GET(req: NextRequest, res: NextResponse) {
+export async function GET(req: NextRequest) {
   try {
     // fr manager we get the id form the session fro public we accept id from the params
 
     //this mock id
-     
-    const tid = req.cookies.get('tid')?.value;
+
+    const tid = req.cookies.get("tid")?.value;
     if (!tid) {
       return NextResponse.json(
-        { message: 'Missing parameters' },
+        { message: "Missing parameters" },
         { status: 500 }
       );
     }
