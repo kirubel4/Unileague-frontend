@@ -5,14 +5,13 @@ export async function GET(req: NextRequest, res: NextResponse) {
     let tid;
     const cookiId = req.cookies.get("tid")?.value;
     const paramId = req.nextUrl.searchParams.get("id");
-    console.log(paramId);
-    if (cookiId) {
-      tid = cookiId;
-    } else if (paramId) {
+
+    if (paramId) {
       tid = paramId;
-    } else {
-      tid = "fb1c80f4-7ffc-4b84-b329-d0851149fa";
+    } else if (cookiId) {
+      tid = cookiId;
     }
+    console.log(tid);
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/matches/all/${tid}`,
       {

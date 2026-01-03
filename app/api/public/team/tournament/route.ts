@@ -7,12 +7,10 @@ export async function GET(req: NextRequest, res: NextResponse) {
     const cookiId = req.cookies.get("tid")?.value;
     const paramId = req.nextUrl.searchParams.get("tid");
 
-    if (cookiId) {
-      tid = cookiId;
-    } else if (paramId) {
+    if (paramId) {
       tid = paramId;
-    } else {
-      tid = "fb1c80f4-7ffc-4b84-b329-d08511349fa2";
+    } else if (cookiId) {
+      tid = cookiId;
     }
 
     const res = await fetch(

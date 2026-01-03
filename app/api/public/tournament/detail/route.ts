@@ -1,3 +1,4 @@
+import { ApiResponse } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -5,10 +6,10 @@ export async function GET(req: NextRequest) {
   const cookiId = req.cookies.get("tid")?.value;
   const paramId = req.nextUrl.searchParams.get("id");
 
-  if (cookiId) {
-    tid = cookiId;
-  } else if (paramId) {
+  if (paramId) {
     tid = paramId;
+  } else if (cookiId) {
+    tid = cookiId;
   }
   if (!tid) {
     return NextResponse.json(
@@ -26,13 +27,8 @@ export async function GET(req: NextRequest) {
       }
     );
 
-    const data = await res.json();
-
-    return NextResponse.json({
-      success: true,
-      data,
-      message: "tournament gets",
-    });
+    const data: ApiResponse = await res.json();
+    return NextResponse.json(data);
   } catch (err) {
     console.error(err);
     return NextResponse.json(

@@ -12,9 +12,8 @@ interface ApiTournament {
     teams?: number;
     managers?: number;
   };
-  logo?: string;
+  logoUrl?: string;
 }
-
 
 interface Tournament {
   id: string;
@@ -34,22 +33,24 @@ interface ApiResponse {
   data: ApiTournament[];
 }
 
-export function mapTournaments(apiData: ApiResponse & { data: any[] }): Tournament[] {
+export function mapTournaments(
+  apiData: ApiResponse & { data: any[] }
+): Tournament[] {
   if (!apiData?.success || !Array.isArray(apiData?.data)) return [];
 
-  return apiData.data.map(t => ({
+  return apiData.data.map((t) => ({
     id: t.id,
-    tournamentName: t.tournamentName ?? 'Unknown Tournament',
+    tournamentName: t.tournamentName ?? "Unknown Tournament",
     startingDate: t.startingDate,
     endingDate: t.endingDate,
     status:
-      t.status.toUpperCase() === 'ONGOING'
-        ? 'ONGOING'
-        : t.status.toUpperCase() === 'UPCOMING'
-        ? 'UPCOMING'
-        : 'COMPLETED',
+      t.status.toUpperCase() === "ONGOING"
+        ? "ONGOING"
+        : t.status.toUpperCase() === "UPCOMING"
+        ? "UPCOMING"
+        : "COMPLETED",
     teams: t._count?.teams ?? 0,
     managers: t._count?.managers ?? 0,
-    logurl: t.logo ?? undefined,
+    logurl: t.logoUrl ?? undefined,
   }));
 }
