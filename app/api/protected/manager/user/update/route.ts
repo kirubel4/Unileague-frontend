@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
+    const token = request.cookies.get("aToken")?.value;
+
     const mid = request.cookies.get("mid")?.value;
     if (!mid) {
       return NextResponse.json({ message: "Missing id" }, { status: 400 });
@@ -19,6 +21,7 @@ export async function POST(request: NextRequest) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         id: mid,

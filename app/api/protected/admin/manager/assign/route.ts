@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
+    const token = request.cookies.get("aToken")?.value;
+
     const body = await request.json();
 
     const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -16,7 +18,10 @@ export async function POST(request: NextRequest) {
       `${backend}/admin/tournament/${body.id}/assign-manager/${body.managerId}`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       }
     );
     console.log(res);

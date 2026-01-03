@@ -5,6 +5,8 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     console.log(formData);
+    const token = request.cookies.get("aToken")?.value;
+
     const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backend) {
       return NextResponse.json(
@@ -16,6 +18,7 @@ export async function POST(request: NextRequest) {
     const res = await fetch(`${backend}/admin/create`, {
       method: "POST",
       body: formData,
+      headers: { Authorization: `Bearer ${token}` },
     });
     console.log(res);
     const data: ApiResponse = await res.json();
