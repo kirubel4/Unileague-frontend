@@ -1,171 +1,118 @@
 "use client";
-
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
-import {
   Trophy,
   Users,
-  ChevronLeft,
   Filter,
   Calendar,
-  Target,
-  TrendingUp,
   Shield,
-  Star,
   MapPin,
   Search,
   ChevronRight,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Tournament } from "@/app/(private)/admin/tournaments/page";
+import { mapTournaments } from "@/app/(private)/admin/tournaments/util";
+import useSWR from "swr";
+import { fetcher } from "@/lib/utils";
 
 // Mock tournaments data for filtering
-const TOURNAMENTS = [
-  { id: "1", name: "Winter Championship 2024", year: 2024 },
-  { id: "2", name: "Summer League 2024", year: 2024 },
-  { id: "3", name: "3rd Year Cup 2023", year: 2023 },
-  { id: "4", name: "4th Year Cup 2024", year: 2024 },
-  { id: "5", name: "5th Year Cup 2024", year: 2024 },
-  { id: "6", name: "CSE Major Tournament 2023", year: 2023 },
-  { id: "7", name: "ECE Major Tournament 2024", year: 2024 },
-  { id: "8", name: "All Departments Cup 2024", year: 2024 },
-];
+// const TOURNAMENTS = [
+//   { id: "1", name: "Winter Championship 2024", year: 2024 },
+//   { id: "2", name: "Summer League 2024", year: 2024 },
+//   { id: "3", name: "3rd Year Cup 2023", year: 2023 },
+//   { id: "4", name: "4th Year Cup 2024", year: 2024 },
+//   { id: "5", name: "5th Year Cup 2024", year: 2024 },
+//   { id: "6", name: "CSE Major Tournament 2023", year: 2023 },
+//   { id: "7", name: "ECE Major Tournament 2024", year: 2024 },
+//   { id: "8", name: "All Departments Cup 2024", year: 2024 },
+// ];
 
 // Mock teams data with tournament association
 const TEAMS = [
   {
     id: "1",
     name: "Software FC (CSE 3rd Year)",
-    players: 18,
-    points: 45,
-    wins: 14,
-    losses: 2,
-    draws: 4,
+
     tournamentId: "3",
     tournamentName: "3rd Year Cup 2023",
     year: 2023,
     logo: "💻",
     coach: "Dr. Michael Chen",
     location: "Computer Science Dept",
-    rating: 4.8,
   },
   {
     id: "2",
     name: "ECE Voltage",
-    players: 17,
-    points: 42,
-    wins: 13,
-    losses: 3,
-    draws: 3,
-    tournamentId: "2",
+
     tournamentName: "Summer League 2024",
     year: 2024,
     logo: "⚡",
     coach: "Prof. Sarah Johnson",
     location: "ECE Department",
-    rating: 4.6,
   },
   {
     id: "3",
     name: "Mechanical Mavericks",
-    players: 16,
-    points: 38,
-    wins: 11,
-    losses: 5,
-    draws: 5,
+
     tournamentId: "1",
     tournamentName: "Winter Championship 2024",
     year: 2024,
     logo: "⚙️",
     coach: "Dr. Robert Kim",
     location: "Mechanical Engineering",
-    rating: 4.4,
   },
   {
     id: "4",
     name: "Civil Constructors",
-    players: 15,
-    points: 36,
-    wins: 10,
-    losses: 6,
-    draws: 6,
     tournamentId: "8",
     tournamentName: "All Departments Cup 2024",
     year: 2024,
     logo: "🏗️",
     coach: "Prof. David Miller",
     location: "Civil Engineering",
-    rating: 4.2,
   },
   {
     id: "5",
     name: "BioTech United (5th Year)",
-    players: 14,
-    points: 32,
-    wins: 9,
-    losses: 7,
-    draws: 5,
     tournamentId: "5",
     tournamentName: "5th Year Cup 2024",
     year: 2024,
     logo: "🧬",
     coach: "Dr. Lisa Wang",
     location: "Biotechnology Dept",
-    rating: 4.0,
   },
   {
     id: "6",
     name: "Architecture FC",
-    players: 13,
-    points: 28,
-    wins: 8,
-    losses: 8,
-    draws: 4,
     tournamentId: "4",
     tournamentName: "4th Year Cup 2024",
     year: 2024,
     logo: "🏛️",
     coach: "Prof. Alex Turner",
     location: "Architecture Dept",
-    rating: 3.9,
   },
   {
     id: "7",
     name: "Chemical Engineers",
-    players: 12,
-    points: 25,
-    wins: 7,
-    losses: 9,
-    draws: 4,
+
     tournamentId: "6",
     tournamentName: "CSE Major Tournament 2023",
     year: 2023,
     logo: "🧪",
     coach: "Dr. James Wilson",
     location: "Chemical Engineering",
-    rating: 3.7,
   },
   {
     id: "8",
     name: "Physics Phantoms",
-    players: 11,
-    points: 22,
-    wins: 6,
-    losses: 10,
-    draws: 4,
     tournamentId: "7",
     tournamentName: "ECE Major Tournament 2024",
     year: 2024,
     logo: "⚛️",
     coach: "Prof. Emma Davis",
     location: "Physics Department",
-    rating: 3.5,
   },
 ];
 
@@ -182,19 +129,10 @@ export default function TeamsPage() {
   const [selectedYear, setSelectedYear] = useState<number | "ALL">("ALL");
   const [selectedTournament, setSelectedTournament] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
-
-  // Calculate statistics
-  const stats = useMemo(() => {
-    const totalTeams = TEAMS.length;
-    const totalPlayers = TEAMS.reduce((sum, team) => sum + team.players, 0);
-    const avgRating =
-      TEAMS.reduce((sum, team) => sum + team.rating, 0) / totalTeams;
-    const totalWins = TEAMS.reduce((sum, team) => sum + team.wins, 0);
-
-    return { totalTeams, totalPlayers, avgRating, totalWins };
-  }, []);
-
-  // Filter teams
+  const { data, error, isLoading } = useSWR("/api/public/tournament", fetcher, {
+    revalidateOnFocus: false,
+  });
+  const TOURNAMENTS: Tournament[] = mapTournaments(data);
   const filteredTeams = useMemo(() => {
     let filtered = TEAMS;
 
@@ -252,20 +190,6 @@ export default function TeamsPage() {
                 and years at ASTU. Track their performance across various
                 tournaments.
               </p>
-              <div className="flex flex-wrap gap-4">
-                <div className="flex items-center gap-2 text-white/80">
-                  <Users className="w-5 h-5" />
-                  <span>{stats.totalTeams} Active Teams</span>
-                </div>
-                <div className="flex items-center gap-2 text-white/80">
-                  <Target className="w-5 h-5" />
-                  <span>{stats.totalPlayers} Players</span>
-                </div>
-                <div className="flex items-center gap-2 text-white/80">
-                  <Trophy className="w-5 h-5" />
-                  <span>{stats.totalWins} Total Wins</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -370,19 +294,23 @@ export default function TeamsPage() {
               </button>
               {TOURNAMENTS.filter(
                 (tournament) =>
-                  selectedYear === "ALL" || tournament.year === selectedYear
+                  selectedYear === "ALL" ||
+                  new Date(tournament.startingDate).getFullYear() ===
+                    selectedYear
               ).map((tournament) => (
                 <button
                   key={tournament.id}
-                  onClick={() => setSelectedTournament(tournament.name)}
+                  onClick={() =>
+                    setSelectedTournament(tournament.tournamentName)
+                  }
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border
                       ${
-                        selectedTournament === tournament.name
+                        selectedTournament === tournament.tournamentName
                           ? "bg-gray-900 text-white border-gray-900"
                           : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
                       }`}
                 >
-                  {tournament.name}
+                  {tournament.tournamentName}
                 </button>
               ))}
             </div>
