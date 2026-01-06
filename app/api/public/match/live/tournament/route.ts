@@ -12,6 +12,7 @@ export async function GET(req: NextRequest) {
         },
       }
     );
+
     const data: ApiResponse = await res.json();
 
     return NextResponse.json(data);

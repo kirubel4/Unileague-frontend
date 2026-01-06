@@ -13,6 +13,12 @@ import {
   Share2,
   Tag,
 } from "lucide-react";
+import useSWR from "swr";
+import {
+  mapBroadcastToNewsArticles,
+  NewsArticle,
+} from "@/app/(private)/manager/news/util";
+import { fetcher } from "@/lib/utils";
 
 interface NewsItem {
   id: number;
@@ -138,7 +144,16 @@ export default function NewsPage() {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [bookmarked, setBookmarked] = useState<number[]>([]);
+  const {
+    data,
+    error,
+    isLoading,
+    mutate: newMutate,
+  } = useSWR("/api/public/news/tournament", fetcher, {
+    revalidateOnFocus: false,
+  });
 
+  const articles: NewsArticle[] = mapBroadcastToNewsArticles(data);
   const categories = ["ALL", "BREAKING", "TRANSFER", "UPDATE", "ANNOUNCEMENT"];
 
   const filteredNews =

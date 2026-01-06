@@ -63,7 +63,7 @@ export default function TournamentDetailPage() {
     data: live,
     isLoading,
     error,
-  } = useSWR("/api/public/match/live", fetcher, {
+  } = useSWR(`/api/public/match/live/tournament?id=${id}`, fetcher, {
     revalidateOnFocus: false,
   });
   const liveMatches = mapLiveMatchesToUI(live);
