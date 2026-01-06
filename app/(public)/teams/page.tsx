@@ -16,6 +16,10 @@ import { Tournament } from "@/app/(private)/admin/tournaments/page";
 import { mapTournaments } from "@/app/(private)/admin/tournaments/util";
 import useSWR from "swr";
 import { fetcher } from "@/lib/utils";
+import {
+  mapTeams,
+  mapTeamsPublic,
+} from "@/app/(private)/manager/players/transfer/util";
 
 // Mock tournaments data for filtering
 // const TOURNAMENTS = [
@@ -96,7 +100,6 @@ const TEAMS = [
   {
     id: "7",
     name: "Chemical Engineers",
-
     tournamentId: "6",
     tournamentName: "CSE Major Tournament 2023",
     year: 2023,
@@ -133,12 +136,22 @@ export default function TeamsPage() {
     revalidateOnFocus: false,
   });
   const TOURNAMENTS: Tournament[] = mapTournaments(data);
-  const filteredTeams = useMemo(() => {
-    let filtered = TEAMS;
+  const {
+    data: team,
+    error: err,
+    isLoading: load,
+  } = useSWR("/api/public/team", fetcher, {
+    revalidateOnFocus: false,
+  });
 
-    if (selectedYear !== "ALL") {
-      filtered = filtered.filter((team) => team.year === selectedYear);
-    }
+  const teams = mapTeamsPublic(team || { team: [] });
+
+  const filteredTeams = useMemo(() => {
+    let filtered = teams;
+
+    // if (selectedYear !== "ALL") {
+    //   filtered = filtered.filter((team) => team.year === selectedYear);
+    // }
 
     if (selectedTournament !== "ALL") {
       filtered = filtered.filter(
@@ -150,13 +163,12 @@ export default function TeamsPage() {
       filtered = filtered.filter(
         (team) =>
           team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          team.coach.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          team.location.toLowerCase().includes(searchQuery.toLowerCase())
+          team.coachName.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
     return filtered;
-  }, [selectedYear, selectedTournament, searchQuery]);
+  }, [selectedYear, searchQuery]);
 
   // Reset filters
   const resetFilters = () => {
@@ -227,58 +239,12 @@ export default function TeamsPage() {
             </div>
           </div>
 
-          {/* Year Filter */}
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <Calendar className="w-5 h-5 text-gray-600" />
-              <h3 className="text-lg font-semibold text-gray-900">
-                Filter by Year
-              </h3>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setSelectedYear("ALL")}
-                className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 border
-                  ${
-                    selectedYear === "ALL"
-                      ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg border-transparent"
-                      : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300"
-                  }`}
-              >
-                All Years
-              </button>
-              {ALL_YEARS.map((year) => (
-                <button
-                  key={year}
-                  onClick={() => setSelectedYear(year)}
-                  className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 border
-                    ${
-                      selectedYear === year
-                        ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg border-transparent"
-                        : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300"
-                    }`}
-                >
-                  {year}
-                </button>
-              ))}
-            </div>
-          </div>
-          {/* Tournament Filter */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
               <Trophy className="w-5 h-5 text-gray-600" />
               <h3 className="text-lg font-semibold text-gray-900">
                 Filter by Tournament
               </h3>
-              <span className="text-sm text-gray-500">
-                (
-                {
-                  TEAMS.filter(
-                    (t) => selectedYear === "ALL" || t.year === selectedYear
-                  ).length
-                }{" "}
-                tournaments available)
-              </span>
             </div>
             <div className="flex flex-wrap gap-2">
               <button
@@ -352,8 +318,8 @@ export default function TeamsPage() {
         <div className="mb-16">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-bold text-gray-900">
-              {filteredTeams.length} Team{filteredTeams.length !== 1 ? "s" : ""}{" "}
-              Found
+              {teams?.length} Team
+              {teams?.length !== 1 ? "s" : ""} Found
             </h3>
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <span>Sorted by:</span>
@@ -366,9 +332,9 @@ export default function TeamsPage() {
             </div>
           </div>
 
-          {filteredTeams.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredTeams.map((team) => (
+          {teams?.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-6">
+              {teams?.map((team) => (
                 <Link
                   key={team.id}
                   href={`/teams/${team.id}`}
@@ -377,9 +343,9 @@ export default function TeamsPage() {
                   <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 h-full">
                     <div className="relative h-40 bg-gradient-to-r from-gray-900 to-gray-800">
                       <div className="absolute inset-0 flex items-center justify-center">
-                        {team.logo ? (
+                        {team.logoUrl ? (
                           <img
-                            src={team.logo}
+                            src={team.logoUrl}
                             alt={team.name}
                             className="w-24 h-24 object-contain"
                           />
@@ -401,13 +367,13 @@ export default function TeamsPage() {
                       </div>
 
                       {/* Year Badge */}
-                      <div className="absolute top-4 right-4">
+                      {/* <div className="absolute top-4 right-4">
                         <div className="px-2 py-1 rounded-lg bg-white/20 backdrop-blur-sm">
                           <span className="text-xs font-semibold text-white">
-                            {team.year}
+                            {team.tournamentName}
                           </span>
                         </div>
-                      </div>
+                      </div> */}
 
                       <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/40 to-transparent" />
                     </div>
@@ -419,16 +385,12 @@ export default function TeamsPage() {
                         </h3>
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <Users className="w-4 h-4" />
-                          <span>Coach: {team.coach}</span>
+                          <span>Coach: {team.coachName}</span>
                         </div>
                       </div>
 
                       <div className="mt-6 pt-4 border-t border-gray-200">
                         <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-1 text-gray-600">
-                            <MapPin className="w-4 h-4" />
-                            <span className="truncate">{team.location}</span>
-                          </div>
                           <div className="flex items-center gap-1 text-blue-600 font-medium group-hover:gap-2 transition-all">
                             <span>View Team</span>
                             <ChevronRight className="w-4 h-4" />
