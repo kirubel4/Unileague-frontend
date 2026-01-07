@@ -45,15 +45,20 @@ interface TeamData {
 
 interface PlayerFormData {
   firstName: string;
-
+  lastName: string;
   jerseyNumber: string;
   position: string;
+  email: string;
+  phoneNumber: string;
 }
 
 interface RegisteredPlayer {
-  playerName: string;
-  position: string;
+  id: string;
+  firstName: string;
+  lastName: string;
   jerseyNumber: number;
+  position: string;
+  email?: string;
 }
 
 const positions = [
@@ -86,27 +91,35 @@ const mockTeamData: TeamData = {
 const mockPlayers: RegisteredPlayer[] = [
   {
     id: "1",
-    playerName: "John",
-
+    firstName: "John",
+    lastName: "Doe",
     jerseyNumber: 7,
+    position: "Forward",
+    email: "john@example.com",
   },
   {
     id: "2",
-    playerName: "John",
-
-    jerseyNumber: 7,
+    firstName: "Mike",
+    lastName: "Smith",
+    jerseyNumber: 10,
+    position: "Midfielder",
+    email: "mike@example.com",
   },
   {
     id: "3",
-    playerName: "John",
-
-    jerseyNumber: 7,
+    firstName: "Alex",
+    lastName: "Johnson",
+    jerseyNumber: 1,
+    position: "Goalkeeper",
+    email: "alex@example.com",
   },
   {
-    id: "5",
-    playerName: "John",
-
-    jerseyNumber: 7,
+    id: "4",
+    firstName: "Chris",
+    lastName: "Brown",
+    jerseyNumber: 5,
+    position: "Defender",
+    email: "chris@example.com",
   },
 ];
 
@@ -119,9 +132,12 @@ export default function PlayerRegistrationPage() {
   const [error, setError] = useState("");
 
   const [formData, setFormData] = useState<PlayerFormData>({
-    playerName: "",
+    firstName: "",
+    lastName: "",
     jerseyNumber: "",
     position: "",
+    email: "",
+    phoneNumber: "",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -157,10 +173,12 @@ export default function PlayerRegistrationPage() {
 
       // Create new player
       const newPlayer: RegisteredPlayer = {
-        playerName: formData.playerName,
-
+        id: Date.now().toString(),
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         jerseyNumber: parseInt(formData.jerseyNumber),
         position: formData.position,
+        email: formData.email || undefined,
       };
 
       // Update state
