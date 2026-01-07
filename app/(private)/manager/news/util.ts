@@ -47,6 +47,7 @@ export function mapBroadcastToNewsArticles(
     author: item.senderAdminId ?? "Unknown", // no author field in API, use senderAdminId
     publishedDate: item.createdAt ?? new Date().toISOString(),
     status: "published", // default to published
+
     views: NaN, // no views info, safe fallback
   }));
 }

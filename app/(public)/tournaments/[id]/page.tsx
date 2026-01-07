@@ -35,8 +35,11 @@ import { mapTeams, Team } from "@/app/(private)/manager/players/transfer/util";
 import Link from "next/link";
 import { MatchCard } from "@/components/pages/publicMatchListing";
 import { mapLiveMatchesToUI } from "../../matches/utility";
+import NewsListing from "@/components/pages/NewsListing";
 export default function TournamentDetailPage() {
   const params = useParams();
+  const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
   const id = params.id as string;
   const [activeTab, setActiveTab] = useState("overview");
   const [isBookmarked, setIsBookmarked] = useState(false);
@@ -498,6 +501,15 @@ export default function TournamentDetailPage() {
           {/* Standings Tab */}
           <TabsContent value="standings">
             <Standings id={id} />
+          </TabsContent>
+          <TabsContent value="News">
+            <NewsListing
+              apiEndpoint={`/api/public/news/tournament?tid=${id}`}
+              page={page}
+              setPage={setPage}
+              searchTerm={searchTerm}
+              mapper="manager"
+            />
           </TabsContent>
 
           {/* Memories Tab */}

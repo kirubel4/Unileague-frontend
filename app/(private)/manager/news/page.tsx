@@ -8,7 +8,6 @@ import {
   Edit,
   Plus,
   Eye,
-  EyeOff,
   AlertCircle,
   Loader2,
   Search,
@@ -20,14 +19,26 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 import useSWR from "swr";
-import { mapBroadcastToNewsArticles, NewsArticle } from "./util";
 import { toast, Toaster } from "sonner";
+import { mapApiToNewsArticle } from "../../admin/news/util";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+
 export default function ManagerNews() {
   const userName = getCookie("uName") || "Manager";
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<
     "all" | "published" | "draft"
   >("all");
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
@@ -36,18 +47,26 @@ export default function ManagerNews() {
     error,
     isLoading,
     mutate: newMutate,
-  } = useSWR("/api/public/news/tournament", fetcher, {
-    revalidateOnFocus: false,
-  });
+  } = useSWR(
+    `/api/public/news/tournament?page=${page}&limit=${pageSize}`,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+    }
+  );
 
-  const articles: NewsArticle[] = mapBroadcastToNewsArticles(data);
-  const filteredArticles = articles.filter((article) => {
+  const articles = mapApiToNewsArticle(
+    data?.data?.articles || data?.data || []
+  );
+  const totalArticles = data?.meta?.totalItems || 0;
+  const totalPages = data?.meta?.totalPages;
+
+  const filteredArticles = articles?.filter((article) => {
     const matchesSearch = article.title
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || article.status === statusFilter;
-    return matchesSearch && matchesStatus;
+
+    return matchesSearch;
   });
 
   async function deleteArticle(id: string) {
@@ -75,6 +94,11 @@ export default function ManagerNews() {
 
       // Refresh the data
       await newMutate();
+
+      // If we're on the last page and it becomes empty after deletion, go to previous page
+      if (filteredArticles?.length === 1 && page > 1) {
+        setPage(page - 1);
+      }
     } catch (error) {
       toast.error("Delete failed");
       setDeleteError(
@@ -90,6 +114,72 @@ export default function ManagerNews() {
     setTimeout(() => setDeleteError(null), 5000);
   }
 
+  // Pagination handlers
+  const goToPage = (pageNumber: number) => {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setPage(pageNumber);
+    }
+  };
+
+  const goToFirstPage = () => goToPage(1);
+  const goToLastPage = () => goToPage(totalPages);
+  const goToPreviousPage = () => goToPage(page - 1);
+  const goToNextPage = () => goToPage(page + 1);
+
+  // Function to generate page numbers to display
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      // Show all pages if total pages is less than or equal to maxVisiblePages
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always show first page
+      pages.push(1);
+
+      // Calculate start and end of visible pages
+      let start = Math.max(2, page - 1);
+      let end = Math.min(totalPages - 1, page + 1);
+
+      // Adjust if we're near the start
+      if (page <= 3) {
+        start = 2;
+        end = 4;
+      }
+
+      // Adjust if we're near the end
+      if (page >= totalPages - 2) {
+        start = totalPages - 3;
+        end = totalPages - 1;
+      }
+
+      // Add ellipsis after first page if needed
+      if (start > 2) {
+        pages.push("ellipsis-start");
+      }
+
+      // Add middle pages
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      // Add ellipsis before last page if needed
+      if (end < totalPages - 1) {
+        pages.push("ellipsis-end");
+      }
+
+      // Always show last page
+      if (totalPages > 1) {
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
+  };
+
   return (
     <Layout role="manager" userName={userName}>
       {/* Header */}
@@ -104,12 +194,17 @@ export default function ManagerNews() {
               Manage tournament news, announcements, and updates
             </p>
           </div>
-          <Link href="/manager/news/create">
-            <Button className="gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-md">
-              <Plus className="w-4 h-4" />
-              Create Article
-            </Button>
-          </Link>
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-gray-500">
+              Page {page} of {totalPages || 1}
+            </div>
+            <Link href="/manager/news/create">
+              <Button className="gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-md">
+                <Plus className="w-4 h-4" />
+                Create Article
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -218,7 +313,7 @@ export default function ManagerNews() {
       )}
 
       {/* Empty State */}
-      {!isLoading && !error && filteredArticles.length === 0 && (
+      {!isLoading && !error && filteredArticles?.length === 0 && (
         <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
           <div className="space-y-4">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
@@ -247,10 +342,11 @@ export default function ManagerNews() {
       )}
 
       {/* Articles Grid */}
-      {!isLoading && !error && filteredArticles.length > 0 && (
-        <div className="space-y-4">
+      {!isLoading && !error && filteredArticles?.length > 0 && (
+        <div className="space-y-6">
           <div className="text-sm text-gray-500 mb-2">
-            Showing {filteredArticles.length} of {articles.length} articles
+            Showing {filteredArticles.length} of {articles.length} articles on
+            this page (Total: {totalArticles} articles)
             {searchTerm && ` matching "${searchTerm}"`}
             {statusFilter !== "all" && ` (${statusFilter})`}
           </div>
@@ -262,21 +358,11 @@ export default function ManagerNews() {
             >
               <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-4">
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-xl font-bold text-gray-900">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
                       {article.title}
                     </h3>
-                    <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                        article.status === "published"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {article.status === "published" ? "Published" : "Draft"}
-                    </span>
                   </div>
-
                   <p className="text-gray-600 line-clamp-2 mb-4">
                     {article.excerpt}
                   </p>
@@ -289,17 +375,8 @@ export default function ManagerNews() {
                     <span>•</span>
                     <span className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
-                      {article.publishedDate}
+                      {article.publishDate}
                     </span>
-                    {article.status === "published" && (
-                      <>
-                        <span>•</span>
-                        <span className="flex items-center gap-1">
-                          <Eye className="w-4 h-4" />
-                          {article.views || 0} views
-                        </span>
-                      </>
-                    )}
                   </div>
                 </div>
 
@@ -348,6 +425,102 @@ export default function ManagerNews() {
               </div>
             </div>
           ))}
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="bg-white rounded-xl border border-gray-200 p-4 mt-6">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+                <div className="text-sm text-gray-600">
+                  Showing page {page} of {totalPages} • {totalArticles} total
+                  articles
+                </div>
+
+                <div className="flex items-center gap-2 text-sm">
+                  <span>Go to page:</span>
+                  <Input
+                    type="number"
+                    min="1"
+                    max={totalPages}
+                    value={page}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value);
+                      if (value >= 1 && value <= totalPages) {
+                        setPage(value);
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const value = parseInt(e.target.value);
+                      if (value >= 1 && value <= totalPages) {
+                        goToPage(value);
+                      } else {
+                        e.target.value = page.toString();
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        const value = parseInt(e.currentTarget.value);
+                        if (value >= 1 && value <= totalPages) {
+                          goToPage(value);
+                        }
+                      }
+                    }}
+                    className="w-20 h-9"
+                  />
+                </div>
+              </div>
+
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={goToPreviousPage}
+                      className={
+                        page === 1
+                          ? "pointer-events-none opacity-50"
+                          : "cursor-pointer"
+                      }
+                    />
+                  </PaginationItem>
+
+                  {getPageNumbers().map((pageNum, index) => {
+                    if (
+                      pageNum === "ellipsis-start" ||
+                      pageNum === "ellipsis-end"
+                    ) {
+                      return (
+                        <PaginationItem key={`ellipsis-${index}`}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      );
+                    }
+
+                    return (
+                      <PaginationItem key={pageNum}>
+                        <PaginationLink
+                          isActive={page === pageNum}
+                          onClick={() => goToPage(pageNum as number)}
+                          className="cursor-pointer min-w-9"
+                        >
+                          {pageNum}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={goToNextPage}
+                      className={
+                        page === totalPages
+                          ? "pointer-events-none opacity-50"
+                          : "cursor-pointer"
+                      }
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </div>
       )}
     </Layout>
