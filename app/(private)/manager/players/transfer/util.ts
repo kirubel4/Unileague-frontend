@@ -6,12 +6,6 @@ interface ApiTeamWrapper {
     coachEmail?: string | null;
     power?: number;
   };
-  tournaments?: {
-    tournament: {
-      id: string;
-      tournamentName: string;
-    };
-  };
   id: string; // top-level id
   playerCount?: number;
   logo?: { url: string }[]; // array of logos
@@ -32,39 +26,19 @@ export interface Team {
   playerCount: number;
   logoUrl: string;
   power: number;
-  tournamentName?: string;
-  tournamentId?: string;
 }
 
 export function mapTeams(apiResponse: ApiResponse): Team[] {
   return apiResponse?.data?.map((item) => ({
-    id: item?.team?.id,
-    name: item?.team?.teamName,
-    coachName: item?.team?.coachName ?? "",
-    coachEmail: item?.team?.coachEmail ?? "",
-    playerCount: item?.playerCount ?? 0,
+    id: item.team.id,
+    name: item.team.teamName,
+    coachName: item.team.coachName ?? "",
+    coachEmail: item.team.coachEmail ?? "",
+    playerCount: item.playerCount ?? 0,
     logoUrl:
-      item?.logo && item?.logo?.length > 0
+      item.logo && item.logo.length > 0
         ? item.logo[0].url
         : "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&h=400&fit=crop",
-    power: item?.team?.power ?? 0,
-    tournamentName: item?.tournaments?.tournament?.tournamentName,
-    tournamentId: item?.tournaments?.tournament?.id,
-  }));
-}
-export function mapTeamsPublic(apiResponse: any): Team[] {
-  return apiResponse?.data?.map((item: any) => ({
-    id: item?.id,
-    name: item?.teamName,
-    coachName: item?.coachName ?? "",
-    coachEmail: item?.coachEmail ?? "",
-    playerCount: item?.playerCount ?? 0,
-    logoUrl:
-      item?.logo && item?.logo?.length > 0
-        ? item.logo[0].url
-        : "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&h=400&fit=crop",
-    power: item?.power ?? 0,
-    tournamentName: item?.tournaments[0]?.tournament?.tournamentName,
-    tournamentId: item?.tournaments[0]?.tournament?.id,
+    power: item.team.power ?? 0,
   }));
 }
