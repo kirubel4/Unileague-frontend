@@ -137,19 +137,16 @@ export default function ManagerMatchesDetail() {
   };
 
   const removeEvent = async (id: string) => {
-    toast.loading("removing event", { id: "33" });
-    const res = await fetch(
-      `/api/protected/manager/match/event/remove?id=${id}`,
-      {
-        method: "DELETE",
-      }
-    );
+    toast.loading("removing event", { id: "2" });
+    const res = await fetch(`/api/protected/match/event/remove?id=${id}`, {
+      method: "DELETE",
+    });
     const resp: ApiResponse = await res.json();
     if (!resp.success) {
-      toast.error(resp.message, { id: "33" });
+      toast.error(resp.message, { id: "2" });
       return;
     }
-    toast.success("event removed", { id: "33" });
+    toast.success("event removed", { id: "2" });
   };
   const statMatch = async () => {
     toast.loading("staring match");

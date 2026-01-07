@@ -95,7 +95,7 @@ export default function Footer() {
               </div>
               <div>
                 <div className="text-xl font-bold text-white">
-                  UNILEAGUE-HUB
+                  ASTU Football
                 </div>
                 <div className="text-sm text-gray-400">
                   Sports Management System
@@ -221,7 +221,8 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-center md:text-left">
             <p className="text-gray-400 text-sm">
-              © {new Date().getFullYear()} UNILEAGUE-HUB. All rights reserved.
+              © {new Date().getFullYear()} ASTU Football Management System. All
+              rights reserved.
             </p>
             <p className="text-gray-500 text-xs mt-2 flex items-center justify-center md:justify-start gap-1">
               Made with <Heart className="w-3 h-3 text-red-500 fill-current" />{" "}

@@ -3,8 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(request: NextRequest) {
   try {
-    const id = request.nextUrl.searchParams.get("id");
-   
+    const body = await request.json();
     const token = request.cookies.get("aToken")?.value;
 
     const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -15,14 +14,13 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const res = await fetch(`${backend}/manager/match/event/${id}/delete`, {
+    const res = await fetch(`${backend}/manager/match/event/create`, {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-   
+      body: JSON.stringify(body),
     });
 
     const data: ApiResponse = await res.json();

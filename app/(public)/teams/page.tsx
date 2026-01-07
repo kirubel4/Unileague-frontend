@@ -1,121 +1,171 @@
 "use client";
+
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import {
   Trophy,
   Users,
+  ChevronLeft,
   Filter,
   Calendar,
+  Target,
+  TrendingUp,
   Shield,
+  Star,
   MapPin,
   Search,
   ChevronRight,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Tournament } from "@/app/(private)/admin/tournaments/page";
-import { mapTournaments } from "@/app/(private)/admin/tournaments/util";
-import useSWR from "swr";
-import { fetcher } from "@/lib/utils";
-import {
-  mapTeams,
-  mapTeamsPublic,
-} from "@/app/(private)/manager/players/transfer/util";
 
 // Mock tournaments data for filtering
-// const TOURNAMENTS = [
-//   { id: "1", name: "Winter Championship 2024", year: 2024 },
-//   { id: "2", name: "Summer League 2024", year: 2024 },
-//   { id: "3", name: "3rd Year Cup 2023", year: 2023 },
-//   { id: "4", name: "4th Year Cup 2024", year: 2024 },
-//   { id: "5", name: "5th Year Cup 2024", year: 2024 },
-//   { id: "6", name: "CSE Major Tournament 2023", year: 2023 },
-//   { id: "7", name: "ECE Major Tournament 2024", year: 2024 },
-//   { id: "8", name: "All Departments Cup 2024", year: 2024 },
-// ];
+const TOURNAMENTS = [
+  { id: "1", name: "Winter Championship 2024", year: 2024 },
+  { id: "2", name: "Summer League 2024", year: 2024 },
+  { id: "3", name: "3rd Year Cup 2023", year: 2023 },
+  { id: "4", name: "4th Year Cup 2024", year: 2024 },
+  { id: "5", name: "5th Year Cup 2024", year: 2024 },
+  { id: "6", name: "CSE Major Tournament 2023", year: 2023 },
+  { id: "7", name: "ECE Major Tournament 2024", year: 2024 },
+  { id: "8", name: "All Departments Cup 2024", year: 2024 },
+];
 
 // Mock teams data with tournament association
 const TEAMS = [
   {
     id: "1",
     name: "Software FC (CSE 3rd Year)",
-
+    players: 18,
+    points: 45,
+    wins: 14,
+    losses: 2,
+    draws: 4,
     tournamentId: "3",
     tournamentName: "3rd Year Cup 2023",
     year: 2023,
     logo: "💻",
     coach: "Dr. Michael Chen",
     location: "Computer Science Dept",
+    rating: 4.8,
   },
   {
     id: "2",
     name: "ECE Voltage",
-
+    players: 17,
+    points: 42,
+    wins: 13,
+    losses: 3,
+    draws: 3,
+    tournamentId: "2",
     tournamentName: "Summer League 2024",
     year: 2024,
     logo: "⚡",
     coach: "Prof. Sarah Johnson",
     location: "ECE Department",
+    rating: 4.6,
   },
   {
     id: "3",
     name: "Mechanical Mavericks",
-
+    players: 16,
+    points: 38,
+    wins: 11,
+    losses: 5,
+    draws: 5,
     tournamentId: "1",
     tournamentName: "Winter Championship 2024",
     year: 2024,
     logo: "⚙️",
     coach: "Dr. Robert Kim",
     location: "Mechanical Engineering",
+    rating: 4.4,
   },
   {
     id: "4",
     name: "Civil Constructors",
+    players: 15,
+    points: 36,
+    wins: 10,
+    losses: 6,
+    draws: 6,
     tournamentId: "8",
     tournamentName: "All Departments Cup 2024",
     year: 2024,
     logo: "🏗️",
     coach: "Prof. David Miller",
     location: "Civil Engineering",
+    rating: 4.2,
   },
   {
     id: "5",
     name: "BioTech United (5th Year)",
+    players: 14,
+    points: 32,
+    wins: 9,
+    losses: 7,
+    draws: 5,
     tournamentId: "5",
     tournamentName: "5th Year Cup 2024",
     year: 2024,
     logo: "🧬",
     coach: "Dr. Lisa Wang",
     location: "Biotechnology Dept",
+    rating: 4.0,
   },
   {
     id: "6",
     name: "Architecture FC",
+    players: 13,
+    points: 28,
+    wins: 8,
+    losses: 8,
+    draws: 4,
     tournamentId: "4",
     tournamentName: "4th Year Cup 2024",
     year: 2024,
     logo: "🏛️",
     coach: "Prof. Alex Turner",
     location: "Architecture Dept",
+    rating: 3.9,
   },
   {
     id: "7",
     name: "Chemical Engineers",
+    players: 12,
+    points: 25,
+    wins: 7,
+    losses: 9,
+    draws: 4,
     tournamentId: "6",
     tournamentName: "CSE Major Tournament 2023",
     year: 2023,
     logo: "🧪",
     coach: "Dr. James Wilson",
     location: "Chemical Engineering",
+    rating: 3.7,
   },
   {
     id: "8",
     name: "Physics Phantoms",
+    players: 11,
+    points: 22,
+    wins: 6,
+    losses: 10,
+    draws: 4,
     tournamentId: "7",
     tournamentName: "ECE Major Tournament 2024",
     year: 2024,
     logo: "⚛️",
     coach: "Prof. Emma Davis",
     location: "Physics Department",
+    rating: 3.5,
   },
 ];
 
@@ -132,26 +182,25 @@ export default function TeamsPage() {
   const [selectedYear, setSelectedYear] = useState<number | "ALL">("ALL");
   const [selectedTournament, setSelectedTournament] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
-  const { data, error, isLoading } = useSWR("/api/public/tournament", fetcher, {
-    revalidateOnFocus: false,
-  });
-  const TOURNAMENTS: Tournament[] = mapTournaments(data);
-  const {
-    data: team,
-    error: err,
-    isLoading: load,
-  } = useSWR("/api/public/team", fetcher, {
-    revalidateOnFocus: false,
-  });
 
-  const teams = mapTeamsPublic(team || { team: [] });
+  // Calculate statistics
+  const stats = useMemo(() => {
+    const totalTeams = TEAMS.length;
+    const totalPlayers = TEAMS.reduce((sum, team) => sum + team.players, 0);
+    const avgRating =
+      TEAMS.reduce((sum, team) => sum + team.rating, 0) / totalTeams;
+    const totalWins = TEAMS.reduce((sum, team) => sum + team.wins, 0);
 
+    return { totalTeams, totalPlayers, avgRating, totalWins };
+  }, []);
+
+  // Filter teams
   const filteredTeams = useMemo(() => {
-    let filtered = teams;
+    let filtered = TEAMS;
 
-    // if (selectedYear !== "ALL") {
-    //   filtered = filtered.filter((team) => team.year === selectedYear);
-    // }
+    if (selectedYear !== "ALL") {
+      filtered = filtered.filter((team) => team.year === selectedYear);
+    }
 
     if (selectedTournament !== "ALL") {
       filtered = filtered.filter(
@@ -163,12 +212,13 @@ export default function TeamsPage() {
       filtered = filtered.filter(
         (team) =>
           team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          team.coachName.toLowerCase().includes(searchQuery.toLowerCase())
+          team.coach.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          team.location.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
     return filtered;
-  }, [selectedYear, searchQuery]);
+  }, [selectedYear, selectedTournament, searchQuery]);
 
   // Reset filters
   const resetFilters = () => {
@@ -202,6 +252,20 @@ export default function TeamsPage() {
                 and years at ASTU. Track their performance across various
                 tournaments.
               </p>
+              <div className="flex flex-wrap gap-4">
+                <div className="flex items-center gap-2 text-white/80">
+                  <Users className="w-5 h-5" />
+                  <span>{stats.totalTeams} Active Teams</span>
+                </div>
+                <div className="flex items-center gap-2 text-white/80">
+                  <Target className="w-5 h-5" />
+                  <span>{stats.totalPlayers} Players</span>
+                </div>
+                <div className="flex items-center gap-2 text-white/80">
+                  <Trophy className="w-5 h-5" />
+                  <span>{stats.totalWins} Total Wins</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -239,12 +303,58 @@ export default function TeamsPage() {
             </div>
           </div>
 
+          {/* Year Filter */}
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <Calendar className="w-5 h-5 text-gray-600" />
+              <h3 className="text-lg font-semibold text-gray-900">
+                Filter by Year
+              </h3>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setSelectedYear("ALL")}
+                className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 border
+                  ${
+                    selectedYear === "ALL"
+                      ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg border-transparent"
+                      : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300"
+                  }`}
+              >
+                All Years
+              </button>
+              {ALL_YEARS.map((year) => (
+                <button
+                  key={year}
+                  onClick={() => setSelectedYear(year)}
+                  className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 border
+                    ${
+                      selectedYear === year
+                        ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg border-transparent"
+                        : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300"
+                    }`}
+                >
+                  {year}
+                </button>
+              ))}
+            </div>
+          </div>
+          {/* Tournament Filter */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
               <Trophy className="w-5 h-5 text-gray-600" />
               <h3 className="text-lg font-semibold text-gray-900">
                 Filter by Tournament
               </h3>
+              <span className="text-sm text-gray-500">
+                (
+                {
+                  TEAMS.filter(
+                    (t) => selectedYear === "ALL" || t.year === selectedYear
+                  ).length
+                }{" "}
+                tournaments available)
+              </span>
             </div>
             <div className="flex flex-wrap gap-2">
               <button
@@ -260,23 +370,19 @@ export default function TeamsPage() {
               </button>
               {TOURNAMENTS.filter(
                 (tournament) =>
-                  selectedYear === "ALL" ||
-                  new Date(tournament.startingDate).getFullYear() ===
-                    selectedYear
+                  selectedYear === "ALL" || tournament.year === selectedYear
               ).map((tournament) => (
                 <button
                   key={tournament.id}
-                  onClick={() =>
-                    setSelectedTournament(tournament.tournamentName)
-                  }
+                  onClick={() => setSelectedTournament(tournament.name)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border
                       ${
-                        selectedTournament === tournament.tournamentName
+                        selectedTournament === tournament.name
                           ? "bg-gray-900 text-white border-gray-900"
                           : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
                       }`}
                 >
-                  {tournament.tournamentName}
+                  {tournament.name}
                 </button>
               ))}
             </div>
@@ -318,8 +424,8 @@ export default function TeamsPage() {
         <div className="mb-16">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-bold text-gray-900">
-              {teams?.length} Team
-              {teams?.length !== 1 ? "s" : ""} Found
+              {filteredTeams.length} Team{filteredTeams.length !== 1 ? "s" : ""}{" "}
+              Found
             </h3>
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <span>Sorted by:</span>
@@ -332,9 +438,9 @@ export default function TeamsPage() {
             </div>
           </div>
 
-          {teams?.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-6">
-              {teams?.map((team) => (
+          {filteredTeams.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredTeams.map((team) => (
                 <Link
                   key={team.id}
                   href={`/teams/${team.id}`}
@@ -343,9 +449,9 @@ export default function TeamsPage() {
                   <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 h-full">
                     <div className="relative h-40 bg-gradient-to-r from-gray-900 to-gray-800">
                       <div className="absolute inset-0 flex items-center justify-center">
-                        {team.logoUrl ? (
+                        {team.logo ? (
                           <img
-                            src={team.logoUrl}
+                            src={team.logo}
                             alt={team.name}
                             className="w-24 h-24 object-contain"
                           />
@@ -367,13 +473,13 @@ export default function TeamsPage() {
                       </div>
 
                       {/* Year Badge */}
-                      {/* <div className="absolute top-4 right-4">
+                      <div className="absolute top-4 right-4">
                         <div className="px-2 py-1 rounded-lg bg-white/20 backdrop-blur-sm">
                           <span className="text-xs font-semibold text-white">
-                            {team.tournamentName}
+                            {team.year}
                           </span>
                         </div>
-                      </div> */}
+                      </div>
 
                       <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/40 to-transparent" />
                     </div>
@@ -385,12 +491,16 @@ export default function TeamsPage() {
                         </h3>
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <Users className="w-4 h-4" />
-                          <span>Coach: {team.coachName}</span>
+                          <span>Coach: {team.coach}</span>
                         </div>
                       </div>
 
                       <div className="mt-6 pt-4 border-t border-gray-200">
                         <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-1 text-gray-600">
+                            <MapPin className="w-4 h-4" />
+                            <span className="truncate">{team.location}</span>
+                          </div>
                           <div className="flex items-center gap-1 text-blue-600 font-medium group-hover:gap-2 transition-all">
                             <span>View Team</span>
                             <ChevronRight className="w-4 h-4" />

@@ -52,8 +52,6 @@ import { fetcher } from "@/lib/utils";
 import useSWR from "swr";
 import { Badge } from "../ui/badge";
 import { Label } from "../ui/label";
-import { MatchCard } from "./publicMatchListing";
-import { mapLiveMatchesToUI } from "@/app/(public)/matches/utility";
 
 // Types
 export interface Player {
@@ -143,14 +141,7 @@ export function TeamDetail({
   } = useSWR(`/api/public/gallery?id=${id}`, fetcher, {
     revalidateOnFocus: false,
   });
-  const { data, isLoading: load } = useSWR(
-    `/api/public/match/recent/team?id=${id}`,
-    fetcher,
-    {
-      revalidateOnFocus: false,
-    }
-  );
-  const recentMatches = mapLiveMatchesToUI(data);
+
   const images: GalleryImg[] = mapGalleryResponse(image?.data || { data: [] });
 
   // Filter players by search
@@ -322,38 +313,16 @@ export function TeamDetail({
               </div>
 
               {/* Recent Matches */}
-              <div className="bg-white rounded-2xl border border-gray-200 p-4 lg:p-6 shadow-sm">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-blue-50">
-                      <Calendar className="w-5 h-5 text-blue-600" />
-                    </div>
-
-                    <div>
-                      <h2 className="text-lg font-bold text-gray-900">
-                        Recent Matches
-                      </h2>
-                      <p className="text-sm text-gray-500">
-                        Results from recently completed fixtures
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Optional badge */}
-                  <span className="text-xs font-medium px-3 py-1 rounded-full bg-gray-100 text-gray-600">
-                    Last Week
-                  </span>
-                </div>
-
-                {/* Divider */}
-                <div className="h-px bg-gray-100 mb-6" />
-
-                {/* Match cards */}
-                <div className="grid grid-cols-1  ">
-                  {recentMatches.map((match) => (
-                    <MatchCard key={match.id} match={match} />
-                  ))}
+              <div className="bg-white rounded-xl border border-gray-200 p-4 lg:p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-blue-600" />
+                    Recent Matches
+                  </h2>
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    View All
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
             </div>
