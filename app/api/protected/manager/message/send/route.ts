@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     const cookieMid = request.cookies.get("mid")?.value;
+    const token = request.cookies.get("aToken")?.value;
 
     if (!cookieMid) {
       return NextResponse.json(
@@ -30,7 +31,10 @@ export async function POST(request: NextRequest) {
     }
     const res = await fetch(`${backend}/manager/message/send`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" }, // important!
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      }, // important!
       body: JSON.stringify(body),
     });
     const data: ApiResponse = await res.json();

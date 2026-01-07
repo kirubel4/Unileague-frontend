@@ -62,22 +62,7 @@ export default function TournamentDetailPage() {
     { revalidateOnFocus: false }
   );
   const teams: Team[] = mapTeams(data || { data: [] });
-  const {
-    data: live,
-    isLoading,
-    error,
-  } = useSWR(`/api/public/match/live/tournament?id=${id}`, fetcher, {
-    revalidateOnFocus: false,
-  });
-  const liveMatches = mapLiveMatchesToUI(live);
-  const {
-    data: upComing,
-    isLoading: load,
-    error: err,
-  } = useSWR("/api/public/match/up-coming", fetcher, {
-    revalidateOnFocus: false,
-  });
-  const upcomingMatches = mapLiveMatchesToUI(upComing);
+
   const images: GalleryImg[] = mapGalleryResponse(image?.data || { data: [] });
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -100,7 +85,7 @@ export default function TournamentDetailPage() {
         return "text-gray-600 bg-gray-100";
     }
   };
-
+  const liveMatch = false;
   if (!tournament) {
     return <div>Loading tournament...</div>;
   }
@@ -189,55 +174,40 @@ export default function TournamentDetailPage() {
       </div>
 
       {/* Live Match Banner */}
-      {liveMatches && liveMatches.length > 0 && (
+      {liveMatch && (
         <div className="bg-gradient-to-r from-red-600 to-orange-600">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <Link
-              href={`/matches/${liveMatches[0].id}`}
-              className="flex items-center justify-between text-white"
-            >
-              {/* LIVE badge */}
+            <div className="flex items-center justify-between text-white">
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
-                <span className="font-semibold tracking-wide">LIVE NOW</span>
+                <span className="font-semibold">LIVE NOW</span>
               </div>
-
-              {/* Match info */}
-              <div className="flex items-center gap-8">
-                {/* Home team */}
-                <div className="text-right min-w-[140px]">
+              <div className="flex items-center gap-6">
+                <div className="text-center">
                   <div className="font-bold text-xl">
-                    {liveMatches[0].teamA.name}
+                    {/* {tournament?.liveMatch.homeTeam} */}
                   </div>
                   <div className="text-sm opacity-90">Home</div>
                 </div>
-
-                {/* Score */}
                 <div className="text-center">
-                  <div className="flex items-center gap-3 text-4xl font-extrabold">
-                    <span>{liveMatches[0].teamA.score}</span>
-                    <span className="text-2xl opacity-80">–</span>
-                    <span>{liveMatches[0].teamB.score}</span>
+                  <div className="font-bold text-3xl">
+                    {/* {tournament?.liveMatch.score} */}
                   </div>
-                  <div className="text-sm opacity-90 mt-1">
-                    {liveMatches[0].round}
+                  <div className="text-sm opacity-90">
+                    {/* {tournament?.liveMatch.minute} */}
                   </div>
                 </div>
-
-                {/* Away team */}
-                <div className="text-left min-w-[140px]">
+                <div className="text-center">
                   <div className="font-bold text-xl">
-                    {liveMatches[0].teamB.name}
+                    {/* {tournament?.liveMatch.awayTeam} */}
                   </div>
                   <div className="text-sm opacity-90">Away</div>
                 </div>
               </div>
-
-              {/* CTA */}
               <button className="px-4 py-2 bg-white text-red-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors">
                 Watch Live
               </button>
-            </Link>
+            </div>
           </div>
         </div>
       )}
@@ -395,24 +365,28 @@ export default function TournamentDetailPage() {
               </div>
             </div>
 
-            <div className="space-y-4">
-              {/* Section header */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900">
-                    Upcoming Matches
-                  </h2>
-                  <p className="text-sm text-gray-600">
-                    Matches scheduled for next week — don’t miss the action
-                  </p>
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-gray-900">Next Match</h3>
+                <div className="flex items-center gap-2 text-blue-600">
+                  <Clock className="w-4 h-4" />
+                  <span className="font-medium">Starts in 2 days</span>
                 </div>
               </div>
-
-              {/* Match cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {upcomingMatches.map((match) => (
-                  <MatchCard key={match.id} match={match} />
-                ))}
+              <div className="flex items-center justify-between">
+                <div className="text-center">
+                  <div className="text-2xl font-bold mb-2">Engineering FC</div>
+                  <div className="text-gray-600">Home</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm text-gray-500 mb-1">Feb 22, 2024</div>
+                  <div className="text-4xl font-bold text-gray-900">VS</div>
+                  <div className="text-sm text-gray-500 mt-1">14:00 AST</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold mb-2">Science United</div>
+                  <div className="text-gray-600">Away</div>
+                </div>
               </div>
             </div>
           </TabsContent>

@@ -6,6 +6,7 @@ export async function DELETE(request: NextRequest) {
     const body = await request.json();
 
     const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
+    const token = request.cookies.get("aToken")?.value;
     if (!backend) {
       return NextResponse.json(
         { message: "Missing NEXT_PUBLIC_BACKEND_URL" },
@@ -16,7 +17,10 @@ export async function DELETE(request: NextRequest) {
       `${backend}/admin/tournament/${body.managerId}/${body.id}`,
       {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       }
     );
     console.log(res);

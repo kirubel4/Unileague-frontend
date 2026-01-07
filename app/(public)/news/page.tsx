@@ -8,6 +8,156 @@ import NewsListing from "@/components/pages/NewsListing";
 export default function NewsPage() {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+import {
+  Calendar,
+  Newspaper,
+  TrendingUp,
+  Zap,
+  Clock,
+  ChevronRight,
+  ExternalLink,
+  Bookmark,
+  Share2,
+  Tag,
+} from "lucide-react";
+
+interface NewsItem {
+  id: number;
+  title: string;
+  description: string;
+  fullContent: string;
+  category: "BREAKING" | "TRANSFER" | "UPDATE" | "ANNOUNCEMENT";
+  timestamp: string;
+  image?: string;
+  author?: string;
+  readTime?: string;
+  views?: number;
+}
+
+const newsItems: NewsItem[] = [
+  {
+    id: 1,
+    title: "Championship Final Set for December 15th at New ASTU Stadium",
+    description:
+      "The most anticipated match of the season approaches as Software FC prepares to face CSE in the grand finale.",
+    fullContent:
+      "The championship final is officially scheduled for December 15th at the newly inaugurated ASTU Main Stadium. After months of intense competition, Software FC and CSE have emerged as the top contenders. Both teams have shown exceptional performance throughout the tournament, with Software FC maintaining an unbeaten streak and CSE showcasing remarkable defensive prowess. The match will feature state-of-the-art broadcasting with 4K resolution and multi-angle replays. Security has been heightened with advanced screening systems to ensure a safe environment for all spectators. Pre-match entertainment includes performances by the university band and special appearances by alumni football stars.",
+    category: "BREAKING",
+    timestamp: "2 days ago",
+    image:
+      "https://images.unsplash.com/photo-1511204579483-e5c2b1d69acd?w=800&h=400&fit=crop",
+    author: "Sports Desk",
+    readTime: "5 min read",
+    views: 2450,
+  },
+  {
+    id: 2,
+    title: "Star Player Alex Morgan Joins Software FC in Record Transfer Deal",
+    description:
+      "Major signing strengthens the squad with international experience and exceptional skills.",
+    fullContent:
+      "Software FC has secured the signature of Alex Morgan in a groundbreaking transfer deal worth $2.5 million. The 24-year-old striker, known for his lightning speed and clinical finishing, joins from Manchester United's youth academy. Morgan has signed a three-year contract with the option to extend for two additional years. The transfer marks a significant investment in Software FC's offensive capabilities and signals their ambition to dominate university football. Team coach Michael Chen stated, 'Alex brings a level of professionalism and skill that will elevate our entire squad. His experience in top-tier competitions will be invaluable.' Morgan will wear the number 7 jersey and is expected to make his debut in the upcoming derby.",
+    category: "TRANSFER",
+    timestamp: "5 hours ago",
+    image:
+      "https://images.unsplash.com/photo-1577223625818-75bc1f2ac0e5?w=800&h=400&fit=crop",
+    author: "Transfer Team",
+    readTime: "4 min read",
+    views: 1870,
+  },
+  {
+    id: 3,
+    title: "New ASTU Stadium Opening Ceremony with Special Guest Appearances",
+    description:
+      "State-of-the-art facility ready for tournaments with capacity of 15,000 spectators.",
+    fullContent:
+      "The $50 million ASTU Stadium will officially open next month with a spectacular ceremony featuring former university football stars and local celebrities. The 15,000-seat facility boasts advanced features including: Under-soil heating system for year-round play, FIFA-certified hybrid grass pitch, 4K LED screens for enhanced viewing, Solar-powered energy system with battery storage, Premium hospitality suites with private balconies, and Advanced player recovery facilities. The stadium's design incorporates sustainable materials and smart technology for energy efficiency. President Dr. Samuel Johnson will inaugurate the stadium, stating 'This facility represents our commitment to sports excellence and student development.' Opening week includes exhibition matches, community events, and facility tours.",
+    category: "UPDATE",
+    timestamp: "1 day ago",
+    image:
+      "https://images.unsplash.com/photo-1543321269-9d86d3680e1c?w=800&h=400&fit=crop",
+    author: "Campus News",
+    readTime: "6 min read",
+    views: 3200,
+  },
+  {
+    id: 4,
+    title: "New Scholarship Program Announced for Student Athletes",
+    description:
+      "ASTU introduces comprehensive scholarship packages for football talent.",
+    fullContent:
+      "The university has launched a new scholarship program targeting exceptional football talent among incoming students. The program offers: Full tuition coverage for four years, Monthly stipend for training expenses, Access to professional coaching and nutritionists, Internship opportunities with partner football clubs, and Academic support with flexible scheduling. Applications open next month for the 2024 academic year. Selection will be based on football skills, academic performance, and leadership potential. The program aims to develop well-rounded athletes who can excel both on the field and in the classroom.",
+    category: "ANNOUNCEMENT",
+    timestamp: "3 days ago",
+    image:
+      "https://images.unsplash.com/photo-1519861158985-92a5d5f8b486?w=800&h=400&fit=crop",
+    author: "Admissions Office",
+    readTime: "3 min read",
+    views: 1560,
+  },
+  {
+    id: 5,
+    title: "Football Coaching Staff Expanded with International Experts",
+    description:
+      "New coaching team brings European training methodologies to ASTU.",
+    fullContent:
+      "ASTU has recruited three international coaches to enhance the football program's technical development. The new team includes: Coach Marco Rossi (Italy) - Specializing in tactical analysis, Coach Kim Ji-hoon (South Korea) - Strength and conditioning expert, and Coach Maria Gonzalez (Spain) - Youth development specialist. They will implement advanced training programs focusing on technical skills, tactical awareness, and sports psychology. The coaching team will also conduct regular workshops for local coaches and organize international friendly matches to expose players to different playing styles.",
+    category: "UPDATE",
+    timestamp: "6 hours ago",
+    image:
+      "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=800&h=400&fit=crop",
+    author: "Sports Department",
+    readTime: "4 min read",
+    views: 980,
+  },
+  {
+    id: 6,
+    title: "Inter-Department League Kicks Off with Record Participation",
+    description:
+      "32 teams from across campus compete in the annual football tournament.",
+    fullContent:
+      "The Inter-Department Football League has begun with unprecedented participation from 32 teams representing all faculties. The tournament features: Group stage with round-robin format, Knockout phase starting next month, Newly introduced fair play award, and Live streaming of all matches. Engineering FC leads Group A with three consecutive wins, while Medical Warriors showcase impressive defensive organization. The tournament serves as a scouting ground for the university's main team, with several standout players expected to receive call-ups. Special awards include top scorer, best goalkeeper, and most valuable player.",
+    category: "BREAKING",
+    timestamp: "Today",
+    image:
+      "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&h=400&fit=crop",
+    author: "Tournament Desk",
+    readTime: "5 min read",
+    views: 4100,
+  },
+];
+
+const categoryColors = {
+  BREAKING: "bg-gradient-to-r from-red-500 to-red-600 text-white",
+  TRANSFER: "bg-gradient-to-r from-yellow-500 to-orange-500 text-white",
+  UPDATE: "bg-gradient-to-r from-blue-500 to-blue-600 text-white",
+  ANNOUNCEMENT: "bg-gradient-to-r from-green-500 to-green-600 text-white",
+};
+
+const categoryIcons = {
+  BREAKING: Zap,
+  TRANSFER: TrendingUp,
+  UPDATE: Newspaper,
+  ANNOUNCEMENT: Tag,
+};
+
+export default function NewsPage() {
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
+  const [bookmarked, setBookmarked] = useState<number[]>([]);
+
+  const categories = ["ALL", "BREAKING", "TRANSFER", "UPDATE", "ANNOUNCEMENT"];
+
+  const filteredNews =
+    selectedCategory === "ALL"
+      ? newsItems
+      : newsItems.filter((item) => item.category === selectedCategory);
+
+  const toggleBookmark = (id: number) => {
+    setBookmarked((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
