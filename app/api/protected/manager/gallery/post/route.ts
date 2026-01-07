@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
+    const token = request.cookies.get("aToken")?.value;
+
     const id = "fb1c80f4-7ffc-4b84-b329-d08511349fa2";
     const formData = await request.formData();
     if (formData.get("ownerId") === "fill") {
@@ -20,6 +22,7 @@ export async function POST(request: NextRequest) {
     const res = await fetch(`${backend}/manager/gallery/post`, {
       method: "POST",
       body: formData,
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     const data: ApiResponse = await res.json();

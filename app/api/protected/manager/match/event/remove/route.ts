@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 export async function DELETE(request: NextRequest) {
   try {
     const id = request.nextUrl.searchParams.get("id");
+   
+    const token = request.cookies.get("aToken")?.value;
 
     const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backend) {
@@ -16,6 +18,11 @@ export async function DELETE(request: NextRequest) {
     const res = await fetch(`${backend}/manager/match/event/${id}/delete`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+   
     });
 
     const data: ApiResponse = await res.json();

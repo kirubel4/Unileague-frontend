@@ -3,17 +3,20 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
-    const response = await fetch(
+    const token = req.cookies.get("aToken")?.value;
+
+    const res = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/system/logs`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
       }
     );
 
-    const data: ApiResponse = await response.json();
+    const data: ApiResponse = await res.json();
 
     return NextResponse.json(data);
   } catch (error: any) {
