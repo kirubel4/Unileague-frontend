@@ -51,7 +51,7 @@ export default function NewsListing({
     totalItems: 0,
     totalPages: 1,
   };
-
+  console.log(articles);
   // Filter articles based on search term
   const filteredArticles = useMemo(() => {
     return articles.filter(

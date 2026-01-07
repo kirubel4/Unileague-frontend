@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,21 +44,16 @@ interface TeamData {
 }
 
 interface PlayerFormData {
-  firstName: string;
-  lastName: string;
+  playerName: string;
   jerseyNumber: string;
   position: string;
-  email: string;
-  phoneNumber: string;
 }
 
 interface RegisteredPlayer {
   id: string;
-  firstName: string;
-  lastName: string;
-  jerseyNumber: number;
+  playerName: string;
   position: string;
-  email?: string;
+  jerseyNumber: number;
 }
 
 const positions = [
@@ -78,7 +73,7 @@ const positions = [
 
 // Mock team data
 const mockTeamData: TeamData = {
-  teamId: "team_123",
+  teamId: "TEAM-ABC-123",
   teamName: "Thunder Strikers",
   tournamentName: "Summer Soccer Cup 2024",
   tournamentId: "tournament_456",
@@ -89,37 +84,37 @@ const mockTeamData: TeamData = {
 
 // Mock registered players
 const mockPlayers: RegisteredPlayer[] = [
-  {
-    id: "1",
-    firstName: "John",
-    lastName: "Doe",
-    jerseyNumber: 7,
-    position: "Forward",
-    email: "john@example.com",
-  },
+  { id: "1", playerName: "John Smith", jerseyNumber: 7, position: "Forward" },
   {
     id: "2",
-    firstName: "Mike",
-    lastName: "Smith",
+    playerName: "Mike Johnson",
     jerseyNumber: 10,
     position: "Midfielder",
-    email: "mike@example.com",
   },
   {
     id: "3",
-    firstName: "Alex",
-    lastName: "Johnson",
+    playerName: "Alex Davis",
     jerseyNumber: 1,
     position: "Goalkeeper",
-    email: "alex@example.com",
   },
   {
     id: "4",
-    firstName: "Chris",
-    lastName: "Brown",
+    playerName: "Chris Wilson",
     jerseyNumber: 5,
     position: "Defender",
-    email: "chris@example.com",
+  },
+  { id: "5", playerName: "Taylor Brown", jerseyNumber: 9, position: "Striker" },
+  {
+    id: "6",
+    playerName: "Jordan Miller",
+    jerseyNumber: 4,
+    position: "Defender",
+  },
+  {
+    id: "7",
+    playerName: "Casey Thomas",
+    jerseyNumber: 8,
+    position: "Midfielder",
   },
 ];
 
@@ -132,12 +127,9 @@ export default function PlayerRegistrationPage() {
   const [error, setError] = useState("");
 
   const [formData, setFormData] = useState<PlayerFormData>({
-    firstName: "",
-    lastName: "",
+    playerName: "",
     jerseyNumber: "",
     position: "",
-    email: "",
-    phoneNumber: "",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -155,8 +147,8 @@ export default function PlayerRegistrationPage() {
     setError("");
 
     // Validate form
-    if (!formData.firstName.trim() || !formData.lastName.trim()) {
-      setError("First name and last name are required");
+    if (!formData.playerName.trim()) {
+      setError("Player name is required");
       setSubmitting(false);
       return;
     }
@@ -169,16 +161,14 @@ export default function PlayerRegistrationPage() {
 
     try {
       // Mock API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
       // Create new player
       const newPlayer: RegisteredPlayer = {
         id: Date.now().toString(),
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+        playerName: formData.playerName,
         jerseyNumber: parseInt(formData.jerseyNumber),
         position: formData.position,
-        email: formData.email || undefined,
       };
 
       // Update state
@@ -193,12 +183,9 @@ export default function PlayerRegistrationPage() {
 
       // Reset form
       setFormData({
-        firstName: "",
-        lastName: "",
+        playerName: "",
         jerseyNumber: "",
         position: "",
-        email: "",
-        phoneNumber: "",
       });
     } catch (err: any) {
       setError(err.message || "Registration failed. Please try again.");
@@ -216,7 +203,7 @@ export default function PlayerRegistrationPage() {
         {/* Header */}
         <div className="mb-6">
           <button
-            onClick={() => router.push("/register/team")}
+            onClick={() => router.push("/auth/register/")}
             className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-4 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -278,7 +265,7 @@ export default function PlayerRegistrationPage() {
                 <div className="space-y-1">
                   <p className="text-sm text-gray-500 font-medium">Team Code</p>
                   <div className="font-mono bg-gray-100 px-3 py-2 rounded-lg border text-sm">
-                    {teamData.teamId.toUpperCase()}
+                    {teamData.teamId}
                   </div>
                 </div>
                 <div className="pt-4 border-t">
@@ -322,10 +309,10 @@ export default function PlayerRegistrationPage() {
                   </div>
                   <div>
                     <p className="font-medium text-sm text-gray-900">
-                      Use real names
+                      Full Player Name
                     </p>
                     <p className="text-xs text-gray-500">
-                      Enter legal names as per ID
+                      Enter full name as per ID
                     </p>
                   </div>
                 </div>
@@ -348,10 +335,10 @@ export default function PlayerRegistrationPage() {
                   </div>
                   <div>
                     <p className="font-medium text-sm text-gray-900">
-                      Correct positions
+                      Primary position
                     </p>
                     <p className="text-xs text-gray-500">
-                      Select primary playing position
+                      Select main playing position
                     </p>
                   </div>
                 </div>
@@ -372,7 +359,7 @@ export default function PlayerRegistrationPage() {
                       Register New Player
                     </CardTitle>
                     <CardDescription className="text-gray-500">
-                      Fill in the player's information below
+                      Enter player details below (3 fields only)
                     </CardDescription>
                   </div>
                 </div>
@@ -386,44 +373,25 @@ export default function PlayerRegistrationPage() {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="firstName"
-                        className="text-sm font-medium"
-                      >
-                        First Name *
-                      </Label>
-                      <Input
-                        id="firstName"
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleInputChange}
-                        placeholder="John"
-                        className="h-11"
-                        required
-                        disabled={submitting}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName" className="text-sm font-medium">
-                        Last Name *
-                      </Label>
-                      <Input
-                        id="lastName"
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleInputChange}
-                        placeholder="Doe"
-                        className="h-11"
-                        required
-                        disabled={submitting}
-                      />
-                    </div>
+                  {/* Player Name Field */}
+                  <div className="space-y-2">
+                    <Label htmlFor="playerName" className="text-sm font-medium">
+                      Player Full Name *
+                    </Label>
+                    <Input
+                      id="playerName"
+                      name="playerName"
+                      value={formData.playerName}
+                      onChange={handleInputChange}
+                      placeholder="Enter full name"
+                      className="h-11"
+                      required
+                      disabled={submitting}
+                    />
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-4">
+                    {/* Jersey Number Field */}
                     <div className="space-y-2">
                       <Label
                         htmlFor="jerseyNumber"
@@ -439,13 +407,14 @@ export default function PlayerRegistrationPage() {
                         max="99"
                         value={formData.jerseyNumber}
                         onChange={handleInputChange}
-                        placeholder="7"
+                        placeholder="Enter number (1-99)"
                         className="h-11"
                         required
                         disabled={submitting}
                       />
                     </div>
 
+                    {/* Position Field */}
                     <div className="space-y-2">
                       <Label htmlFor="position" className="text-sm font-medium">
                         Position *
@@ -469,47 +438,11 @@ export default function PlayerRegistrationPage() {
                     </div>
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="text-sm font-medium">
-                        Email Address
-                      </Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        placeholder="player@example.com"
-                        className="h-11"
-                        disabled={submitting}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="phoneNumber"
-                        className="text-sm font-medium"
-                      >
-                        Phone Number
-                      </Label>
-                      <Input
-                        id="phoneNumber"
-                        name="phoneNumber"
-                        type="tel"
-                        value={formData.phoneNumber}
-                        onChange={handleInputChange}
-                        placeholder="+1 (555) 123-4567"
-                        className="h-11"
-                        disabled={submitting}
-                      />
-                    </div>
-                  </div>
-
+                  {/* Form Actions */}
                   <div className="pt-6 border-t">
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                       <div className="text-sm text-gray-500">
-                        Fields marked with * are required
+                        All fields are required
                       </div>
 
                       <div className="flex gap-3">
@@ -518,12 +451,9 @@ export default function PlayerRegistrationPage() {
                           variant="outline"
                           onClick={() =>
                             setFormData({
-                              firstName: "",
-                              lastName: "",
+                              playerName: "",
                               jerseyNumber: "",
                               position: "",
-                              email: "",
-                              phoneNumber: "",
                             })
                           }
                           disabled={submitting}
@@ -587,10 +517,10 @@ export default function PlayerRegistrationPage() {
                         </div>
                         <div>
                           <p className="font-medium text-gray-900">
-                            {player.firstName} {player.lastName}
+                            {player.playerName}
                           </p>
                           <p className="text-sm text-gray-500">
-                            {player.email || "No email provided"}
+                            {player.position}
                           </p>
                         </div>
                       </div>

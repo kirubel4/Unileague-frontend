@@ -12,7 +12,7 @@ export const mapApiToNewsArticle = (apiData: any[]): NewsArticle[] => {
       title: item.meta?.title || "Untitled",
       excerpt: excerpt,
       content: item.meta?.contetn,
-      image: item.image,
+      image: item.Image,
       author: item.sender?.username || "Unknown",
       scope: "global", // Assuming all are global from this endpoint
       published: true, // Assuming all fetched are published
