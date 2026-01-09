@@ -15,6 +15,7 @@ import { Tournament } from "@/app/(private)/admin/tournaments/page";
 import { mapTournaments } from "@/app/(private)/admin/tournaments/util";
 import useSWR from "swr";
 import { fetcher } from "@/lib/utils";
+import Link from "next/link";
 
 // Mock data based on your Tournament interface
 
@@ -347,15 +348,16 @@ export default function TournamentsPage() {
         <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 md:p-12 mb-16">
           <div className="max-w-3xl mx-auto text-center">
             <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
-              Want to host a tournament?
+              Want participate on Tournaments?
             </h3>
             <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
-              Get in touch with the ASTU Sports Committee to organize your own
-              football tournament.
+              register with team key
             </p>
-            <button className="px-8 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-all hover:scale-105 active:scale-95">
-              Contact Sports Committee
-            </button>
+            <Link href={"/tournaments/register"}>
+              <button className="px-8 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-all hover:scale-105 active:scale-95">
+                click here to register
+              </button>
+            </Link>
           </div>
         </div>
       </div>

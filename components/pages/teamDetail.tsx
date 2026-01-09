@@ -473,15 +473,7 @@ export function TeamDetail({
                         <th className="py-3 px-4 text-left text-xs lg:text-sm font-semibold text-gray-600">
                           Position
                         </th>
-                        <th className="py-3 px-4 text-left text-xs lg:text-sm font-semibold text-gray-600">
-                          Nationality
-                        </th>
-                        <th className="py-3 px-4 text-left text-xs lg:text-sm font-semibold text-gray-600">
-                          Age
-                        </th>
-                        <th className="py-3 px-4 text-left text-xs lg:text-sm font-semibold text-gray-600">
-                          Status
-                        </th>
+
                         {mode === "admin" && (
                           <th className="py-3 px-4 text-left text-xs lg:text-sm font-semibold text-gray-600">
                             Actions
