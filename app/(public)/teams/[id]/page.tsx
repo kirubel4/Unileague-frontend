@@ -139,8 +139,6 @@ export default function AdminTeamDetailPage() {
 
                 {/* Team Description */}
                 <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-3xl">
-                  {team?.location ||
-                    "Addis Ababa Science and Technology University"}
                   {team?.coach && ` • Coach: ${team.coach}`}
                 </p>
 

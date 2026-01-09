@@ -9,6 +9,7 @@ import { ChevronLeft, Copy, Check, Upload, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ApiResponse, getCookie } from "@/lib/utils";
+import { toast, Toaster } from "sonner";
 
 export default function ManagerTeamsCreate() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -17,7 +18,6 @@ export default function ManagerTeamsCreate() {
   const navigate = useRouter();
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [formData, setFormData] = useState({
     teamName: "",
     coachName: "",
@@ -32,7 +32,8 @@ export default function ManagerTeamsCreate() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!imageFile) {
-      alert("Please upload a team logo");
+      toast.error("select image please buddy");
+      setIsSubmitting(false);
       return;
     }
     setIsSubmitting(true);
@@ -48,10 +49,12 @@ export default function ManagerTeamsCreate() {
     });
     const response: ApiResponse = await res.json();
     if (!response.success) {
-      console.log(response.message);
+      toast.error(response.message);
+      setIsSubmitting(false);
       return;
     }
-    console.log("team created and registered");
+    toast.success("Team created");
+    setIsSubmitting(false);
     navigate.push("/manager/teams");
   };
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,6 +87,7 @@ export default function ManagerTeamsCreate() {
   return (
     <Layout role="manager" userName={userName}>
       {/* Header */}
+      <Toaster />
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground">Register Team</h1>
         <p className="text-muted-foreground mt-2">
