@@ -8,7 +8,6 @@ export function middleware(req: NextRequest) {
   if (url.pathname.startsWith("/admin")) {
     if (!token) {
       console.log("No token found, redirecting to login");
-
       url.pathname = "/auth/";
       return NextResponse.redirect(url);
     }
@@ -30,9 +29,19 @@ export function middleware(req: NextRequest) {
       return NextResponse.redirect(url);
     }
   }
+  if (url.pathname.startsWith("/tournaments/register/player")) {
+    if (!token) {
+      url.pathname = "/tournaments";
+      return NextResponse.redirect(url);
+    }
+  }
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/manager/:path*"],
+  matcher: [
+    "/admin/:path*",
+    "/manager/:path*",
+    "/tournaments/register/player/:path*",
+  ],
 };

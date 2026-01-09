@@ -2,24 +2,10 @@ import { ApiResponse, forwardApiResponse } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest) {
   try {
-    let tid;
-    const cookiId = req.cookies.get("tid")?.value;
-    const paramId = req.nextUrl.searchParams.get("tid");
     const page = req.nextUrl.searchParams.get("page");
-    console.log(page);
-    if (paramId) {
-      tid = paramId;
-    } else if (cookiId) {
-      tid = cookiId;
-    }
-    if (!tid) {
-      return NextResponse.json(
-        { message: "Missing parameters" },
-        { status: 500 }
-      );
-    }
+
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/notification/${tid}/tournament?page=${page}`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/notification/broadcast/${page}`,
       {
         method: "GET",
         headers: {
@@ -27,7 +13,6 @@ export async function GET(req: NextRequest) {
         },
       }
     );
-
     const data: ApiResponse = await res.json();
 
     return NextResponse.json(data);

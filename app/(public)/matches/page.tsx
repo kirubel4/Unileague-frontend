@@ -1,6 +1,7 @@
 "use client";
 
 import { MatchList } from "@/components/pages/MatchList";
+import MatchesListing from "@/components/pages/publicMatchListing";
 import {
   Calendar,
   Trophy,
@@ -67,23 +68,6 @@ export default function MatchesPage() {
         <div className="mb-12">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                Featured Matches
-              </h2>
-              <p className="text-gray-600">
-                Highlights of upcoming important matches
-              </p>
-            </div>
-            <button className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium">
-              <span>View All Featured</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <div>
               <h2 className="text-2xl font-bold text-gray-900">All Matches</h2>
               <p className="text-gray-600">
                 Complete schedule of all football matches
@@ -91,13 +75,7 @@ export default function MatchesPage() {
             </div>
           </div>
 
-          <MatchList
-            mode={"public"}
-            title="Matches Fixture"
-            description="View all football matches"
-            apiEndpoint={`/api/public/match/team?id=`}
-            className="mt-8"
-          />
+          <MatchesListing />
         </div>
       </div>
     </div>

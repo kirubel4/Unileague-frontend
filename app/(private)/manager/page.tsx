@@ -40,7 +40,7 @@ export default function ManagerDashboard() {
     fetcher
   );
 
-  const tournament: Tournament | null = tournamentRes?.data?.data ?? null;
+  const tournament: Tournament | null = tournamentRes?.data ?? null;
   const mappedTournament = tournament
     ? {
         id: tournament.id,
@@ -55,6 +55,10 @@ export default function ManagerDashboard() {
         managers: tournament.managers || [],
       }
     : null;
+  {
+    mappedTournament?.name;
+  }
+  console.log(tournament);
   const tournamentInfo = {
     name: "City League Championship 2024",
     logo: "⚽",
@@ -120,19 +124,19 @@ export default function ManagerDashboard() {
   const quickStats = [
     {
       label: "Total Teams",
-      value: tournamentInfo.teams,
+      value: mappedTournament?.teams,
       icon: <Users className="w-5 h-5" />,
       color: "bg-blue-50 text-blue-600",
     },
     {
       label: "Total Players",
-      value: tournamentInfo.players,
+      value: mappedTournament?.players,
       icon: <Users className="w-5 h-5" />,
       color: "bg-green-50 text-green-600",
     },
     {
-      label: "Completed Matches",
-      value: tournamentInfo.completedMatches,
+      label: "Tournament Status",
+      value: mappedTournament?.status,
       icon: <CheckCircle className="w-5 h-5" />,
       color: "bg-purple-50 text-purple-600",
     },
@@ -146,7 +150,7 @@ export default function ManagerDashboard() {
           <div className="text-5xl">{tournamentInfo.logo}</div>
           <div>
             <h1 className="text-3xl font-bold text-foreground">
-              {tournamentInfo.name}
+              {mappedTournament?.name}
             </h1>
             <p className="text-muted-foreground mt-1">
               Match Progress: {tournamentInfo.completedMatches} of{" "}
