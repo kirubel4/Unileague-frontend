@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-export async function GET(req: NextResponse) {
+import { NextRequest, NextResponse } from "next/server";
+export async function GET(req: NextRequest) {
   try {
     const token = req.cookies.get("aToken")?.value;
 
