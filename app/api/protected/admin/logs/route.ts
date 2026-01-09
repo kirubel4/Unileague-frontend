@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
       }
     );
 
-    const data: ApiResponse = await response.json();
+    const data: ApiResponse = await res.json();
 
     return NextResponse.json(data);
   } catch (error: any) {
