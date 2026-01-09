@@ -3,14 +3,16 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const mid = request.cookies.get('mid')?.value;
-    const tid = request.cookies.get('tid')?.value;
+    const mid = request.cookies.get("mid")?.value;
+    const tid = request.cookies.get("tid")?.value;
     if (!mid || !tid) {
       return NextResponse.json(
-        { message: 'Missing parameters' },
+        { message: "Missing parameters" },
         { status: 500 }
       );
     }
+    const token = request.cookies.get("aToken")?.value;
+
     const formData = await request.formData();
     formData.append("tournamentId", tid);
     formData.append("managerId", mid);
@@ -26,6 +28,7 @@ export async function POST(request: NextRequest) {
     const res = await fetch(`${backend}/manager/news/create`, {
       method: "POST",
       body: formData,
+      headers: { Authorization: `Bearer ${token}` },
     });
     console.log(res);
     const data: ApiResponse = await res.json();

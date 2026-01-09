@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function PUT(request: NextRequest) {
   try {
     const matchId = request.nextUrl.searchParams.get("id");
+    const token = request.cookies.get("aToken")?.value;
 
     if (!matchId) {
       return NextResponse.json(
@@ -21,7 +22,10 @@ export async function PUT(request: NextRequest) {
 
     const res = await fetch(`${backend}/manager/match/${matchId}/start`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     const data: ApiResponse = await res.json();

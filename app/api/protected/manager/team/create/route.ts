@@ -5,6 +5,7 @@ export async function POST(request: NextRequest) {
   try {
     let tid;
     const cookiId = request.cookies.get("tid")?.value;
+    const token = request.cookies.get("aToken")?.value;
 
     if (cookiId) {
       tid = cookiId;
@@ -24,6 +25,7 @@ export async function POST(request: NextRequest) {
     const res = await fetch(`${backend}/manager/team/create`, {
       method: "POST",
       body: formData,
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     const data: ApiResponse = await res.json();
