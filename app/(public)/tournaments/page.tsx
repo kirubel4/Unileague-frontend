@@ -16,6 +16,7 @@ import { mapTournaments } from "@/app/(private)/admin/tournaments/util";
 import useSWR from "swr";
 import { fetcher } from "@/lib/utils";
 import Link from "next/link";
+import Loading from "@/components/ui/loading";
 
 // Mock data based on your Tournament interface
 
@@ -217,105 +218,39 @@ export default function TournamentsPage() {
         </div>
 
         {/* Tournament Grid */}
-        {filteredTournaments?.length > 0 ? (
+        {/* Tournament Grid Section */}
+        {isLoading ? (
+          // Loading state
           <div className="mb-16">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-gray-900">
-                Showing {filteredTournaments?.length} tournament
-                {filteredTournaments?.length !== 1 ? "s" : ""}
+                Loading tournaments...
               </h3>
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                >
-                  Clear search
-                </button>
-              )}
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredTournaments?.map((tournament) => (
+              {/* Loading skeleton cards */}
+              {[...Array(3)].map((_, index) => (
                 <div
-                  key={tournament?.id}
-                  onClick={() => handleCardClick(tournament.id)}
-                  className="group bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+                  key={index}
+                  className="group bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden animate-pulse"
                 >
-                  {/* Tournament Image */}
-                  <div className="relative h-48 overflow-hidden">
-                    <div
-                      className="absolute inset-0 bg-gradient-to-br from-gray-900 to-gray-800 group-hover:scale-105 transition-transform duration-500"
-                      style={{
-                        backgroundImage: tournament?.logurl
-                          ? `url(${tournament.logurl})`
-                          : undefined,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                      }}
-                    >
-                      {!tournament?.logurl && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Trophy className="w-16 h-16 text-gray-700" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-
-                    {/* Status Badge */}
-                    <div className="absolute top-4 left-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(
-                          tournament?.status
-                        )}`}
-                      >
-                        {tournament?.status}
-                      </span>
-                    </div>
-
-                    {/* Year Badge */}
-                    <div className="absolute top-4 right-4 bg-primary/50 backdrop-blur-sm px-3 py-1 rounded-full">
-                      <span className="text-sm font-semibold text-white">
-                        {getTournamentYear(tournament.startingDate)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Tournament Info */}
+                  {/* Tournament Image skeleton */}
+                  <div className="relative h-48 overflow-hidden bg-gray-200" />
+                  {/* Tournament Info skeleton */}
                   <div className="p-6">
-                    <h4 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                      {tournament?.tournamentName}
-                    </h4>
-
-                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-                      <div className="flex items-center gap-1.5">
-                        <Calendar className="w-4 h-4" />
-                        <span>
-                          {formatDate(tournament?.startingDate)} -{" "}
-                          {formatDate(tournament?.endingDate)}
-                        </span>
-                      </div>
-                    </div>
-
+                    <div className="h-6 bg-gray-200 rounded mb-4"></div>
+                    <div className="h-4 bg-gray-200 rounded mb-4"></div>
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <Users className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm font-medium text-gray-700">
-                          {tournament?.teams} Teams
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2 text-blue-600 font-medium group-hover:gap-3 transition-all">
-                        <span className="text-sm">View Details</span>
-                        <ChevronRight className="w-4 h-4" />
-                      </div>
+                      <div className="h-4 w-20 bg-gray-200 rounded"></div>
+                      <div className="h-4 w-24 bg-gray-200 rounded"></div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-        ) : (
-          // Empty State
+        ) : filteredTournaments.length === 0 ? (
+          // Empty state
           <div className="text-center py-16">
             <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 mb-6">
               <Trophy className="w-12 h-12 text-gray-400" />
@@ -341,6 +276,104 @@ export default function TournamentsPage() {
                 Show all tournaments
               </button>
             )}
+          </div>
+        ) : (
+          // Tournament grid with data
+          <div className="mb-16">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">
+                Showing {filteredTournaments.length} tournament
+                {filteredTournaments.length !== 1 ? "s" : ""}
+              </h3>
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  Clear search
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredTournaments.map((tournament) => (
+                <div
+                  key={tournament.id}
+                  onClick={() => handleCardClick(tournament.id)}
+                  className="group bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+                >
+                  {/* Tournament Image */}
+                  <div className="relative h-48 overflow-hidden">
+                    <div
+                      className="absolute inset-0 bg-gradient-to-br from-gray-900 to-gray-800 group-hover:scale-105 transition-transform duration-500"
+                      style={{
+                        backgroundImage: tournament.logurl
+                          ? `url(${tournament.logurl})`
+                          : undefined,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                      }}
+                    >
+                      {!tournament.logurl && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Trophy className="w-16 h-16 text-gray-700" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+                    {/* Status Badge */}
+                    <div className="absolute top-4 left-4">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(
+                          tournament.status
+                        )}`}
+                      >
+                        {tournament.status}
+                      </span>
+                    </div>
+
+                    {/* Year Badge */}
+                    <div className="absolute top-4 right-4 bg-primary/50 backdrop-blur-sm px-3 py-1 rounded-full">
+                      <span className="text-sm font-semibold text-white">
+                        {getTournamentYear(tournament.startingDate)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Tournament Info */}
+                  <div className="p-6">
+                    <h4 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                      {tournament.tournamentName}
+                    </h4>
+
+                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
+                      <div className="flex items-center gap-1.5">
+                        <Calendar className="w-4 h-4" />
+                        <span>
+                          {formatDate(tournament.startingDate)} -{" "}
+                          {formatDate(tournament.endingDate)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <Users className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm font-medium text-gray-700">
+                          {tournament.teams} Teams
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-blue-600 font-medium group-hover:gap-3 transition-all">
+                        <span className="text-sm">View Details</span>
+                        <ChevronRight className="w-4 h-4" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
