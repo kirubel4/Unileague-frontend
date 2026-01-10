@@ -35,7 +35,6 @@ export async function POST(request: NextRequest) {
     parsedContent.adminId = mid;
     formData.set("content", JSON.stringify(parsedContent));
 
-    console.log(formData);
     const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backend) {
       return NextResponse.json(
