@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
       );
     }
     const formData = await request.formData();
-
+    const token = request.cookies.get("aToken")?.value;
     const content = formData.get("content");
 
     if (!content || typeof content !== "string") {
@@ -46,6 +46,9 @@ export async function POST(request: NextRequest) {
     const res = await fetch(`${backend}/admin/news/create`, {
       method: "POST",
       body: formData,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     const data: ApiResponse = await res.json();
     return NextResponse.json(data, { status: res.status });
