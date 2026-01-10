@@ -332,9 +332,66 @@ export default function TeamsPage() {
             </div>
           </div>
 
-          {teams?.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-6">
-              {teams?.map((team) => (
+          {load ? (
+            // Loading state
+            <div className="mb-16">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-gray-900">
+                  Loading teams...
+                </h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Loading skeleton cards */}
+                {[...Array(6)].map((_, index) => (
+                  <div
+                    key={index}
+                    className="group block bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden animate-pulse"
+                  >
+                    {/* Team image skeleton */}
+                    <div className="relative h-40 bg-gray-200" />
+                    {/* Team info skeleton */}
+                    <div className="p-6">
+                      <div className="mb-4">
+                        <div className="h-6 bg-gray-200 rounded mb-2 w-3/4"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                      </div>
+                      <div className="mt-6 pt-4 border-t border-gray-200">
+                        <div className="flex items-center justify-between">
+                          <div className="h-4 w-20 bg-gray-200 rounded"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : teams.length === 0 ? (
+            // Empty state
+            <div className="text-center py-16">
+              <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 mb-6">
+                <Shield className="w-12 h-12 text-gray-400" />
+              </div>
+              <h3 className="text-2xl font-semibold text-gray-900 mb-3">
+                No teams found
+              </h3>
+              <p className="text-gray-600 max-w-md mx-auto mb-6">
+                {searchQuery
+                  ? `No teams match your current filters. Try adjusting your search criteria or clear all filters.`
+                  : `No teams are available at the moment. Please check back later.`}
+              </p>
+              {searchQuery && (
+                <button
+                  onClick={resetFilters}
+                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
+                >
+                  Clear all filters
+                </button>
+              )}
+            </div>
+          ) : (
+            // Teams grid with data
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {teams.map((team) => (
                 <Link
                   key={team.id}
                   href={`/teams/${team.id}`}
@@ -366,15 +423,6 @@ export default function TeamsPage() {
                         </div>
                       </div>
 
-                      {/* Year Badge */}
-                      {/* <div className="absolute top-4 right-4">
-                        <div className="px-2 py-1 rounded-lg bg-white/20 backdrop-blur-sm">
-                          <span className="text-xs font-semibold text-white">
-                            {team.tournamentName}
-                          </span>
-                        </div>
-                      </div> */}
-
                       <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/40 to-transparent" />
                     </div>
 
@@ -401,26 +449,6 @@ export default function TeamsPage() {
                   </div>
                 </Link>
               ))}
-            </div>
-          ) : (
-            // Empty State
-            <div className="text-center py-16">
-              <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 mb-6">
-                <Shield className="w-12 h-12 text-gray-400" />
-              </div>
-              <h3 className="text-2xl font-semibold text-gray-900 mb-3">
-                No teams found
-              </h3>
-              <p className="text-gray-600 max-w-md mx-auto mb-6">
-                No teams match your current filters. Try adjusting your search
-                criteria or clear all filters.
-              </p>
-              <button
-                onClick={resetFilters}
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
-              >
-                Clear all filters
-              </button>
             </div>
           )}
         </div>
