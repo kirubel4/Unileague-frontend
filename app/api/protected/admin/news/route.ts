@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
       );
     }
     const formData = await request.formData();
-
+    const token = request.cookies.get("aToken")?.value;
     const content = formData.get("content");
 
     if (!content || typeof content !== "string") {
@@ -35,7 +35,6 @@ export async function POST(request: NextRequest) {
     parsedContent.adminId = mid;
     formData.set("content", JSON.stringify(parsedContent));
 
-    console.log(formData);
     const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backend) {
       return NextResponse.json(
@@ -46,6 +45,9 @@ export async function POST(request: NextRequest) {
     const res = await fetch(`${backend}/admin/news/create`, {
       method: "POST",
       body: formData,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     const data: ApiResponse = await res.json();
     return NextResponse.json(data, { status: res.status });

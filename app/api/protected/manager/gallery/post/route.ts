@@ -4,13 +4,22 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     const token = request.cookies.get("aToken")?.value;
+    let tid;
+    const cookiId = request.cookies.get("tid")?.value;
+    if (cookiId) {
+      tid = cookiId;
+    }
 
-    const id = "fb1c80f4-7ffc-4b84-b329-d08511349fa2";
     const formData = await request.formData();
     if (formData.get("ownerId") === "fill") {
-      formData.set("ownerId", id);
+      if (!tid) {
+        return NextResponse.json(
+          { message: "Missing parameter please re-login" },
+          { status: 400 }
+        );
+      }
+      formData.set("ownerId", String(tid));
     }
-    console.log(formData);
     const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backend) {
       return NextResponse.json(
