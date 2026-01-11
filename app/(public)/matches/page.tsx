@@ -22,15 +22,15 @@ export default function MatchesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-white">
       {/* Hero Header */}
-      <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
+      <div className="relative bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
         {/* Background Pattern */}
-        <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px]" />
+        <div className="absolute inset-0 bg-grid-white/[0.02] bg-size-[20px_20px]" />
 
         {/* Animated Elements */}
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-gradient-to-r from-green-500/10 to-blue-500/10 blur-3xl" />
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-linear-to-r from-blue-500/10 to-purple-500/10 blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-linear-to-r from-green-500/10 to-blue-500/10 blur-3xl" />
 
         <div className="relative px-6 py-24 md:py-32">
           <div className="max-w-7xl mx-auto">
@@ -46,7 +46,7 @@ export default function MatchesPage() {
               {/* Main Title */}
               <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight">
                 Match{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400">
+                <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-green-400">
                   Fixtures
                 </span>
               </h1>
@@ -61,7 +61,7 @@ export default function MatchesPage() {
           </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-50 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-gray-50 to-transparent" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-10">

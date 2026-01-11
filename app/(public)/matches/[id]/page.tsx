@@ -106,14 +106,14 @@ export default function MatchDetailPage() {
   const { date, time } = formatDateTime(matches?.dateTime);
 
   return (
-    <div className="min-h-screen lg:mb-10 mb-5 sm:mb-7 bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen lg:mb-10 mb-5 sm:mb-7 bg-linear-to-b from-gray-50 to-white">
       {/* Back Navigation */}
 
       {/* Match Header */}
-      <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-        <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px]" />
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-gradient-to-r from-green-500/10 to-blue-500/10 blur-3xl" />
+      <div className="relative bg-linear-to-br from-gray-900 via-gray-800 to-gray-900">
+        <div className="absolute inset-0 bg-grid-white/[0.02] bg-size-[20px_20px]" />
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-linear-to-r from-blue-500/10 to-purple-500/10 blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-linear-to-r from-green-500/10 to-blue-500/10 blur-3xl" />
 
         <div className="relative px-6 py-12 md:py-16">
           <div className="max-w-7xl mx-auto">
@@ -227,7 +227,7 @@ export default function MatchDetailPage() {
           </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-50 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-gray-50 to-transparent" />
       </div>
 
       {/* Main Content */}
@@ -285,7 +285,7 @@ export default function MatchDetailPage() {
                   {/* Timeline Visualization */}
                   <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
                     <div
-                      className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-600 to-purple-600"
+                      className="absolute top-0 left-0 h-full bg-linear-to-r from-blue-600 to-purple-600"
                       style={{
                         width: `${
                           (matches?.statistics.possession.home / 100) * 100
@@ -293,7 +293,7 @@ export default function MatchDetailPage() {
                       }}
                     />
                     <div
-                      className="absolute top-0 right-0 h-full bg-gradient-to-r from-green-600 to-emerald-600"
+                      className="absolute top-0 right-0 h-full bg-linear-to-r from-green-600 to-emerald-600"
                       style={{
                         width: `${
                           (matches?.statistics.possession.away / 100) * 100
@@ -382,13 +382,13 @@ export default function MatchDetailPage() {
                     <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                       <div className="flex h-full">
                         <div
-                          className="bg-gradient-to-r from-blue-600 to-blue-500"
+                          className="bg-linear-to-r from-blue-600 to-blue-500"
                           style={{
                             width: `${matches?.statistics.possession.home}%`,
                           }}
                         />
                         <div
-                          className="bg-gradient-to-r from-green-600 to-emerald-500"
+                          className="bg-linear-to-r from-green-600 to-emerald-500"
                           style={{
                             width: `${matches?.statistics.possession.away}%`,
                           }}
@@ -711,7 +711,7 @@ export default function MatchDetailPage() {
                           <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
                             <div className="flex h-full">
                               <div
-                                className="bg-gradient-to-r from-blue-600 to-blue-500"
+                                className="bg-linear-to-r from-blue-600 to-blue-500"
                                 style={{
                                   width: `${
                                     total > 0 ? (homeValue / total) * 100 : 50
@@ -719,7 +719,7 @@ export default function MatchDetailPage() {
                                 }}
                               />
                               <div
-                                className="bg-gradient-to-r from-green-600 to-emerald-500"
+                                className="bg-linear-to-r from-green-600 to-emerald-500"
                                 style={{
                                   width: `${
                                     total > 0 ? (awayValue / total) * 100 : 50

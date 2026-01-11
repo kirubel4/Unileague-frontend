@@ -75,10 +75,10 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border-t border-gray-800">
+    <footer className="relative bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 border-t border-gray-800">
       {/* Decorative Elements */}
-      <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px]" />
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
+      <div className="absolute inset-0 bg-grid-white/[0.02] bg-size-[20px_20px]" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-blue-500/50 to-transparent" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
@@ -86,8 +86,8 @@ export default function Footer() {
           <div className="space-y-6">
             <Link href="/" className="inline-flex items-center gap-3 group">
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur opacity-75 group-hover:opacity-100 transition-opacity" />
-                <div className="relative w-12 h-12 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 shadow-xl flex items-center justify-center overflow-hidden border-2 border-white/20">
+                <div className="absolute inset-0 bg-linear-to-r from-blue-500 to-purple-500 rounded-full blur opacity-75 group-hover:opacity-100 transition-opacity" />
+                <div className="relative w-12 h-12 rounded-full bg-linear-to-r from-blue-600 to-indigo-600 shadow-xl flex items-center justify-center overflow-hidden border-2 border-white/20">
                   <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
                     <Trophy className="w-5 h-5 text-blue-600" />
                   </div>
@@ -158,7 +158,7 @@ export default function Footer() {
                 const Icon = info.icon;
                 return (
                   <li key={index} className="flex items-start gap-3">
-                    <div className="p-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg">
+                    <div className="p-2 bg-linear-to-r from-blue-500/10 to-purple-500/10 rounded-lg">
                       <Icon className="w-4 h-4 text-blue-400" />
                     </div>
                     <div>
@@ -199,13 +199,13 @@ export default function Footer() {
               </div>
               <button
                 type="submit"
-                className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg hover:shadow-blue-500/25 transition-all"
+                className="w-full py-3 bg-linear-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg hover:shadow-blue-500/25 transition-all"
               >
                 Subscribe
               </button>
             </form>
 
-            <div className="mt-6 p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg border border-white/10">
+            <div className="mt-6 p-4 bg-linear-to-r from-blue-500/10 to-purple-500/10 rounded-lg border border-white/10">
               <div className="flex items-center gap-2 text-sm text-gray-400">
                 <Shield className="w-4 h-4" />
                 <span>Secure & Privacy Protected</span>
@@ -215,7 +215,7 @@ export default function Footer() {
         </div>
 
         {/* Divider */}
-        <div className="my-8 lg:my-12 h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent" />
+        <div className="my-8 lg:my-12 h-px bg-linear-to-r from-transparent via-gray-700 to-transparent" />
 
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
@@ -260,7 +260,7 @@ export default function Footer() {
         {/* Back to Top */}
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-8 right-8 p-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all z-50"
+          className="fixed bottom-8 right-8 p-3 bg-linear-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all z-50"
           aria-label="Back to top"
         >
           <svg
@@ -280,7 +280,7 @@ export default function Footer() {
       </div>
 
       {/* Decorative Bottom */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600" />
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-linear-to-r from-blue-600 via-purple-600 to-pink-600" />
     </footer>
   );
 }

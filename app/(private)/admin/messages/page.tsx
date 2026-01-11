@@ -211,7 +211,7 @@ export default function AdminMessages() {
         `}
         >
           {/* Header with Search */}
-          <div className="p-4 border-b border-border bg-gradient-to-r from-gray-50 to-white">
+          <div className="p-4 border-b border-border bg-linear-to-r from-gray-50 to-white">
             <div className="relative">
               <Search className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
               <Input
@@ -258,8 +258,8 @@ export default function AdminMessages() {
                   >
                     <div className="flex items-center gap-3">
                       {/* Avatar */}
-                      <div className="relative flex-shrink-0">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                      <div className="relative shrink-0">
+                        <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                           {getInitials(manager.name)}
                         </div>
                         {manager.unreadCount > 0 && (
@@ -316,10 +316,10 @@ export default function AdminMessages() {
           {selectedManagerData ? (
             <>
               {/* Chat Header */}
-              <div className="px-4 md:px-6 py-4 border-b border-border bg-gradient-to-r from-gray-50 to-white">
+              <div className="px-4 md:px-6 py-4 border-b border-border bg-linear-to-r from-gray-50 to-white">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                    <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                       {getInitials(selectedManagerData.name)}
                     </div>
                     <div>
@@ -356,7 +356,7 @@ export default function AdminMessages() {
               </div>
 
               {/* Messages Container */}
-              <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-gradient-to-b from-gray-50/50 to-white">
+              <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-linear-to-b from-gray-50/50 to-white">
                 {isLoadingMessages ? (
                   <div className="flex items-center justify-center h-full">
                     <div className="text-center space-y-4">
@@ -368,7 +368,7 @@ export default function AdminMessages() {
                   </div>
                 ) : sortedMessages?.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-center px-4">
-                    <div className="w-20 h-20 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-full flex items-center justify-center mb-6">
+                    <div className="w-20 h-20 bg-linear-to-br from-blue-50 to-indigo-50 rounded-full flex items-center justify-center mb-6">
                       <MessageCircle className="w-10 h-10 text-blue-400" />
                     </div>
                     <h3 className="text-xl font-semibold text-gray-800 mb-3">
@@ -416,7 +416,7 @@ export default function AdminMessages() {
                               <div
                                 className={`px-4 py-3 rounded-2xl ${
                                   isAdmin
-                                    ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-br-none"
+                                    ? "bg-linear-to-r from-blue-600 to-blue-500 text-white rounded-br-none"
                                     : "bg-white text-gray-800 border border-gray-200 shadow-sm rounded-bl-none"
                                 }`}
                               >

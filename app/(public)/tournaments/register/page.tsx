@@ -56,7 +56,7 @@ export default function TeamRegistrationAuth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 to-slate-100 px-4">
       <Toaster position="top-center" />
 
       <Card className="w-full max-w-md shadow-lg">

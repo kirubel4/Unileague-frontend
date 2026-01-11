@@ -139,7 +139,7 @@ export default function PlayerRegistrationPage() {
   const progress = (10 / 20) * 100;
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
           <p className="text-gray-600">Loading team information...</p>
@@ -148,14 +148,14 @@ export default function PlayerRegistrationPage() {
     );
   }
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 p-4 md:p-6">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-slate-100 p-4 md:p-6">
       <Toaster position="top-center" />
 
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="space-y-4">
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-4 md:p-5">
+          <div className="bg-linear-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-4 md:p-5">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-full bg-linear-to-r from-blue-600 to-indigo-600 flex items-center justify-center">
                 <Trophy className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -201,7 +201,7 @@ export default function PlayerRegistrationPage() {
                     </span>
                   </p>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-linear-to-r from-green-400 to-emerald-500 flex items-center justify-center">
                   <Users className="w-5 h-5 text-white" />
                 </div>
               </div>
@@ -217,7 +217,7 @@ export default function PlayerRegistrationPage() {
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}
                     transition={{ duration: 0.8 }}
-                    className="h-2 rounded-full bg-gradient-to-r from-green-400 to-emerald-500"
+                    className="h-2 rounded-full bg-linear-to-r from-green-400 to-emerald-500"
                   />
                 </div>
               </div>
@@ -229,7 +229,7 @@ export default function PlayerRegistrationPage() {
           {/* LEFT - Form Section */}
           <div className="space-y-6">
             <Card className="shadow-lg border-0">
-              <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-lg">
+              <CardHeader className="bg-linear-to-r from-blue-600 to-blue-700 text-white rounded-t-lg">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
                     <UserPlus className="w-5 h-5" />
@@ -353,7 +353,7 @@ export default function PlayerRegistrationPage() {
 
                   <Button
                     type="submit"
-                    className="w-full h-11 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+                    className="w-full h-11 bg-linear-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
                     disabled={loading}
                   >
                     {loading ? (
@@ -401,7 +401,7 @@ export default function PlayerRegistrationPage() {
                       key={p.id}
                       className="flex items-center gap-4 p-4 rounded-xl border bg-white hover:shadow-md transition-all duration-200"
                     >
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white flex items-center justify-center font-bold text-lg">
+                      <div className="w-12 h-12 rounded-full bg-linear-to-r from-blue-600 to-blue-500 text-white flex items-center justify-center font-bold text-lg">
                         #{p.number}
                       </div>
                       <div className="flex-1">

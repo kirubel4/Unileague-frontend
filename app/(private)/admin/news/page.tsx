@@ -251,7 +251,7 @@ export default function AdminNews() {
                                 : "Tournament"}
                             </span>
                             {article.tournament && (
-                              <span className="text-xs text-muted-foreground truncate max-w-[150px]">
+                              <span className="text-xs text-muted-foreground truncate max-w-37.5">
                                 {article.tournament}
                               </span>
                             )}

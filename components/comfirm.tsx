@@ -32,7 +32,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   if (!mounted || !isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40">
+    <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/40">
       <div className="bg-white rounded-lg shadow-xl p-6 w-80">
         <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
         <p className="text-gray-600 mt-2 text-sm">{message}</p>

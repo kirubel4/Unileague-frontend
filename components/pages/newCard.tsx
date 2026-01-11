@@ -77,13 +77,13 @@ export default function NewsCard({ article, scope }: NewsCardProps) {
             className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-blue-500/20 to-purple-500/20" />
+          <div className="w-full h-full bg-linear-to-br from-blue-500/20 to-purple-500/20" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/40 to-transparent" />
 
         {/* Scope Badge */}
         <div className="absolute top-4 left-4">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-linear-to-r from-blue-600 to-purple-600 text-white shadow-lg">
             <Newspaper className="w-3 h-3" />
             <span className="text-xs font-bold">
               {scope === "global" ? "Global" : "Tournament"}
@@ -145,7 +145,7 @@ export default function NewsCard({ article, scope }: NewsCardProps) {
         {/* Expanded Content - Accordion Style */}
         <div
           className={`transition-all duration-300 ease-in-out overflow-hidden ${
-            isExpanded ? "max-h-[2000px] opacity-100 mt-4" : "max-h-0 opacity-0"
+            isExpanded ? "max-h-500 opacity-100 mt-4" : "max-h-0 opacity-0"
           }`}
         >
           <div className="space-y-4 pt-4 border-t border-gray-100">
@@ -191,7 +191,7 @@ export default function NewsCard({ article, scope }: NewsCardProps) {
 
             {/* Key Takeaways */}
             {article.excerpt && (
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 p-4">
+              <div className="bg-linear-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Zap className="w-4 h-4 text-blue-600" />
                   <h4 className="font-bold text-blue-800">Quick Summary</h4>
@@ -203,7 +203,7 @@ export default function NewsCard({ article, scope }: NewsCardProps) {
                     .slice(0, 3)
                     .map((point, index) => (
                       <li key={index} className="flex items-start gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 shrink-0" />
                         <span className="text-sm text-blue-700">
                           {point.trim()}
                           {!point.trim().endsWith(".") && "."}

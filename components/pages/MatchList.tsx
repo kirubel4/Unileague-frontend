@@ -190,7 +190,7 @@ export function MatchList({
   if (isLoading) {
     return (
       loadingComponent || (
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-100">
           <div className="text-center space-y-3">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
             <p className="text-muted-foreground">Loading matches...</p>
@@ -396,7 +396,7 @@ export function MatchList({
         {activeTab === "scheduled" && (
           <>
             {Object.entries(matchesByDate).length === 0 ? (
-              <div className="text-center py-12 bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-dashed border-gray-200">
+              <div className="text-center py-12 bg-linear-to-br from-gray-50 to-white rounded-2xl border border-dashed border-gray-200">
                 <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                 <p className="text-gray-500 font-medium">
                   No scheduled matches
@@ -411,7 +411,7 @@ export function MatchList({
               Object.entries(matchesByDate).map(([date, matches]) => (
                 <div key={date}>
                   <div className="flex items-center gap-2 mb-4">
-                    <Calendar className="w-4 h-4 text-primary flex-shrink-0" />
+                    <Calendar className="w-4 h-4 text-primary shrink-0" />
                     <h3 className="text-base lg:text-lg font-bold text-foreground truncate">
                       {date}
                     </h3>
@@ -428,7 +428,7 @@ export function MatchList({
                         <div
                           key={match.id}
                           onClick={() => handleMatchClick(match.id)}
-                          className="bg-gradient-to-br from-white to-blue-50 rounded-xl border border-blue-100 p-4 lg:p-5 hover:shadow-lg hover:border-blue-200 transition-all duration-200 group cursor-pointer"
+                          className="bg-linear-to-br from-white to-blue-50 rounded-xl border border-blue-100 p-4 lg:p-5 hover:shadow-lg hover:border-blue-200 transition-all duration-200 group cursor-pointer"
                         >
                           {/* Header */}
                           <div className="flex items-start justify-between mb-4">
@@ -507,7 +507,7 @@ export function MatchList({
         {activeTab === "live" && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 lg:gap-4">
             {filteredMatches.length === 0 ? (
-              <div className="col-span-full text-center py-12 bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-dashed border-gray-200">
+              <div className="col-span-full text-center py-12 bg-linear-to-br from-gray-50 to-white rounded-2xl border border-dashed border-gray-200">
                 <PlayCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                 <p className="text-gray-500 font-medium">No live matches</p>
                 <p className="text-sm text-gray-400 mt-1">
@@ -521,7 +521,7 @@ export function MatchList({
                 <div
                   key={match.id}
                   onClick={() => handleMatchClick(match.id)}
-                  className="bg-gradient-to-br from-white to-red-50 rounded-xl border-2 border-red-500 shadow-lg p-4 lg:p-5 hover:shadow-xl transition-all duration-200 cursor-pointer"
+                  className="bg-linear-to-br from-white to-red-50 rounded-xl border-2 border-red-500 shadow-lg p-4 lg:p-5 hover:shadow-xl transition-all duration-200 cursor-pointer"
                 >
                   {/* Live Badge */}
                   <div className="flex items-center justify-between mb-4">
@@ -600,7 +600,7 @@ export function MatchList({
         {activeTab === "completed" && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 lg:gap-4">
             {filteredMatches.length === 0 ? (
-              <div className="col-span-full text-center py-12 bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-dashed border-gray-200">
+              <div className="col-span-full text-center py-12 bg-linear-to-br from-gray-50 to-white rounded-2xl border border-dashed border-gray-200">
                 <CheckCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                 <p className="text-gray-500 font-medium">
                   No completed matches
@@ -619,7 +619,7 @@ export function MatchList({
                   <div
                     key={match.id}
                     onClick={() => handleMatchClick(match.id)}
-                    className="bg-gradient-to-br from-white to-green-50 rounded-xl border border-green-100 p-4 lg:p-5 hover:shadow-md hover:border-green-200 transition-all duration-200 group cursor-pointer"
+                    className="bg-linear-to-br from-white to-green-50 rounded-xl border border-green-100 p-4 lg:p-5 hover:shadow-md hover:border-green-200 transition-all duration-200 group cursor-pointer"
                   >
                     {/* Header */}
                     <div className="flex items-center justify-between mb-4">

@@ -46,7 +46,7 @@ export default function ManagerFixtures() {
   if (isLoading) {
     return (
       <Layout role="manager" userName={userName}>
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-100">
           <div className="text-center space-y-3">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
             <p className="text-muted-foreground">Loading fixtures data...</p>
@@ -172,7 +172,7 @@ export default function ManagerFixtures() {
       {/* Dashboard Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Setup Guide */}
-        <div className="bg-gradient-to-br from-blue-50 to-white rounded-xl border border-blue-100 p-6">
+        <div className="bg-linear-to-br from-blue-50 to-white rounded-xl border border-blue-100 p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2 bg-blue-100 rounded-lg">
               <Target className="w-5 h-5 text-blue-600" />
@@ -182,7 +182,7 @@ export default function ManagerFixtures() {
 
           <div className="space-y-4">
             <div className="flex gap-3">
-              <div className="flex-shrink-0 w-8 h-8 bg-white border border-blue-200 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
+              <div className="shrink-0 w-8 h-8 bg-white border border-blue-200 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
                 1
               </div>
               <div>
@@ -196,7 +196,7 @@ export default function ManagerFixtures() {
             </div>
 
             <div className="flex gap-3">
-              <div className="flex-shrink-0 w-8 h-8 bg-white border border-blue-200 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
+              <div className="shrink-0 w-8 h-8 bg-white border border-blue-200 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
                 2
               </div>
               <div>
@@ -210,7 +210,7 @@ export default function ManagerFixtures() {
             </div>
 
             <div className="flex gap-3">
-              <div className="flex-shrink-0 w-8 h-8 bg-white border border-blue-200 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
+              <div className="shrink-0 w-8 h-8 bg-white border border-blue-200 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
                 3
               </div>
               <div>
@@ -237,7 +237,7 @@ export default function ManagerFixtures() {
         </div>
 
         {/* Tournament Overview */}
-        <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl border border-border p-6">
+        <div className="bg-linear-to-br from-gray-50 to-white rounded-xl border border-border p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2 bg-gray-100 rounded-lg">
               <BarChart className="w-5 h-5 text-gray-600" />

@@ -444,7 +444,7 @@ export default function CreateMatchPage() {
         <div className="lg:col-span-1">
           <div className="sticky top-6">
             {/* Match Preview Card */}
-            <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl border border-border shadow-sm p-6 mb-6">
+            <div className="bg-linear-to-br from-gray-50 to-white rounded-xl border border-border shadow-sm p-6 mb-6">
               <h3 className="text-lg font-bold text-foreground mb-4">
                 Match Preview
               </h3>
@@ -493,7 +493,7 @@ export default function CreateMatchPage() {
                   <div className="space-y-3">
                     {formData.scheduledDate && (
                       <div className="flex items-center gap-3 text-sm">
-                        <Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
                         <div>
                           <p className="font-medium text-foreground">
                             Scheduled Date
@@ -516,7 +516,7 @@ export default function CreateMatchPage() {
 
                     {formData.venue && (
                       <div className="flex items-center gap-3 text-sm">
-                        <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
                         <div>
                           <p className="font-medium text-foreground">Venue</p>
                           <p className="text-muted-foreground">
@@ -528,7 +528,7 @@ export default function CreateMatchPage() {
 
                     {formData.referee && (
                       <div className="flex items-center gap-3 text-sm">
-                        <User className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        <User className="w-4 h-4 text-muted-foreground shrink-0" />
                         <div>
                           <p className="font-medium text-foreground">Referee</p>
                           <p className="text-muted-foreground">
@@ -543,14 +543,14 @@ export default function CreateMatchPage() {
             </div>
 
             {/* Quick Tips */}
-            <div className="bg-gradient-to-br from-blue-50 to-white rounded-xl border border-blue-100 p-6">
+            <div className="bg-linear-to-br from-blue-50 to-white rounded-xl border border-blue-100 p-6">
               <h3 className="text-lg font-bold text-foreground mb-4">
                 Quick Tips
               </h3>
 
               <div className="space-y-3">
                 <div className="flex gap-3">
-                  <div className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-xs">
+                  <div className="shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-xs">
                     1
                   </div>
                   <p className="text-sm text-muted-foreground">
@@ -560,7 +560,7 @@ export default function CreateMatchPage() {
                 </div>
 
                 <div className="flex gap-3">
-                  <div className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-xs">
+                  <div className="shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-xs">
                     2
                   </div>
                   <p className="text-sm text-muted-foreground">

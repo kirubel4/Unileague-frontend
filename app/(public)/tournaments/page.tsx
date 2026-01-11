@@ -89,10 +89,10 @@ export default function TournamentsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <main className="min-h-screen bg-linear-to-b from-gray-50 to-white">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-        <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px]" />
+      <div className="relative bg-linear-to-br from-gray-900 via-gray-800 to-gray-900">
+        <div className="absolute inset-0 bg-grid-white/[0.02] bg-size-[20px_20px]" />
         <div className="relative px-6 py-24 md:py-32">
           <div className="max-w-7xl mx-auto">
             <div className="max-w-3xl">
@@ -104,7 +104,7 @@ export default function TournamentsPage() {
               </div>
               <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
                 University{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+                <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-purple-400">
                   Tournaments
                 </span>
               </h1>
@@ -130,7 +130,7 @@ export default function TournamentsPage() {
         </div>
 
         {/* Floating cards background */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t  from-gray-50 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t  from-gray-50 to-transparent" />
       </div>
 
       {/* Main Content */}
@@ -180,7 +180,7 @@ export default function TournamentsPage() {
                   className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 border
         ${
           activeYear === year
-            ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg border-transparent"
+            ? "bg-linear-to-r from-blue-600 to-purple-600 text-white shadow-lg border-transparent"
             : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300"
         }`}
                 >
@@ -252,7 +252,7 @@ export default function TournamentsPage() {
         ) : filteredTournaments.length === 0 ? (
           // Empty state
           <div className="text-center py-16">
-            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 mb-6">
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-linear-to-br from-gray-100 to-gray-200 mb-6">
               <Trophy className="w-12 h-12 text-gray-400" />
             </div>
             <h3 className="text-2xl font-semibold text-gray-900 mb-3">
@@ -271,7 +271,7 @@ export default function TournamentsPage() {
                   setSearchQuery("");
                   setStatusFilter("ALL");
                 }}
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
+                className="px-6 py-3 bg-linear-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
               >
                 Show all tournaments
               </button>
@@ -305,7 +305,7 @@ export default function TournamentsPage() {
                   {/* Tournament Image */}
                   <div className="relative h-48 overflow-hidden">
                     <div
-                      className="absolute inset-0 bg-gradient-to-br from-gray-900 to-gray-800 group-hover:scale-105 transition-transform duration-500"
+                      className="absolute inset-0 bg-linear-to-br from-gray-900 to-gray-800 group-hover:scale-105 transition-transform duration-500"
                       style={{
                         backgroundImage: tournament.logurl
                           ? `url(${tournament.logurl})`
@@ -320,7 +320,7 @@ export default function TournamentsPage() {
                         </div>
                       )}
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
 
                     {/* Status Badge */}
                     <div className="absolute top-4 left-4">
@@ -378,7 +378,7 @@ export default function TournamentsPage() {
         )}
 
         {/* CTA Section */}
-        <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 md:p-12 mb-16">
+        <div className="bg-linear-to-r from-gray-900 to-gray-800 rounded-2xl p-8 md:p-12 mb-16">
           <div className="max-w-3xl mx-auto text-center">
             <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
               Want participate on Tournaments?

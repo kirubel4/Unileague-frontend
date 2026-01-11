@@ -13,10 +13,10 @@ import {
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-white">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
-        <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px]" />
+      <div className="relative bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
+        <div className="absolute inset-0 bg-grid-white/[0.02] bg-size-[20px_20px]" />
 
         <div className="relative px-6 py-24 md:py-32">
           <div className="max-w-7xl mx-auto">
@@ -45,7 +45,7 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/tournaments"
-                  className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-blue-500/25 hover:scale-105 active:scale-95 transition-all duration-300 inline-flex items-center justify-center gap-2"
+                  className="px-8 py-3 bg-linear-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-blue-500/25 hover:scale-105 active:scale-95 transition-all duration-300 inline-flex items-center justify-center gap-2"
                 >
                   <Trophy className="w-5 h-5" />
                   Browse Tournaments
@@ -62,7 +62,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-50 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-gray-50 to-transparent" />
       </div>
 
       {/* Main Content */}
@@ -80,7 +80,7 @@ export default function Home() {
               className="group bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
             >
               <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-r from-blue-100 to-blue-50 border border-blue-200 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <div className="w-16 h-16 rounded-xl bg-linear-to-r from-blue-100 to-blue-50 border border-blue-200 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <Trophy className="w-8 h-8 text-blue-600" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
@@ -102,7 +102,7 @@ export default function Home() {
               className="group bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
             >
               <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-r from-green-100 to-green-50 border border-green-200 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <div className="w-16 h-16 rounded-xl bg-linear-to-r from-green-100 to-green-50 border border-green-200 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <Calendar className="w-8 h-8 text-green-600" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
@@ -124,7 +124,7 @@ export default function Home() {
               className="group bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
             >
               <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-r from-purple-100 to-purple-50 border border-purple-200 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <div className="w-16 h-16 rounded-xl bg-linear-to-r from-purple-100 to-purple-50 border border-purple-200 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <Users className="w-8 h-8 text-purple-600" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Teams</h3>
@@ -144,7 +144,7 @@ export default function Home() {
               className="group bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
             >
               <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-r from-orange-100 to-orange-50 border border-orange-200 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <div className="w-16 h-16 rounded-xl bg-linear-to-r from-orange-100 to-orange-50 border border-orange-200 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <Newspaper className="w-8 h-8 text-orange-600" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">News</h3>
@@ -250,35 +250,35 @@ export default function Home() {
           <div className="flex flex-wrap gap-4 justify-center">
             <Link
               href="/tournaments"
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-xl hover:shadow-lg transition-all"
+              className="px-6 py-3 bg-linear-to-r from-blue-600 to-blue-700 text-white font-medium rounded-xl hover:shadow-lg transition-all"
             >
               View Tournaments
             </Link>
 
             <Link
               href="/matches"
-              className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-medium rounded-xl hover:shadow-lg transition-all"
+              className="px-6 py-3 bg-linear-to-r from-green-600 to-green-700 text-white font-medium rounded-xl hover:shadow-lg transition-all"
             >
               Check Matches
             </Link>
 
             <Link
               href="/teams"
-              className="px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-medium rounded-xl hover:shadow-lg transition-all"
+              className="px-6 py-3 bg-linear-to-r from-purple-600 to-purple-700 text-white font-medium rounded-xl hover:shadow-lg transition-all"
             >
               Browse Teams
             </Link>
 
             <Link
               href="/news"
-              className="px-6 py-3 bg-gradient-to-r from-orange-600 to-orange-700 text-white font-medium rounded-xl hover:shadow-lg transition-all"
+              className="px-6 py-3 bg-linear-to-r from-orange-600 to-orange-700 text-white font-medium rounded-xl hover:shadow-lg transition-all"
             >
               Read News
             </Link>
 
             <Link
               href="/about"
-              className="px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white font-medium rounded-xl hover:shadow-lg transition-all"
+              className="px-6 py-3 bg-linear-to-r from-gray-600 to-gray-700 text-white font-medium rounded-xl hover:shadow-lg transition-all"
             >
               About Us
             </Link>

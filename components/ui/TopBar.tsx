@@ -61,12 +61,12 @@ export function TopBar({
             href="/"
             className="flex items-center gap-3 group transition-all duration-200"
           >
-            <div className="relative w-9 h-9 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-200">
+            <div className="relative w-9 h-9 bg-linear-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-200">
               <span className="text-white font-bold text-lg">⚽</span>
               <div className="absolute -inset-1 bg-primary/20 rounded-xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              <span className="text-xl font-bold bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                 UniLeague-Hub
               </span>
               <span className="text-xs text-gray-500 font-medium tracking-wide">
@@ -98,12 +98,12 @@ export function TopBar({
           href="/"
           className="flex items-center gap-3 group transition-all duration-200"
         >
-          <div className="relative w-9 h-9 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-200">
+          <div className="relative w-9 h-9 bg-linear-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-200">
             <span className="text-white font-bold text-lg">⚽</span>
             <div className="absolute -inset-1 bg-primary/20 rounded-xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </div>
           <div className="flex flex-col">
-            <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
               UniLeague-Hub
             </span>
             <span className="text-xs text-gray-500 font-medium tracking-wide">
@@ -152,7 +152,7 @@ export function TopBar({
                 <p className="text-xs text-gray-500 font-medium">{userRole}</p>
               </div>
               <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center shadow-sm group-hover:shadow transition-shadow">
+                <div className="w-10 h-10 bg-linear-to-br from-primary to-primary/80 rounded-full flex items-center justify-center shadow-sm group-hover:shadow transition-shadow">
                   <User className="w-5 h-5 text-white" />
                 </div>
                 <div className="absolute inset-0 bg-primary/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
