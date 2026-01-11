@@ -101,7 +101,7 @@ export default function ManagerTeams() {
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-gradient-to-br from-blue-100 to-blue-50 rounded-lg">
+              <div className="p-2 bg-linear-to-br from-blue-100 to-blue-50 rounded-lg">
                 <Trophy className="w-6 h-6 text-blue-600" />
               </div>
               <h1 className="text-3xl font-bold text-foreground">
@@ -115,7 +115,7 @@ export default function ManagerTeams() {
 
           <div className="flex flex-col sm:flex-row gap-3">
             <Link href="/manager/teams/create">
-              <Button className="gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-md">
+              <Button className="gap-2 bg-linear-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-md">
                 <Plus className="w-4 h-4" />
                 Register New Team
               </Button>
@@ -130,7 +130,7 @@ export default function ManagerTeams() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-gradient-to-br from-blue-50 to-white rounded-xl border border-blue-100 p-4">
+        <div className="bg-linear-to-br from-blue-50 to-white rounded-xl border border-blue-100 p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground font-medium">
@@ -146,7 +146,7 @@ export default function ManagerTeams() {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-green-50 to-white rounded-xl border border-green-100 p-4">
+        <div className="bg-linear-to-br from-green-50 to-white rounded-xl border border-green-100 p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground font-medium">
@@ -162,7 +162,7 @@ export default function ManagerTeams() {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-50 to-white rounded-xl border border-purple-100 p-4">
+        <div className="bg-linear-to-br from-purple-50 to-white rounded-xl border border-purple-100 p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground font-medium">
@@ -178,7 +178,7 @@ export default function ManagerTeams() {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-orange-50 to-white rounded-xl border border-orange-100 p-4">
+        <div className="bg-linear-to-br from-orange-50 to-white rounded-xl border border-orange-100 p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground font-medium">
@@ -267,7 +267,7 @@ export default function ManagerTeams() {
         ) : (
           <>
             {/* Table Header */}
-            <div className="px-6 py-4 border-b border-border bg-gradient-to-r from-gray-50 to-white">
+            <div className="px-6 py-4 border-b border-border bg-linear-to-r from-gray-50 to-white">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">

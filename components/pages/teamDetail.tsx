@@ -224,7 +224,7 @@ export function TeamDetail({
           {mode === "admin" && (
             <div className="flex items-center gap-4">
               <div className="relative">
-                <div className="w-16 h-16 lg:w-20 lg:h-20 bg-gradient-to-br from-red-600 to-red-700 rounded-2xl flex items-center justify-center shadow-lg">
+                <div className="w-16 h-16 lg:w-20 lg:h-20 bg-linear-to-br from-red-600 to-red-700 rounded-2xl flex items-center justify-center shadow-lg">
                   <Trophy className="w-8 h-8 lg:w-10 lg:h-10 text-white" />
                 </div>
               </div>
@@ -362,7 +362,7 @@ export function TeamDetail({
             <div className="space-y-6">
               {/* Admin Actions */}
               {mode === "admin" && (
-                <div className="bg-gradient-to-br from-blue-50 to-white rounded-xl border border-blue-200 p-4 lg:p-6">
+                <div className="bg-linear-to-br from-blue-50 to-white rounded-xl border border-blue-200 p-4 lg:p-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-4">
                     Quick Actions
                   </h3>

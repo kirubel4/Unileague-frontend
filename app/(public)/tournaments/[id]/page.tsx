@@ -106,16 +106,13 @@ export default function TournamentDetailPage() {
   }
 
   return (
-    <div
-      key={id}
-      className="min-h-screen bg-gradient-to-b from-gray-50 to-white"
-    >
+    <div key={id} className="min-h-screen bg-linear-to-b from-gray-50 to-white">
       {/* Back Navigation */}
 
       {/* Tournament Header */}
       <div className="relative h-64 md:h-80 overflow-hidden">
         <div
-          className="absolute inset-0 bg-gradient-to-r from-gray-900 to-gray-800"
+          className="absolute inset-0 bg-linear-to-r from-gray-900 to-gray-800"
           style={{
             backgroundImage: tournament?.logurl
               ? `url(${tournament?.logurl})`
@@ -124,7 +121,7 @@ export default function TournamentDetailPage() {
             backgroundPosition: "center",
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/50 to-transparent" />
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-end pb-8">
@@ -190,7 +187,7 @@ export default function TournamentDetailPage() {
 
       {/* Live Match Banner */}
       {liveMatches && liveMatches.length > 0 && (
-        <div className="bg-gradient-to-r from-red-600 to-orange-600">
+        <div className="bg-linear-to-r from-red-600 to-orange-600">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <Link
               href={`/matches/${liveMatches[0].id}`}
@@ -205,7 +202,7 @@ export default function TournamentDetailPage() {
               {/* Match info */}
               <div className="flex items-center gap-8">
                 {/* Home team */}
-                <div className="text-right min-w-[140px]">
+                <div className="text-right min-w-35">
                   <div className="font-bold text-xl">
                     {liveMatches[0].teamA.name}
                   </div>
@@ -225,7 +222,7 @@ export default function TournamentDetailPage() {
                 </div>
 
                 {/* Away team */}
-                <div className="text-left min-w-[140px]">
+                <div className="text-left min-w-35">
                   <div className="font-bold text-xl">
                     {liveMatches[0].teamB.name}
                   </div>

@@ -59,7 +59,7 @@ const MatchTabBar = ({
         onClick={() => onTabChange("live")}
         className={`px-6 py-3 font-medium text-sm md:text-base flex items-center gap-2 rounded-t-lg transition-all ${
           activeTab === "live"
-            ? "bg-gradient-to-r from-blue-500 to-green-500 text-white shadow-lg transform -translate-y-0.5"
+            ? "bg-linear-to-r from-blue-500 to-green-500 text-white shadow-lg transform -translate-y-0.5"
             : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
         }`}
       >
@@ -83,7 +83,7 @@ const MatchTabBar = ({
         onClick={() => onTabChange("upcoming")}
         className={`px-6 py-3 font-medium text-sm md:text-base flex items-center gap-2 rounded-t-lg transition-all ${
           activeTab === "upcoming"
-            ? "bg-gradient-to-r from-blue-500 to-green-500 text-white shadow-lg transform -translate-y-0.5"
+            ? "bg-linear-to-r from-blue-500 to-green-500 text-white shadow-lg transform -translate-y-0.5"
             : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
         }`}
       >
@@ -127,9 +127,9 @@ export const MatchCard = ({ match }: MatchCardProps) => {
       <div
         className={`px-4 py-2 flex items-center justify-between ${
           isLive || isCompleted
-            ? "bg-gradient-to-r from-red-50 to-orange-50"
+            ? "bg-linear-to-r from-red-50 to-orange-50"
             : isUpcoming
-            ? "bg-gradient-to-r from-blue-50 to-cyan-50"
+            ? "bg-linear-to-r from-blue-50 to-cyan-50"
             : "bg-gray-50"
         }`}
       >
@@ -170,7 +170,7 @@ export const MatchCard = ({ match }: MatchCardProps) => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex-1">
             <div className="flex items-center gap-4 mb-2">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-100 to-green-100 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-linear-to-r from-blue-100 to-green-100 flex items-center justify-center">
                 <Users className="w-5 h-5 text-blue-600" />
               </div>
               <div className="flex-1">
@@ -217,7 +217,7 @@ export const MatchCard = ({ match }: MatchCardProps) => {
                 <h3 className="font-bold text-gray-900">{match.teamB.name}</h3>
                 <p className="text-sm text-gray-600">Away Team</p>
               </div>
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-green-100 to-blue-100 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-linear-to-r from-green-100 to-blue-100 flex items-center justify-center">
                 <Users className="w-5 h-5 text-green-600" />
               </div>
             </div>
@@ -233,9 +233,9 @@ export const MatchCard = ({ match }: MatchCardProps) => {
           <button
             className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all ${
               isLive
-                ? "bg-gradient-to-r from-red-500 to-orange-500 text-white hover:shadow-lg"
+                ? "bg-linear-to-r from-red-500 to-orange-500 text-white hover:shadow-lg"
                 : isUpcoming
-                ? "bg-gradient-to-r from-blue-500 to-green-500 text-white hover:shadow-lg"
+                ? "bg-linear-to-r from-blue-500 to-green-500 text-white hover:shadow-lg"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
@@ -248,7 +248,7 @@ export const MatchCard = ({ match }: MatchCardProps) => {
       {isLive && (
         <div className="px-4 pb-4">
           <div className="w-full bg-gray-200 rounded-full h-1.5">
-            <div className="bg-gradient-to-r from-red-500 to-orange-500 h-1.5 rounded-full w-3/4 animate-pulse"></div>
+            <div className="bg-linear-to-r from-red-500 to-orange-500 h-1.5 rounded-full w-3/4 animate-pulse"></div>
           </div>
           <div className="flex justify-between text-xs text-gray-600 mt-1">
             <span>1st Half</span>
@@ -278,7 +278,7 @@ const UpcomingMatchesSection = ({ matches }: { matches: Match[] }) => {
         Object.entries(groupedMatches).map(([date, dateMatches]) => (
           <div key={date} className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-green-500 text-white">
+              <div className="p-2 rounded-lg bg-linear-to-r from-blue-500 to-green-500 text-white">
                 <Calendar className="w-5 h-5" />
               </div>
               <div>
@@ -298,7 +298,7 @@ const UpcomingMatchesSection = ({ matches }: { matches: Match[] }) => {
         ))
       ) : (
         <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-gray-100 to-gray-200 flex items-center justify-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-linear-to-r from-gray-100 to-gray-200 flex items-center justify-center">
             <Clock className="w-8 h-8 text-gray-400" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -358,7 +358,7 @@ export default function MatchesListing() {
               </>
             ) : (
               <div className="text-center py-12">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-gray-100 to-gray-200 flex items-center justify-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-linear-to-r from-gray-100 to-gray-200 flex items-center justify-center">
                   <Clock className="w-8 h-8 text-gray-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -370,7 +370,7 @@ export default function MatchesListing() {
                 </p>
                 <button
                   onClick={() => setActiveTab("upcoming")}
-                  className="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-green-500 text-white font-medium rounded-lg hover:shadow-lg transition-all"
+                  className="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-blue-500 to-green-500 text-white font-medium rounded-lg hover:shadow-lg transition-all"
                 >
                   View Upcoming Matches
                   <ChevronRight className="w-4 h-4" />

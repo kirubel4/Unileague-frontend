@@ -330,7 +330,7 @@ export default function ManagerMatchesDetail() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4">
                       <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-200">
-                        <MapPin className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                        <MapPin className="w-5 h-5 text-muted-foreground mt-0.5 shrink-0" />
                         <div>
                           <p className="text-xs text-muted-foreground font-medium">
                             Venue
@@ -341,7 +341,7 @@ export default function ManagerMatchesDetail() {
                         </div>
                       </div>
                       <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-200">
-                        <Clock className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                        <Clock className="w-5 h-5 text-muted-foreground mt-0.5 shrink-0" />
                         <div>
                           <p className="text-xs text-muted-foreground font-medium">
                             Start Time
@@ -354,7 +354,7 @@ export default function ManagerMatchesDetail() {
                     </div>
                     <div className="space-y-4">
                       <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-200">
-                        {/* <Whistle className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" /> */}
+                        {/* <Whistle className="w-5 h-5 text-muted-foreground mt-0.5 shrink-0" /> */}
                         <div>
                           <p className="text-xs text-muted-foreground font-medium">
                             Referee
@@ -365,7 +365,7 @@ export default function ManagerMatchesDetail() {
                         </div>
                       </div>
                       <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-200">
-                        <TrendingUp className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                        <TrendingUp className="w-5 h-5 text-muted-foreground mt-0.5 shrink-0" />
                         <div>
                           <p className="text-xs text-muted-foreground font-medium">
                             Status

@@ -10,12 +10,12 @@ export default function NewsPage() {
   const [searchTerm, setSearchTerm] = useState("");
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-white">
       {/* Hero Header */}
-      <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
-        <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px]" />
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-gradient-to-r from-red-500/10 to-orange-500/10 blur-3xl" />
+      <div className="relative bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
+        <div className="absolute inset-0 bg-grid-white/[0.02] bg-size-[20px_20px]" />
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-linear-to-r from-blue-500/10 to-purple-500/10 blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-linear-to-r from-red-500/10 to-orange-500/10 blur-3xl" />
 
         <div className="relative px-6 py-24 md:py-32">
           <div className="max-w-7xl mx-auto">
@@ -29,7 +29,7 @@ export default function NewsPage() {
 
               <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight">
                 Latest{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+                <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-purple-400">
                   Football News
                 </span>
               </h1>
@@ -57,7 +57,7 @@ export default function NewsPage() {
           </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-50 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-gray-50 to-transparent" />
       </div>
 
       {/* Main Content */}

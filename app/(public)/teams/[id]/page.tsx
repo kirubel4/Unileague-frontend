@@ -86,8 +86,8 @@ export default function AdminTeamDetailPage() {
   return (
     <main>
       {/* Team Header Section */}
-      <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-        <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px]" />
+      <div className="relative bg-linear-to-br from-gray-900 via-gray-800 to-gray-900">
+        <div className="absolute inset-0 bg-grid-white/[0.02] bg-size-[20px_20px]" />
 
         {/* Background overlay with team logo pattern */}
         {team?.logo && (
@@ -103,7 +103,7 @@ export default function AdminTeamDetailPage() {
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8 lg:gap-12">
               {/* Team Logo */}
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <div className="w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center overflow-hidden">
                   {team?.logo ? (
                     <img
@@ -236,7 +236,7 @@ export default function AdminTeamDetailPage() {
         </div>
 
         {/* Gradient transition */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-50 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-gray-50 to-transparent" />
       </div>
 
       {/* Main Content */}

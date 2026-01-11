@@ -55,34 +55,34 @@ export default function Navbar() {
       <nav
         className={`relative overflow-hidden transition-all duration-300 ${
           isScrolled
-            ? "bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900"
-            : "bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900"
+            ? "bg-linear-to-r from-gray-900 via-gray-800 to-gray-900"
+            : "bg-linear-to-r from-gray-900 via-gray-800 to-gray-900"
         }`}
       >
         {/* Animated background elements */}
-        <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px]" />
-        <div className="absolute -top-24 -left-24 w-64 h-64 rounded-full bg-gradient-to-r from-blue-500/5 to-purple-500/5 blur-3xl" />
-        <div className="absolute -bottom-24 -right-24 w-64 h-64 rounded-full bg-gradient-to-r from-green-500/5 to-blue-500/5 blur-3xl" />
+        <div className="absolute inset-0 bg-grid-white/[0.02] bg-size-[20px_20px]" />
+        <div className="absolute -top-24 -left-24 w-64 h-64 rounded-full bg-linear-to-r from-blue-500/5 to-purple-500/5 blur-3xl" />
+        <div className="absolute -bottom-24 -right-24 w-64 h-64 rounded-full bg-linear-to-r from-green-500/5 to-blue-500/5 blur-3xl" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3 group">
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur opacity-75 group-hover:opacity-100 transition-opacity" />
-                <div className="relative w-12 h-12 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 shadow-xl flex items-center justify-center overflow-hidden border-2 border-white/20">
+                <div className="absolute inset-0 bg-linear-to-r from-blue-500 to-purple-500 rounded-full blur opacity-75 group-hover:opacity-100 transition-opacity" />
+                <div className="relative w-12 h-12 rounded-full bg-linear-to-r from-blue-600 to-indigo-600 shadow-xl flex items-center justify-center overflow-hidden border-2 border-white/20">
                   <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
                     <Shield className="w-5 h-5 text-blue-600" />
                   </div>
                 </div>
               </div>
-              <div className="hidden sm:block">
+              <div className="sm:block">
                 <div className="flex items-center gap-2">
                   <span className="text-xl font-bold text-white">
                     UNILEAGUE
                   </span>
-                  <div className="w-1 h-1 rounded-full bg-gradient-to-r from-blue-400 to-purple-400" />
-                  <span className="text-lg font-semibold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  <div className="w-1 h-1 rounded-full bg-linear-to-r from-blue-400 to-purple-400" />
+                  <span className="text-lg font-semibold bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
                     HUB
                   </span>
                 </div>
@@ -103,7 +103,7 @@ export default function Navbar() {
                     href={link.href}
                     className={`relative px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 group ${
                       active
-                        ? "text-white bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-white/10"
+                        ? "text-white bg-linear-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-white/10"
                         : "text-gray-300 hover:text-white hover:bg-white/5"
                     }`}
                   >
@@ -118,11 +118,11 @@ export default function Navbar() {
 
                     {/* Active indicator */}
                     {active && (
-                      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full" />
+                      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-linear-to-r from-blue-400 to-purple-400 rounded-full" />
                     )}
 
                     {/* Hover effect */}
-                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/0 via-purple-500/0 to-pink-500/0 group-hover:from-blue-500/5 group-hover:via-purple-500/5 group-hover:to-pink-500/5 transition-all duration-300 opacity-0 group-hover:opacity-100" />
+                    <div className="absolute inset-0 rounded-xl bg-linear-to-r from-blue-500/0 via-purple-500/0 to-pink-500/0 group-hover:from-blue-500/5 group-hover:via-purple-500/5 group-hover:to-pink-500/5 transition-all duration-300 opacity-0 group-hover:opacity-100" />
                   </Link>
                 );
               })}
@@ -139,7 +139,7 @@ export default function Navbar() {
                 ) : (
                   <Menu className="w-6 h-6 text-white group-hover:scale-110 transition-transform duration-300" />
                 )}
-                <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-500/0 to-purple-500/0 group-hover:from-blue-500/10 group-hover:to-purple-500/10 transition-all duration-300" />
+                <div className="absolute inset-0 rounded-lg bg-linear-to-r from-blue-500/0 to-purple-500/0 group-hover:from-blue-500/10 group-hover:to-purple-500/10 transition-all duration-300" />
               </div>
             </button>
           </div>
@@ -157,7 +157,7 @@ export default function Navbar() {
                       href={link.href}
                       className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium transition-all duration-300 ${
                         active
-                          ? "bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-white backdrop-blur-sm border border-white/10"
+                          ? "bg-linear-to-r from-blue-600/20 to-purple-600/20 text-white backdrop-blur-sm border border-white/10"
                           : "text-gray-300 hover:text-white hover:bg-white/5"
                       }`}
                       onClick={() => setIsMobileMenuOpen(false)}
@@ -167,7 +167,7 @@ export default function Navbar() {
                       />
                       <span>{link.label}</span>
                       {active && (
-                        <div className="ml-auto w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 animate-pulse" />
+                        <div className="ml-auto w-2 h-2 rounded-full bg-linear-to-r from-blue-400 to-purple-400 animate-pulse" />
                       )}
                     </Link>
                   );
@@ -178,7 +178,7 @@ export default function Navbar() {
         </div>
 
         {/* Bottom gradient line */}
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-blue-500/50 to-transparent" />
       </nav>
     </header>
   );

@@ -178,9 +178,9 @@ export default function TeamsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-white">
       {/* Hero Header */}
-      <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      <div className="relative bg-linear-to-br from-gray-900 via-gray-800 to-gray-900">
         <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px]" />
         <div className="relative px-6 py-24 md:py-32">
           <div className="max-w-7xl mx-auto">
@@ -193,7 +193,7 @@ export default function TeamsPage() {
               </div>
               <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
                 University{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-400">
+                <span className="text-transparent bg-clip-text bg-linear-to-r from-green-400 to-blue-400">
                   Football Teams
                 </span>
               </h1>
@@ -207,7 +207,7 @@ export default function TeamsPage() {
         </div>
 
         {/* Floating cards background */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-50 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-gray-50 to-transparent" />
       </div>
 
       {/* Main Content */}
@@ -368,7 +368,7 @@ export default function TeamsPage() {
           ) : teams.length === 0 ? (
             // Empty state
             <div className="text-center py-16">
-              <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 mb-6">
+              <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-linear-to-br from-gray-100 to-gray-200 mb-6">
                 <Shield className="w-12 h-12 text-gray-400" />
               </div>
               <h3 className="text-2xl font-semibold text-gray-900 mb-3">
@@ -382,7 +382,7 @@ export default function TeamsPage() {
               {searchQuery && (
                 <button
                   onClick={resetFilters}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
+                  className="px-6 py-3 bg-linear-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
                 >
                   Clear all filters
                 </button>
@@ -398,7 +398,7 @@ export default function TeamsPage() {
                   className="group block"
                 >
                   <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 h-full">
-                    <div className="relative h-40 bg-gradient-to-r from-gray-900 to-gray-800">
+                    <div className="relative h-40 bg-linear-to-r from-gray-900 to-gray-800">
                       <div className="absolute inset-0 flex items-center justify-center">
                         {team.logoUrl ? (
                           <img
@@ -423,7 +423,7 @@ export default function TeamsPage() {
                         </div>
                       </div>
 
-                      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/40 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 h-16 bg-linear-to-t from-black/40 to-transparent" />
                     </div>
 
                     <div className="p-6">
@@ -454,7 +454,7 @@ export default function TeamsPage() {
         </div>
 
         {/* CTA Section */}
-        <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 md:p-12 mb-16">
+        <div className="bg-linear-to-r from-gray-900 to-gray-800 rounded-2xl p-8 md:p-12 mb-16">
           <div className="max-w-3xl mx-auto text-center">
             <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
               Want to register a new team?

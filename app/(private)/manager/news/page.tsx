@@ -199,7 +199,7 @@ export default function ManagerNews() {
               Page {page} of {totalPages || 1}
             </div>
             <Link href="/manager/news/create">
-              <Button className="gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-md">
+              <Button className="gap-2 bg-linear-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-md">
                 <Plus className="w-4 h-4" />
                 Create Article
               </Button>
@@ -212,7 +212,7 @@ export default function ManagerNews() {
       {deleteError && (
         <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 animate-in slide-in-from-top duration-300">
           <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
             <div className="flex-1">
               <p className="font-medium text-red-800">Delete Failed</p>
               <p className="text-sm text-red-700 mt-1">{deleteError}</p>
@@ -380,7 +380,7 @@ export default function ManagerNews() {
                   </div>
                 </div>
 
-                <div className="flex gap-2 flex-shrink-0">
+                <div className="flex gap-2 shrink-0">
                   <Link href={`/manager/news/${article.id}/edit`}>
                     <Button variant="outline" className="gap-2 h-9">
                       <Edit className="w-4 h-4" />

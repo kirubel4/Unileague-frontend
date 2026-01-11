@@ -122,12 +122,12 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-white">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
-        <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px]" />
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 blur-3xl" />
+      <div className="relative bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
+        <div className="absolute inset-0 bg-grid-white/[0.02] bg-size-[20px_20px]" />
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-linear-to-r from-purple-500/10 to-pink-500/10 blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-linear-to-r from-blue-500/10 to-cyan-500/10 blur-3xl" />
 
         <div className="relative px-6 py-24 md:py-32">
           <div className="max-w-7xl mx-auto">
@@ -141,7 +141,7 @@ export default function AboutPage() {
 
               <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight">
                 Empowering{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+                <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-400 to-pink-400">
                   University Football
                 </span>
               </h1>
@@ -170,7 +170,7 @@ export default function AboutPage() {
           </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-50 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-gray-50 to-transparent" />
       </div>
 
       {/* Main Content */}
@@ -180,7 +180,7 @@ export default function AboutPage() {
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
               Platform{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-600 to-pink-600">
                 Overview
               </span>
             </h2>
@@ -203,7 +203,7 @@ export default function AboutPage() {
               </p>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-                <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-100">
+                <div className="text-center p-4 bg-linear-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-100">
                   <div className="text-3xl font-bold text-purple-700 mb-2">
                     50+
                   </div>
@@ -211,7 +211,7 @@ export default function AboutPage() {
                     Tournaments Managed
                   </div>
                 </div>
-                <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border border-blue-100">
+                <div className="text-center p-4 bg-linear-to-br from-blue-50 to-cyan-50 rounded-xl border border-blue-100">
                   <div className="text-3xl font-bold text-blue-700 mb-2">
                     500+
                   </div>
@@ -219,7 +219,7 @@ export default function AboutPage() {
                     Matches Tracked
                   </div>
                 </div>
-                <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-100">
+                <div className="text-center p-4 bg-linear-to-br from-green-50 to-emerald-50 rounded-xl border border-green-100">
                   <div className="text-3xl font-bold text-green-700 mb-2">
                     1K+
                   </div>
@@ -227,7 +227,7 @@ export default function AboutPage() {
                     Active Users
                   </div>
                 </div>
-                <div className="text-center p-4 bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl border border-orange-100">
+                <div className="text-center p-4 bg-linear-to-br from-orange-50 to-amber-50 rounded-xl border border-orange-100">
                   <div className="text-3xl font-bold text-orange-700 mb-2">
                     24/7
                   </div>
@@ -244,7 +244,7 @@ export default function AboutPage() {
         <div className="mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
             Platform{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-cyan-600">
               Features
             </span>
           </h2>
@@ -257,7 +257,7 @@ export default function AboutPage() {
                   key={index}
                   className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-shadow group"
                 >
-                  <div className="inline-flex p-3 bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl mb-4 group-hover:scale-110 transition-transform">
+                  <div className="inline-flex p-3 bg-linear-to-r from-blue-100 to-purple-100 rounded-xl mb-4 group-hover:scale-110 transition-transform">
                     <Icon className="w-6 h-6 text-blue-600" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-3">
@@ -407,7 +407,7 @@ export default function AboutPage() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-3"
+                    className="w-full py-3.5 bg-linear-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-3"
                   >
                     {isSubmitting ? (
                       <>
@@ -448,7 +448,7 @@ export default function AboutPage() {
                   const Icon = info.icon;
                   return (
                     <div key={index} className="flex items-start gap-4">
-                      <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl">
+                      <div className="p-3 bg-linear-to-r from-blue-50 to-blue-100 rounded-xl">
                         <Icon className="w-5 h-5 text-blue-600" />
                       </div>
                       <div>
@@ -504,9 +504,9 @@ export default function AboutPage() {
         </div>
 
         {/* Team Section */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100 p-8 mb-16">
+        <div className="bg-linear-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100 p-8 mb-16">
           <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 mb-6">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-linear-to-r from-blue-600 to-purple-600 mb-6">
               <Users className="w-8 h-8 text-white" />
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
@@ -519,7 +519,7 @@ export default function AboutPage() {
             </p>
             <div className="flex flex-wrap justify-center gap-6">
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 mx-auto mb-2" />
+                <div className="w-16 h-16 rounded-full bg-linear-to-r from-blue-400 to-cyan-400 mx-auto mb-2" />
                 <div className="font-semibold text-gray-900">
                   Sports Committee
                 </div>
@@ -528,14 +528,14 @@ export default function AboutPage() {
                 </div>
               </div>
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 mx-auto mb-2" />
+                <div className="w-16 h-16 rounded-full bg-linear-to-r from-purple-400 to-pink-400 mx-auto mb-2" />
                 <div className="font-semibold text-gray-900">Tech Team</div>
                 <div className="text-sm text-gray-600">
                   Platform Development
                 </div>
               </div>
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-green-400 to-emerald-400 mx-auto mb-2" />
+                <div className="w-16 h-16 rounded-full bg-linear-to-r from-green-400 to-emerald-400 mx-auto mb-2" />
                 <div className="font-semibold text-gray-900">Media Team</div>
                 <div className="text-sm text-gray-600">Content & Coverage</div>
               </div>

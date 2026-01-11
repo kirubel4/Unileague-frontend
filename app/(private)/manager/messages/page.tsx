@@ -144,9 +144,9 @@ export default function ManagerMessages() {
 
       {/* Info Banner */}
       <div className="mb-6">
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-4">
+        <div className="bg-linear-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
               <AlertCircle className="w-5 h-5 text-blue-600" />
             </div>
             <div className="flex-1">
@@ -169,13 +169,13 @@ export default function ManagerMessages() {
       </div>
 
       {/* Chat Container */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col h-[calc(100vh-320px)] min-h-[500px]">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col h-[calc(100vh-320px)] min-h-125">
         {/* Chat Header */}
-        <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+        <div className="px-6 py-4 border-b border-gray-200 bg-linear-to-r from-gray-50 to-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-linear-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center">
                   <MessageCircle className="w-6 h-6 text-white" />
                 </div>
                 <div className="absolute -bottom-1 -right-1 w-4 h-4  border-2 border-white rounded-full"></div>
@@ -201,7 +201,7 @@ export default function ManagerMessages() {
         </div>
 
         {/* Messages Container */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-gradient-to-b from-gray-50/50 to-white">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-linear-to-b from-gray-50/50 to-white">
           {isLoading ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center space-y-4">
@@ -221,7 +221,7 @@ export default function ManagerMessages() {
             </div>
           ) : sortedMessages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-4">
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-full flex items-center justify-center mb-6">
+              <div className="w-20 h-20 bg-linear-to-br from-blue-50 to-indigo-50 rounded-full flex items-center justify-center mb-6">
                 <MessageCircle className="w-10 h-10 text-blue-400" />
               </div>
               <h3 className="text-xl font-semibold text-gray-800 mb-3">
@@ -286,7 +286,7 @@ export default function ManagerMessages() {
                         <div
                           className={`px-4 py-3 rounded-2xl ${
                             isManager
-                              ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-br-none"
+                              ? "bg-linear-to-r from-blue-600 to-blue-500 text-white rounded-br-none"
                               : "bg-white text-gray-800 border border-gray-200 shadow-sm rounded-bl-none"
                           }`}
                         >

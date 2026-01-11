@@ -155,9 +155,9 @@ export function Sidebar({ role = "super_admin" }: SidebarProps) {
 
           {/* Sidebar Footer */}
           {isOpen && (
-            <div className="p-4 border-t border-gray-100 flex-shrink-0">
+            <div className="p-4 border-t border-gray-100 shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-linear-to-br from-primary to-primary/80 rounded-full flex items-center justify-center">
                   <span className="text-white text-xs font-bold">AU</span>
                 </div>
                 <div className="overflow-hidden">
@@ -199,7 +199,7 @@ export function Sidebar({ role = "super_admin" }: SidebarProps) {
               {/* Mobile Sidebar Header */}
               <div className="p-6 border-b border-gray-100">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center shadow-sm">
+                  <div className="w-12 h-12 bg-linear-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center shadow-sm">
                     <span className="text-white font-bold text-xl">⚽</span>
                   </div>
                   <div>
@@ -252,7 +252,7 @@ export function Sidebar({ role = "super_admin" }: SidebarProps) {
               {/* Mobile Footer */}
               <div className="p-6 border-t border-gray-100">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-linear-to-br from-primary to-primary/80 rounded-full flex items-center justify-center">
                     <span className="text-white text-sm font-bold">AU</span>
                   </div>
                   <div>
