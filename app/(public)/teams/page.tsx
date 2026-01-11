@@ -181,7 +181,7 @@ export default function TeamsPage() {
     <div className="min-h-screen bg-linear-to-b from-gray-50 to-white">
       {/* Hero Header */}
       <div className="relative bg-linear-to-br from-gray-900 via-gray-800 to-gray-900">
-        <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px]" />
+        <div className="absolute inset-0 bg-grid-white/[0.02] bg-size-[20px_20px]" />
         <div className="relative px-6 py-24 md:py-32">
           <div className="max-w-7xl mx-auto">
             <div className="max-w-3xl">

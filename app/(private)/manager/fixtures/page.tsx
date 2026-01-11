@@ -46,7 +46,7 @@ export default function ManagerFixtures() {
   if (isLoading) {
     return (
       <Layout role="manager" userName={userName}>
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-100">
           <div className="text-center space-y-3">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
             <p className="text-muted-foreground">Loading fixtures data...</p>
