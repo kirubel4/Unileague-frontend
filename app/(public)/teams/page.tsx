@@ -365,7 +365,7 @@ export default function TeamsPage() {
                 ))}
               </div>
             </div>
-          ) : teams.length === 0 ? (
+          ) : teams?.length === 0 ? (
             // Empty state
             <div className="text-center py-16">
               <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-linear-to-br from-gray-100 to-gray-200 mb-6">

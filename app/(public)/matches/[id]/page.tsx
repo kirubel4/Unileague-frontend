@@ -115,159 +115,231 @@ export default function MatchDetailPage() {
         <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-linear-to-r from-blue-500/10 to-purple-500/10 blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-linear-to-r from-green-500/10 to-blue-500/10 blur-3xl" />
 
-        <div className="relative px-6 py-12 md:py-16">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-8">
+        <div className="relative px-4 py-8 sm:px-6 md:py-12 lg:py-16">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center">
               {/* Tournament Badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-6">
-                <Trophy className="w-4 h-4 text-white" />
-                <span className="text-sm font-medium text-white">
-                  {matches?.tournament}
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-linear-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-white/20 mb-4 sm:mb-6">
+                <Trophy className="w-4 h-4 text-yellow-400" />
+                <span className="text-sm font-semibold text-white tracking-wide">
+                  {matches?.tournament || "PREMIER LEAGUE"}
                 </span>
               </div>
 
               {/* Match Round */}
-              <div className="text-lg text-white/80 mb-2">{matches.round}</div>
+              <div className="text-sm sm:text-base text-white/70 mb-4 sm:mb-6 px-2">
+                {matches?.round || "ROUND 28"} • {date} • {time}
+              </div>
 
-              {/* Teams & Score */}
-              <div className="flex flex-col md:flex-row items-center justify-between gap-8 max-w-4xl mx-auto">
+              {/* Teams & Score - Proper responsive layout */}
+              <div className="flex flex-row items-center justify-between gap-4 sm:gap-8 lg:gap-12 max-w-5xl mx-auto">
                 {/* Home Team */}
-                <div className="text-center flex-1">
-                  <div className="flex flex-col items-center gap-4">
-                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 overflow-hidden">
-                      {matches?.homeTeam.logo ? (
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-col items-center gap-2 sm:gap-4">
+                    {/* Team Logo */}
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-white/5 rounded-full backdrop-blur-sm border border-white/10 overflow-hidden">
+                      {matches?.homeTeam?.logo ? (
                         <img
-                          src={matches?.homeTeam.logo}
-                          alt={matches?.homeTeam.name}
-                          className="w-full h-full object-cover"
+                          src={matches.homeTeam.logo}
+                          alt={matches.homeTeam.name}
+                          className="w-full h-full object-contain p-2"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Shield className="w-10 h-10 text-white/60" />
+                          <Shield className="w-8 h-8 sm:w-10 sm:h-10 text-white/50" />
                         </div>
                       )}
                     </div>
-                    <div>
-                      <div className="text-2xl md:text-3xl font-bold text-white">
-                        {matches?.homeTeam.name}
+
+                    {/* Team Name */}
+                    <div className="text-center">
+                      <div className="text-lg sm:text-xl md:text-2xl font-bold text-white truncate max-w-full px-2">
+                        {matches?.homeTeam?.name?.slice(0, 4) +
+                          matches?.homeTeam?.name?.slice(8, 12) || "HOME"}
                       </div>
-                      <div className="text-sm text-white/60 mt-1">
-                        {matches?.homeTeam.shortName}
+                      <div className="text-xs sm:text-sm text-white/60 font-medium">
+                        {matches?.homeTeam?.shortName || "HOM"}
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Score */}
-                <div className="text-center">
-                  <div
-                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4 ${
-                      matches?.status === "ONGOING"
-                        ? "bg-red-100 text-red-700 animate-pulse"
-                        : matches?.status === "UPCOMING"
-                        ? "bg-blue-100 text-blue-700"
-                        : "bg-green-100 text-green-700"
-                    }`}
-                  >
-                    <div className="w-2 h-2 rounded-full bg-current" />
-                    <span className="text-sm font-semibold">
-                      {matches?.status === "ONGOING" ? "LIVE" : matches?.status}
-                    </span>
-                  </div>
+                {/* Center: Score & Status */}
+                <div className="flex-1 min-w-0 px-2 sm:px-0">
+                  <div className="flex flex-col items-center gap-3 sm:gap-4">
+                    {/* Match Status Badge */}
+                    <div
+                      className={`
+                   px-3 sm:px-4 py-1.5 sm:py-2 rounded-md
+                font-semibold text-xs sm:text-sm
+                ${
+                  matches?.status === "ONGOING"
+                    ? " text-red-400 animate-pulse"
+                    : matches?.status === "UPCOMING"
+                    ? " text-white"
+                    : " text-white"
+                }
+              `}
+                    >
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          matches?.status === "ONGOING" ? "animate-ping" : ""
+                        }`}
+                      />
+                      <span>
+                        {matches?.status === "ONGOING"
+                          ? "LIVE"
+                          : matches?.status === "UPCOMING"
+                          ? "UPCOMING"
+                          : "FT"}
+                      </span>
+                    </div>
 
-                  <div className="text-5xl md:text-7xl font-bold text-white mb-2">
-                    {matches?.score.home} - {matches?.score.away}
-                  </div>
+                    {/* Score Display */}
+                    <div className="flex items-center justify-center gap-4 sm:gap-6 md:gap-8">
+                      {/* Home Score */}
+                      <div className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white">
+                        {matches?.score?.home || "0"}
+                      </div>
 
-                  <div className="text-sm text-white/60">
-                    {date} • {time}
+                      {/* VS Separator */}
+                      <div className="text-xl sm:text-2xl text-white/50 font-light">
+                        -
+                      </div>
+
+                      {/* Away Score */}
+                      <div className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white">
+                        {matches?.score?.away || "0"}
+                      </div>
+                    </div>
+
+                    {/* Date & Time - Show on all screens */}
+                    <div className="text-xs sm:text-sm text-white/60 mt-1">
+                      {date} • {time}
+                    </div>
                   </div>
                 </div>
 
                 {/* Away Team */}
-                <div className="text-center flex-1">
-                  <div className="flex flex-col items-center gap-4">
-                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 overflow-hidden">
-                      {matches?.awayTeam.logo ? (
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-col items-center gap-2 sm:gap-4">
+                    {/* Team Logo */}
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-white/5 rounded-full backdrop-blur-sm border border-white/10 overflow-hidden">
+                      {matches?.awayTeam?.logo ? (
                         <img
-                          src={matches?.awayTeam.logo}
-                          alt={matches?.awayTeam.name}
-                          className="w-full h-full object-cover"
+                          src={matches.awayTeam.logo}
+                          alt={matches.awayTeam.name}
+                          className="w-full h-full object-contain p-2"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Shield className="w-10 h-10 text-white/60" />
+                          <Shield className="w-8 h-8 sm:w-10 sm:h-10 text-white/50" />
                         </div>
                       )}
                     </div>
-                    <div>
-                      <div className="text-2xl md:text-3xl font-bold text-white">
-                        {matches?.awayTeam.name}
+
+                    {/* Team Name */}
+                    <div className="text-center">
+                      <div className="text-lg sm:text-xl md:text-2xl font-bold text-white truncate max-w-full px-2">
+                        {matches?.awayTeam?.name?.slice(0, 4) +
+                          matches?.awayTeam?.name?.slice(8, 12) || "AWAY"}
                       </div>
-                      <div className="text-sm text-white/60 mt-1">
-                        {matches?.awayTeam.shortName}
+                      <div className="text-xs sm:text-sm text-white/60 font-medium">
+                        {matches?.awayTeam?.shortName || "AWY"}
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Match Info */}
-              <div className="flex flex-wrap justify-center gap-6 mt-8 text-white/80">
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  <span>{matches?.venue}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Flag className="w-4 h-4" />
-                  <span>Referee: {matches?.referee}</span>
+              {/* Match Info - Simple responsive layout */}
+              <div className="mt-6 sm:mt-8 md:mt-12 px-2">
+                <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-8">
+                  <div className="flex items-center gap-2 text-white/80">
+                    <MapPin className="w-4 h-4" />
+                    <span className="text-sm sm:text-base">
+                      {matches?.venue || "Stadium"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-white/80">
+                    <Flag className="w-4 h-4" />
+                    <span className="text-sm sm:text-base">
+                      Referee: {matches?.referee || "Official"}
+                    </span>
+                  </div>
                 </div>
               </div>
+
+              {/* Live Match Stats */}
+              {matches?.status === "ONGOING" && (
+                <div className="mt-6 sm:mt-8 px-4">
+                  <div className="bg-linear-to-r from-red-500/10 to-red-600/10 border border-red-500/20 rounded-lg sm:rounded-xl p-3 sm:p-4">
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                      <span className="text-xs sm:text-sm font-semibold text-red-300">
+                        LIVE UPDATES
+                      </span>
+                    </div>
+                    <div className="text-center text-xs sm:text-sm text-white/80">
+                      Second Half • 67' • Possession: 58% - 42%
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-gray-50 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-12 sm:h-24 md:h-32 bg-linear-to-t from-gray-50 to-transparent" />
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-10">
+      <div className="max-w-7xl sm:py-6 lg:py-8 mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-10">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="mb-8 bg-gray-100 p-1 rounded-xl">
+          <TabsList className="mb-8 bg-gray-100 p-1 rounded-xl flex gap-1 overflow-x-auto scrollbar-hide">
             <TabsTrigger
               value="overview"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg px-6 py-2.5"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex items-center gap-2 px-3 lg:px-4 py-2 lg:py-3 font-medium text-sm rounded-lg transition-all flex-1 justify-center"
             >
               <div className="flex items-center gap-2">
                 <BarChart3 className="w-4 h-4" />
-                <span>Overview</span>
+                <span className="hidden sm:inline text-sm font-medium">
+                  Overview
+                </span>
               </div>
             </TabsTrigger>
             <TabsTrigger
               value="events"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg px-6 py-2.5"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex items-center gap-2 px-3 lg:px-4 py-2 lg:py-3 font-medium text-sm rounded-lg transition-all flex-1 justify-center"
             >
               <div className="flex items-center gap-2">
                 <Zap className="w-4 h-4" />
-                <span>Events</span>
+                <span className="hidden sm:inline text-sm font-medium">
+                  Events
+                </span>
               </div>
             </TabsTrigger>
             <TabsTrigger
               value="lineup"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg px-6 py-2.5"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex items-center gap-2 px-3 lg:px-4 py-2 lg:py-3 font-medium text-sm rounded-lg transition-all flex-1 justify-center"
             >
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
-                <span>Lineup</span>
+                <span className="hidden sm:inline text-sm font-medium">
+                  Lineup
+                </span>
               </div>
             </TabsTrigger>
             <TabsTrigger
               value="stats"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg px-6 py-2.5"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex items-center gap-2 px-3 lg:px-4 py-2 lg:py-3 font-medium text-sm rounded-lg transition-all flex-1 justify-center"
             >
               <div className="flex items-center gap-2">
                 <Target className="w-4 h-4" />
-                <span>Statistics</span>
+                <span className="hidden sm:inline text-sm font-medium">
+                  Statistics
+                </span>
               </div>
             </TabsTrigger>
           </TabsList>
@@ -339,7 +411,7 @@ export default function MatchDetailPage() {
                                     ? "Goal"
                                     : event.type === "CARD"
                                     ? "Yellow Card"
-                                    : "Red Card"}
+                                    : "Yellow Card"}
                                   {event.details && ` • ${event.details}`}
                                 </div>
                               </div>
