@@ -246,7 +246,7 @@ export default function TournamentDetailPage() {
           onValueChange={setActiveTab}
           className="w-full "
         >
-          <TabsList className="mb-8 bg-gray-50 p-1 rounded-xl flex gap-1 overflow-x-auto scrollbar-hide">
+          <TabsList className="mb-8 bg-gray-100 p-1 rounded-xl flex gap-1 overflow-x-auto scrollbar-hide">
             {[
               { value: "overview", label: "Overview", Icon: Calendar },
               { value: "teams", label: "Teams", Icon: Users },
@@ -258,11 +258,7 @@ export default function TournamentDetailPage() {
               <TabsTrigger
                 key={value}
                 value={value}
-                className="
-        data-[state=active]:bg-white
-        data-[state=active]:shadow-sm
-       flex items-center gap-2 px-3 lg:px-4 py-2 lg:py-3 font-medium text-sm rounded-lg transition-all flex-1 justify-center 
-      "
+                className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex items-center gap-2 px-3 lg:px-4 py-2 lg:py-3 font-medium text-sm rounded-lg transition-all flex-1 justify-center"
               >
                 <Icon className="w-4 h-4 shrink-0" />
                 <span className="hidden sm:inline text-sm font-medium">
