@@ -371,8 +371,8 @@ export function MatchList({
               <span
                 className={
                   activeTab === tab
-                    ? "text-foreground font-semibold"
-                    : "text-muted-foreground"
+                    ? "text-foreground font-semibold hidden sm:inline"
+                    : "text-muted-foreground hidden sm:inline"
                 }
               >
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}

@@ -240,63 +240,32 @@ export default function TournamentDetailPage() {
       )}
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="mb-8 bg-gray-100 p-1 rounded-xl">
-            <TabsTrigger
-              value="overview"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg px-6 py-2.5"
-            >
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                <span>Overview</span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger
-              value="teams"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg px-6 py-2.5"
-            >
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                <span>Teams</span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger
-              value="matches"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg px-6 py-2.5"
-            >
-              <div className="flex items-center gap-2">
-                <CalendarDays className="w-4 h-4" />
-                <span>Matches</span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger
-              value="standings"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg px-6 py-2.5"
-            >
-              <div className="flex items-center gap-2">
-                <BarChart3 className="w-4 h-4" />
-                <span>Standings</span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger
-              value="News"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg px-6 py-2.5"
-            >
-              <div className="flex items-center gap-2">
-                <NewspaperIcon className="w-4 h-4" />
-                <span>News</span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger
-              value="memories"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg px-6 py-2.5"
-            >
-              <div className="flex items-center gap-2">
-                <ImageIcon className="w-4 h-4" />
-                <span>Memories</span>
-              </div>
-            </TabsTrigger>
+      <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="w-full "
+        >
+          <TabsList className="mb-8 bg-gray-100 p-1 rounded-xl flex gap-1 overflow-x-auto scrollbar-hide">
+            {[
+              { value: "overview", label: "Overview", Icon: Calendar },
+              { value: "teams", label: "Teams", Icon: Users },
+              { value: "matches", label: "Matches", Icon: CalendarDays },
+              { value: "standings", label: "Standings", Icon: BarChart3 },
+              { value: "News", label: "News", Icon: NewspaperIcon },
+              { value: "memories", label: "Memories", Icon: ImageIcon },
+            ].map(({ value, label, Icon }) => (
+              <TabsTrigger
+                key={value}
+                value={value}
+                className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex items-center gap-2 px-3 lg:px-4 py-2 lg:py-3 font-medium text-sm rounded-lg transition-all flex-1 justify-center"
+              >
+                <Icon className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline text-sm font-medium">
+                  {label}
+                </span>
+              </TabsTrigger>
+            ))}
           </TabsList>
 
           {/* Overview Tab */}
