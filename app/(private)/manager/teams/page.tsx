@@ -17,17 +17,21 @@ import {
   Eye,
   UserPlus,
   AlertCircle,
+  Send,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import useSWR from "swr";
 import { mapTeams, Team } from "../players/transfer/util";
+import { toast, Toaster } from "sonner";
+import ConfirmModal from "@/components/comfirm";
 
 export default function ManagerTeams() {
   const userName = getCookie("uName") || "Manager";
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
-
+  const [openModalId, setOpenModalId] = useState(false);
+  const [selected, setSelected] = useState({ id: "" });
   const {
     data,
     error,
@@ -59,7 +63,22 @@ export default function ManagerTeams() {
       setSelectedTeams(filteredTeams.map((team) => team.id));
     }
   };
-
+  const resendCredentail = async (id: string) => {
+    setOpenModalId(false);
+    toast.loading("resting.....");
+    const res = await fetch(
+      `/api/protected/manager/team/credential/resend?id=${id}`,
+      {
+        method: "POST",
+      }
+    );
+    const respon: ApiResponse = await res.json();
+    if (respon.success) {
+      toast.error(respon.message);
+      return;
+    }
+    toast.success("resent");
+  };
   async function handleDelete(id: string) {
     if (
       !confirm(
@@ -91,12 +110,12 @@ export default function ManagerTeams() {
     ) {
       return;
     }
-    // Implement bulk delete logic here
   }
 
   return (
     <Layout role="manager" userName={userName}>
       {/* Header */}
+      <Toaster />
       <div className="mb-8">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
@@ -322,7 +341,7 @@ export default function ManagerTeams() {
                     </th>
                     <th className="py-4 px-6 text-left">
                       <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        Status
+                        Credential
                       </span>
                     </th>
                     <th className="py-4 px-6 text-left">
@@ -409,9 +428,17 @@ export default function ManagerTeams() {
                         </td>
 
                         <td className="py-4 px-6">
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Active
-                          </span>
+                          <Button
+                            onClick={() => {
+                              setOpenModalId(true);
+                              setSelected({ id: team.id });
+                            }}
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                          >
+                            <Send className="w-4 h-4" />
+                          </Button>
                         </td>
 
                         <td className="py-4 px-6">
@@ -521,6 +548,12 @@ export default function ManagerTeams() {
           </>
         )}
       </div>
+      <ConfirmModal
+        isOpen={openModalId}
+        onConfirm={() => resendCredentail(selected.id)}
+        onCancel={() => setOpenModalId(false)}
+        message="Do you want reset credential And send it to their email?"
+      />
     </Layout>
   );
 }

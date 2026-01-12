@@ -23,6 +23,7 @@ interface Tournament {
   status: "UPCOMING" | "ONGOING" | "COMPLETED";
   teams?: number;
   managers?: number;
+  managerId?: string;
   logurl?: string;
 }
 
@@ -51,6 +52,7 @@ export function mapTournaments(
         : "COMPLETED",
     teams: t._count?.teams ?? 0,
     managers: t._count?.managers ?? 0,
+    managerId: t.managerId ?? undefined,
     logurl: t.logoUrl ?? undefined,
   }));
 }

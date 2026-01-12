@@ -10,7 +10,7 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { mapTournaments } from "../../tournaments/util";
 import useSWR from "swr";
-import { fetcher, getCookie } from "@/lib/utils";
+import { ApiResponse, fetcher, getCookie } from "@/lib/utils";
 import { Tournament } from "../../tournaments/page";
 import { toast, Toaster } from "sonner";
 export default function AdminManagersCreate() {
@@ -18,6 +18,7 @@ export default function AdminManagersCreate() {
   const navigate = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
+    username: "",
     fullname: "",
     email: "",
     tournamentId: "",
@@ -26,6 +27,9 @@ export default function AdminManagersCreate() {
     revalidateOnFocus: false,
   });
   const tournaments: Tournament[] = mapTournaments(data);
+  const filterTour = tournaments.filter(
+    (tour) => tour.managerId === null || tour.managerId === undefined
+  );
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -38,11 +42,24 @@ export default function AdminManagersCreate() {
     e.preventDefault();
     toast.loading("creating manager");
     setIsSubmitting(true);
-
-    setTimeout(() => {
-      alert(`Manager "${formData.fullname}" created successfully!`);
-      navigate.push("/admin/managers");
-    }, 800);
+    const res = await fetch("/api/protected/admin/manager/create", {
+      method: "POST",
+      body: JSON.stringify({
+        fullName: formData.fullname,
+        username: formData.username,
+        email: formData.email,
+        tournamentId: formData.tournamentId,
+      }),
+    });
+    const respond: ApiResponse = await res.json();
+    if (!respond.success) {
+      toast.error(respond.message);
+      setIsSubmitting(false);
+      return;
+    }
+    toast.success("manager created");
+    setIsSubmitting(false);
+    navigate.push("/admin/managers");
   };
 
   return (
@@ -83,6 +100,20 @@ export default function AdminManagersCreate() {
                 className="h-10 rounded-lg"
               />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="fullname" className="font-medium">
+                User Name *
+              </Label>
+              <Input
+                id="username"
+                name="username"
+                placeholder="John"
+                value={formData.username}
+                onChange={handleChange}
+                required
+                className="h-10 rounded-lg"
+              />
+            </div>
 
             {/* Email */}
             <div className="space-y-2">
@@ -114,7 +145,7 @@ export default function AdminManagersCreate() {
                 className="w-full h-10 px-3 border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
               >
                 <option value="">Select a tournament...</option>
-                {tournaments?.map((t) => (
+                {filterTour?.map((t) => (
                   <option key={t.id} value={t.id}>
                     {t.tournamentName}
                   </option>

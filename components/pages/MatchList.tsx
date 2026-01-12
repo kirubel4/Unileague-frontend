@@ -458,7 +458,8 @@ export function MatchList({
                             <div className="flex items-center justify-between">
                               <div className="text-center flex-1">
                                 <p className="font-bold text-base lg:text-lg text-gray-900 truncate px-2">
-                                  {match.homeTeam.teamName}
+                                  {match?.homeTeam?.teamName.slice(0, 4) +
+                                    match?.homeTeam?.teamName?.slice(8, 2)}
                                 </p>
                                 <p className="text-xs text-gray-500 mt-1">
                                   Home
@@ -473,7 +474,8 @@ export function MatchList({
                               </div>
                               <div className="text-center flex-1">
                                 <p className="font-bold text-base lg:text-lg text-gray-900 truncate px-2">
-                                  {match.awayTeam.teamName}
+                                  {match?.awayTeam?.teamName.slice(0, 4) +
+                                    match?.awayTeam?.teamName?.slice(8, 2)}
                                 </p>
                                 <p className="text-xs text-gray-500 mt-1">
                                   Away

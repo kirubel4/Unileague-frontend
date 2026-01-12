@@ -174,7 +174,11 @@ export const MatchCard = ({ match }: MatchCardProps) => {
                 <Users className="w-5 h-5 text-blue-600" />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-gray-900">{match.teamA.name}</h3>
+                <h3 className="font-bold text-gray-900">
+                  {" "}
+                  {match?.teamA?.name?.slice(0, 4) +
+                    match?.teamA?.name?.slice(8, 12)}
+                </h3>
                 <p className="text-sm text-gray-600">Home Team</p>
               </div>
               {isLive || match.status === "finished" ? (
@@ -214,7 +218,10 @@ export const MatchCard = ({ match }: MatchCardProps) => {
                 </div>
               ) : null}
               <div className="flex-1">
-                <h3 className="font-bold text-gray-900">{match.teamB.name}</h3>
+                <h3 className="font-bold text-gray-900">
+                  {match?.teamB?.name?.slice(0, 4) +
+                    match?.teamB?.name?.slice(8, 12)}
+                </h3>
                 <p className="text-sm text-gray-600">Away Team</p>
               </div>
               <div className="w-10 h-10 rounded-full bg-linear-to-r from-green-100 to-blue-100 flex items-center justify-center">
