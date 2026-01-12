@@ -17,6 +17,7 @@ export interface Tournament {
   status: "UPCOMING" | "ONGOING" | "COMPLETED";
   teams?: number;
   managers?: number;
+  managerId?: string;
   logurl?: string;
 }
 
