@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
       tid = cookiId;
     }
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/teams/status/${tid}`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/matches/up-coming/${tid}/team`,
       {
         method: "GET",
         headers: {

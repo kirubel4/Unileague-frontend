@@ -1,15 +1,22 @@
 // app/lineup/page.tsx
 "use client";
-
-import React from "react";
 import Link from "next/link";
 import { Calendar, MapPin, Clock, Users } from "lucide-react";
-
-import { mockGames } from "../mockData";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import useSWR from "swr";
+import { fetcher } from "@/lib/utils";
+import { mapLiveMatchesToUI } from "@/app/(public)/matches/utility";
 
 const LineupPage = () => {
+  const {
+    data,
+    isLoading: load,
+    error,
+  } = useSWR(`/api/public/match/up-coming/team`, fetcher, {
+    revalidateOnFocus: false,
+  });
+  const recentMatches = mapLiveMatchesToUI(data);
   return (
     <div className="flex flex-1">
       <main className="flex-1 p-8">
@@ -32,73 +39,98 @@ const LineupPage = () => {
                 Upcoming Games
               </h2>
               <div className="text-sm text-gray-500">
-                {mockGames.length} games scheduled
+                {recentMatches?.length} games scheduled
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockGames.map((game) => (
-                <Card
-                  key={game.id}
-                  className="hover:shadow-lg transition-shadow"
-                >
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center space-x-2">
-                        <div
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            game.type === "Home"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-gray-100 text-gray-800"
+              {load &&
+                Array.from({ length: 6 }).map((_, i) => (
+                  <MatchCardSkeleton key={i} />
+                ))}
+
+              {/* Error */}
+              {!load && error && (
+                <div className="col-span-full">
+                  <MatchLoadError onRetry={() => location.reload()} />
+                </div>
+              )}
+
+              {/* Empty */}
+              {!load && !error && recentMatches.length === 0 && (
+                <div className="col-span-full text-center py-20 text-gray-500">
+                  No upcoming matches available
+                </div>
+              )}
+
+              {/* Data */}
+              {!load &&
+                !error &&
+                recentMatches.map((game) => (
+                  <Card
+                    key={game.id}
+                    className="group relative overflow-hidden transition-all hover:shadow-xl"
+                  >
+                    <CardContent className="p-6 space-y-5">
+                      {/* Top badges */}
+                      <div className="flex items-center justify-between">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            game.isFeatured
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-gray-100 text-gray-700"
                           }`}
                         >
-                          {game.type}
-                        </div>
-                        <div className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          {game.isFeatured ? "Featured Match" : "Regular Match"}
+                        </span>
+
+                        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
                           {game.status}
-                        </div>
-                      </div>
-                    </div>
-
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                      vs {game.opponent}
-                    </h3>
-
-                    <div className="space-y-3">
-                      <div className="flex items-center text-gray-600">
-                        <Calendar className="w-4 h-4 mr-2" />
-                        <span>
-                          {new Date(game.date).toLocaleDateString("en-US", {
-                            weekday: "long",
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })}
                         </span>
                       </div>
 
-                      <div className="flex items-center text-gray-600">
-                        <Clock className="w-4 h-4 mr-2" />
-                        <span>{game.time}</span>
+                      {/* Teams */}
+                      <div className="text-center">
+                        <h3 className="text-lg font-bold text-gray-900">
+                          {game.teamA?.name}
+                          <span className="mx-2 text-gray-400">vs</span>
+                          {game.teamB?.name}
+                        </h3>
                       </div>
 
-                      <div className="flex items-center text-gray-600">
-                        <MapPin className="w-4 h-4 mr-2" />
-                        <span>{game.location}</span>
-                      </div>
-                    </div>
+                      {/* Match meta */}
+                      <div className="space-y-3 text-sm text-gray-600">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-gray-400" />
+                          <span>{game.date}</span>
+                        </div>
 
-                    <div className="mt-6 pt-4 border-t border-gray-100">
-                      <Link href={`/coach/lineup/${game.id}`}>
-                        <Button className="w-full" size="lg">
-                          <Users className="w-4 h-4 mr-2" />
-                          Select Lineup
-                        </Button>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-gray-400" />
+                          <span>{game.time}</span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-gray-400" />
+                          <span>{game.venue}</span>
+                        </div>
+                      </div>
+
+                      {/* Action */}
+                      <div className="pt-4 border-t">
+                        <Link href={`/coach/line-up/${game.id}`}>
+                          <Button
+                            size="lg"
+                            className="w-full gap-2 group-hover:scale-[1.02] transition-transform"
+                          >
+                            <Users className="w-4 h-4" />
+                            Select Lineup
+                          </Button>
+                        </Link>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
             </div>
           </div>
         </div>
@@ -108,3 +140,37 @@ const LineupPage = () => {
 };
 
 export default LineupPage;
+const MatchCardSkeleton = () => (
+  <Card className="overflow-hidden">
+    <CardContent className="p-6 space-y-5 animate-pulse">
+      <div className="flex justify-between">
+        <div className="h-5 w-24 rounded bg-gray-200" />
+        <div className="h-5 w-20 rounded bg-gray-200" />
+      </div>
+
+      <div className="h-6 w-3/4 mx-auto rounded bg-gray-200" />
+
+      <div className="space-y-3">
+        <div className="h-4 w-2/3 rounded bg-gray-200" />
+        <div className="h-4 w-1/2 rounded bg-gray-200" />
+        <div className="h-4 w-3/4 rounded bg-gray-200" />
+      </div>
+
+      <div className="h-10 w-full rounded bg-gray-200" />
+    </CardContent>
+  </Card>
+);
+const MatchLoadError = ({ onRetry }: { onRetry: () => void }) => (
+  <div className="flex flex-col items-center justify-center py-20 text-center">
+    <p className="text-lg font-semibold text-gray-800">
+      Failed to load matches
+    </p>
+    <p className="text-sm text-gray-500 mt-1">
+      Please check your connection and try again.
+    </p>
+
+    <Button className="mt-4" onClick={onRetry}>
+      Retry
+    </Button>
+  </div>
+);

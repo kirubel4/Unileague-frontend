@@ -1,432 +1,945 @@
 "use client";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { UserPlus, Crown, X, Users2 } from "lucide-react";
 
-import React, { useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import {
-  Trophy,
-  Users,
-  UserPlus,
-  ArrowLeft,
-  Crown,
-  Star,
-  Check,
-  X,
-} from "lucide-react";
-
-import { mockGames, mockPlayers } from "../../mockData";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-
-type Player = (typeof mockPlayers)[number] & {
-  isStarting: boolean;
-  isBench: boolean;
-  isCaptain: boolean;
-};
+import { toast, Toaster } from "sonner";
+import { cn, fetcher } from "@/lib/utils";
+import useSWR from "swr";
+import { mapApiPlayersToPlayers } from "@/app/(private)/manager/teams/[id]/util";
+import {
+  FORMATIONS,
+  LineupRole,
+  MatchInfo,
+  Player,
+  PlayerPosition,
+} from "./utlity";
+export interface PositionSlot {
+  position: PlayerPosition;
+  player: Player | null;
+}
 
 export default function LineupBuilder() {
-  const { gameId } = useParams<{ gameId: string }>();
   const router = useRouter();
-
-  const game = mockGames.find((g) => g.id === gameId);
-
-  const [players, setPlayers] = useState<Player[]>(
-    mockPlayers.map((p) => ({
-      ...p,
-      isStarting: false,
-      isBench: false,
-      isCaptain: false,
-    }))
-  );
-
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [selectedFormation, setSelectedFormation] = useState("4-3-3");
+  const [positionSlots, setPositionSlots] = useState<PositionSlot[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showUnavailable, setShowUnavailable] = useState(false);
 
+  const [matchInfo] = useState<MatchInfo>({
+    id: "match-123",
+    opponent: "FC Barcelona",
+    date: "2024-01-20",
+    time: "15:00",
+    location: "Home Stadium",
+    teamId: "team-456",
+  });
+
+  const {
+    data,
+    error: fetchError,
+    isLoading,
+    mutate,
+  } = useSWR("/api/public/player/team", fetcher);
+
+  // Initialize players
+  useEffect(() => {
+    if (data?.data) {
+      const apiPlayers = mapApiPlayersToPlayers(data.data);
+      setPlayers(
+        apiPlayers.map((p) => ({
+          ...p,
+          isAvailable: p.isAvailable ?? true,
+          isSelected: false,
+          assignedPosition: null,
+          role: null,
+          isCaptain: false,
+        }))
+      );
+    }
+  }, [data]);
+
+  // Initialize position slots based on formation
+  useEffect(() => {
+    const formation = FORMATIONS.find((f) => f.value === selectedFormation);
+    if (formation) {
+      const slots = formation.positions.map((pos, idx) => ({
+        id: `${pos}-${idx}`,
+        position: pos as PlayerPosition,
+        player: null,
+      }));
+      setPositionSlots(slots);
+    }
+  }, [selectedFormation]);
+
+  // Update positionSlots when players change (to keep them in sync)
+  useEffect(() => {
+    setPositionSlots((prev) =>
+      prev.map((slot) => {
+        const player = players.find(
+          (p) =>
+            p.assignedPosition === slot.position &&
+            p.role === LineupRole.STARTING
+        );
+        return {
+          ...slot,
+          player: player || null,
+        };
+      })
+    );
+  }, [players]);
+
+  // Derived state
   const startingPlayers = useMemo(
-    () => players.filter((p) => p.isStarting),
+    () => players.filter((p) => p.role === LineupRole.STARTING),
     [players]
   );
 
   const benchPlayers = useMemo(
-    () => players.filter((p) => p.isBench),
+    () => players.filter((p) => p.role === LineupRole.BENCH),
     [players]
   );
 
-  const captain = startingPlayers.find((p) => p.isCaptain);
+  const availablePlayers = useMemo(
+    () => players.filter((p) => p.isAvailable && !p.isSelected),
+    [players]
+  );
 
-  /* =========================
-     PLAYER ACTION HANDLERS
-  ========================== */
+  const unavailablePlayers = useMemo(
+    () => players.filter((p) => !p.isAvailable),
+    [players]
+  );
 
-  function toggleStarting(playerId: string) {
+  const captain = useMemo(
+    () => startingPlayers.find((p) => p.isCaptain),
+    [startingPlayers]
+  );
+
+  // Assign player to position
+  const assignPlayerToPosition = (player: Player, position: PlayerPosition) => {
     setPlayers((prev) =>
-      prev.map((p) =>
-        p.id === playerId
-          ? {
-              ...p,
-              isStarting: !p.isStarting,
-              isBench: false,
-              isCaptain: p.isStarting ? false : p.isCaptain,
-            }
-          : p
-      )
+      prev.map((p) => {
+        // Clear previous player in the same position
+        if (p.assignedPosition === position && p.id !== player.id) {
+          return {
+            ...p,
+            isSelected: false,
+            assignedPosition: null,
+            role: null,
+          };
+        }
+        // Assign the selected player
+        if (p.id === player.id) {
+          return {
+            ...p,
+            isSelected: true,
+            assignedPosition: position,
+            role: LineupRole.STARTING,
+            isCaptain: false,
+          };
+        }
+        return p;
+      })
     );
-  }
+  };
 
-  function toggleBench(playerId: string) {
+  // Remove player from position
+  const removePlayerFromPosition = (position: PlayerPosition) => {
     setPlayers((prev) =>
       prev.map((p) =>
-        p.id === playerId
+        p.assignedPosition === position
           ? {
               ...p,
-              isBench: !p.isBench,
-              isStarting: false,
+              isSelected: false,
+              assignedPosition: null,
+              role: null,
               isCaptain: false,
             }
           : p
       )
     );
-  }
+  };
 
-  function setCaptain(playerId: string) {
+  // Add to bench
+  const addToBench = (player: Player) => {
+    setPlayers((prev) =>
+      prev.map((p) =>
+        p.id === player.id
+          ? {
+              ...p,
+              isSelected: true,
+              role: LineupRole.BENCH,
+              assignedPosition: null,
+              isCaptain: false, // Can't be captain from bench
+            }
+          : p
+      )
+    );
+  };
+
+  // Remove from bench
+  const removeFromBench = (playerId: string) => {
+    setPlayers((prev) =>
+      prev.map((p) =>
+        p.id === playerId
+          ? { ...p, isSelected: false, role: null, isCaptain: false }
+          : p
+      )
+    );
+  };
+
+  // Set captain - FIXED VERSION
+  const setCaptain = (playerId: string) => {
+    console.log("Setting captain for:", playerId);
+
     setPlayers((prev) =>
       prev.map((p) => ({
         ...p,
-        isCaptain: p.id === playerId,
+        isCaptain: p.id === playerId && p.role === LineupRole.STARTING,
       }))
     );
-  }
 
-  /* =========================
-     SUBMIT
-  ========================== */
+    toast.success("Captain set!");
+  };
 
-  function submitLineup() {
-    setError(null);
+  // Clear captain
+  const clearCaptain = () => {
+    setPlayers((prev) =>
+      prev.map((p) => ({
+        ...p,
+        isCaptain: false,
+      }))
+    );
+  };
 
-    if (startingPlayers.length !== 11) {
-      setError("You must select exactly 11 starting players.");
-      return;
+  // Auto-assign based on positions
+  const autoAssign = () => {
+    const formation = FORMATIONS.find((f) => f.value === selectedFormation);
+    if (!formation) return;
+
+    const available = [...availablePlayers];
+    const positions = formation.positions as PlayerPosition[];
+
+    positions.forEach((position) => {
+      // Check if position is already filled
+      const isAlreadyFilled = players.some(
+        (p) => p.assignedPosition === position && p.role === LineupRole.STARTING
+      );
+
+      if (!isAlreadyFilled && available.length > 0) {
+        // Find best matching player for this position
+        const matchingPlayer =
+          available.find(
+            (p) =>
+              p.position.toLowerCase() === position.toLowerCase() ||
+              (position === "CB" &&
+                (p.position === "RCB" || p.position === "LCB"))
+          ) || available[0];
+
+        if (matchingPlayer) {
+          assignPlayerToPosition(matchingPlayer, position);
+          available.splice(available.indexOf(matchingPlayer), 1);
+        }
+      }
+    });
+
+    toast.success("Auto-assigned players to positions");
+  };
+
+  // Clear all assignments
+  const clearAll = () => {
+    setPlayers((prev) =>
+      prev.map((p) => ({
+        ...p,
+        isSelected: false,
+        assignedPosition: null,
+        role: null,
+        isCaptain: false,
+      }))
+    );
+    toast.info("All assignments cleared");
+  };
+
+  // Prepare submission data
+  const prepareLineupData = () => {
+    const startingLineup = players
+      .filter((p) => p.role === LineupRole.STARTING && p.assignedPosition)
+      .map((player) => ({
+        playerId: player.id,
+        position: player.assignedPosition!,
+        role: LineupRole.STARTING,
+        isCaptain: player.isCaptain || undefined,
+      }));
+
+    const benchLineup = benchPlayers.map((player) => ({
+      playerId: player.id,
+      position: player.position.toUpperCase() as PlayerPosition,
+      role: LineupRole.BENCH,
+      isCaptain: false,
+    }));
+
+    return [...startingLineup, ...benchLineup];
+  };
+
+  // Validate lineup
+  const validateLineup = (): string | null => {
+    const formation = FORMATIONS.find((f) => f.value === selectedFormation);
+    if (!formation) return "Formation not found";
+
+    const unfilled = formation.positions.filter(
+      (pos) =>
+        !players.some(
+          (p) => p.assignedPosition === pos && p.role === LineupRole.STARTING
+        )
+    );
+
+    if (unfilled.length > 0) {
+      return `Missing players for: ${unfilled.join(", ")}`;
     }
 
     if (benchPlayers.length === 0) {
-      setError("Select at least one bench player.");
-      return;
+      return "Add at least 1 bench player";
     }
 
     if (!captain) {
-      setError("Select a captain from starting players.");
+      return "Select a captain";
+    }
+
+    const hasGK = players.some(
+      (p) =>
+        p.assignedPosition === PlayerPosition.GK &&
+        p.role === LineupRole.STARTING
+    );
+    if (!hasGK) return "Must assign a goalkeeper";
+
+    return null;
+  };
+
+  // Submit lineup
+  const submitLineup = async () => {
+    setError(null);
+    const validationError = validateLineup();
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
-    console.log({
-      gameId,
-      startingPlayers,
-      benchPlayers,
-      captain,
-    });
+    setIsSubmitting(true);
+    try {
+      const lineupData = prepareLineupData();
+      const payload = {
+        teamId: matchInfo.teamId,
+        matchId: matchInfo.id,
+        formation: selectedFormation,
+        requestById: "user-123",
+        players: lineupData,
+      };
 
-    toast.success("submited");
+      console.log("Submitting:", payload);
+      // await fetch("/api/lineup", { method: "POST", body: JSON.stringify(payload) });
 
-    router.push("/lineup");
-  }
+      toast.success("Lineup submitted for approval!");
+      setTimeout(() => router.push("/coach/line-up"), 1500);
+    } catch (error) {
+      setError("Failed to submit lineup");
+      toast.error("Submission failed");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-  if (!game) {
+  // Render formation layout
+  const renderFormationLayout = () => {
+    const formation = FORMATIONS.find((f) => f.value === selectedFormation);
+    if (!formation) return null;
+
+    // Group positions by line (GK, Defense, Midfield, Attack)
+    const lines = {
+      GK: formation.positions.filter((p) => p === "GK"),
+      Defense: formation.positions.filter((p) =>
+        ["RB", "RCB", "LCB", "LB", "CB"].includes(p)
+      ),
+      Midfield: formation.positions.filter((p) =>
+        ["CDM", "CM", "CAM", "RM", "LM"].includes(p)
+      ),
+      Attack: formation.positions.filter((p) =>
+        ["RW", "LW", "ST", "CF"].includes(p)
+      ),
+    };
+
     return (
-      <div className="p-6 text-center">
-        <p className="text-lg font-semibold">Game not found</p>
-        <Button className="mt-4" onClick={() => router.push("/lineup")}>
-          Back
-        </Button>
+      <div className="mb-8">
+        <Toaster />
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <select
+              value={selectedFormation}
+              onChange={(e) => {
+                setSelectedFormation(e.target.value);
+                clearAll();
+              }}
+              className="h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            >
+              {FORMATIONS.map((form) => (
+                <option key={form.value} value={form.value}>
+                  {form.label} Formation
+                </option>
+              ))}
+            </select>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={autoAssign}>
+                Auto Assign
+              </Button>
+              <Button size="sm" variant="ghost" onClick={clearAll}>
+                Clear All
+              </Button>
+              {captain && (
+                <Button size="sm" variant="ghost" onClick={clearCaptain}>
+                  Clear Captain
+                </Button>
+              )}
+            </div>
+          </div>
+          <div className="text-sm text-gray-500">
+            {formation.positions.length} players needed
+          </div>
+        </div>
+
+        {/* Formation visualization */}
+        <div className="relative rounded-2xl bg-linear-to-br from-gray-900 to-gray-800 p-6">
+          {/* Soccer field background */}
+          <div className="absolute inset-4 rounded-xl border-2 border-white/20"></div>
+          <div className="absolute left-1/2 top-0 h-full w-0.5 -translate-x-1/2 bg-white/20"></div>
+          <div className="absolute left-1/2 top-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/20"></div>
+
+          {/* Position slots */}
+          <div className="relative grid grid-cols-1 gap-8">
+            {/* Goalkeeper */}
+            <div className="flex justify-center">
+              {lines.GK.map((pos) => {
+                const player = players.find(
+                  (p) =>
+                    p.assignedPosition === pos && p.role === LineupRole.STARTING
+                );
+                return (
+                  <PositionSlot
+                    key={pos}
+                    position={pos as PlayerPosition}
+                    player={player || null}
+                    onAssign={(player) =>
+                      assignPlayerToPosition(player, pos as PlayerPosition)
+                    }
+                    onRemove={() =>
+                      removePlayerFromPosition(pos as PlayerPosition)
+                    }
+                    onCaptain={() => player && setCaptain(player.id)}
+                    isCaptain={!!player?.isCaptain}
+                  />
+                );
+              })}
+            </div>
+
+            {/* Defense */}
+            <div className="flex justify-center gap-4">
+              {lines.Defense.map((pos) => {
+                const player = players.find(
+                  (p) =>
+                    p.assignedPosition === pos && p.role === LineupRole.STARTING
+                );
+                return (
+                  <PositionSlot
+                    key={pos}
+                    position={pos as PlayerPosition}
+                    player={player || null}
+                    onAssign={(player) =>
+                      assignPlayerToPosition(player, pos as PlayerPosition)
+                    }
+                    onRemove={() =>
+                      removePlayerFromPosition(pos as PlayerPosition)
+                    }
+                    onCaptain={() => player && setCaptain(player.id)}
+                    isCaptain={!!player?.isCaptain}
+                  />
+                );
+              })}
+            </div>
+
+            {/* Midfield */}
+            <div className="flex justify-center gap-4">
+              {lines.Midfield.map((pos, idx) => {
+                const player = players.find(
+                  (p) =>
+                    p.assignedPosition === pos && p.role === LineupRole.STARTING
+                );
+                return (
+                  <PositionSlot
+                    key={`${pos}-${idx}`} // Use string + index
+                    position={pos as PlayerPosition}
+                    player={player || null}
+                    onAssign={(player) =>
+                      assignPlayerToPosition(player, pos as PlayerPosition)
+                    }
+                    onRemove={() =>
+                      removePlayerFromPosition(pos as PlayerPosition)
+                    }
+                    onCaptain={() => player && setCaptain(player.id)}
+                    isCaptain={!!player?.isCaptain}
+                  />
+                );
+              })}
+            </div>
+
+            {/* Attack */}
+            <div className="flex justify-center gap-4">
+              {lines.Attack.map((pos, idx) => {
+                const player = players.find(
+                  (p) =>
+                    p.assignedPosition === pos && p.role === LineupRole.STARTING
+                );
+                return (
+                  <PositionSlot
+                    key={`${pos}-${idx}`}
+                    position={pos as PlayerPosition}
+                    player={player || null}
+                    onAssign={(player) =>
+                      assignPlayerToPosition(player, pos as PlayerPosition)
+                    }
+                    onRemove={() =>
+                      removePlayerFromPosition(pos as PlayerPosition)
+                    }
+                    onCaptain={() => player && setCaptain(player.id)}
+                    isCaptain={!!player?.isCaptain}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+          <p className="text-gray-600">Loading players...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-white">
       {/* Header */}
-      <div className="border-b bg-white">
+      <div className="border-b bg-white/80 backdrop-blur-sm">
         <div className="mx-auto max-w-7xl px-4 py-4">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold">Lineup vs {game.opponent}</h1>
-              <p className="text-sm text-gray-500">
-                {game.date} • {game.time} • {game.location}
+              <h1 className="text-2xl font-bold text-gray-900">
+                Lineup Builder
+              </h1>
+              <p className="text-sm text-gray-600">
+                {matchInfo.date} • vs {matchInfo.opponent}
               </p>
             </div>
-
-            <div className="flex gap-6">
-              <Stat label="Starting" value={`${startingPlayers.length}/11`} />
-              <Stat label="Bench" value={benchPlayers.length} />
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <div className="text-sm text-gray-600">Progress</div>
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-32 rounded-full bg-gray-200">
+                    <div
+                      className="h-full rounded-full bg-green-500 transition-all"
+                      style={{
+                        width: `${
+                          ((startingPlayers.length + benchPlayers.length) /
+                            (positionSlots.length + 5)) *
+                          100
+                        }%`,
+                      }}
+                    ></div>
+                  </div>
+                  <span className="text-sm font-medium">
+                    {startingPlayers.length}/{positionSlots.length} starters
+                  </span>
+                </div>
+              </div>
+              <Button
+                size="lg"
+                onClick={submitLineup}
+                disabled={isSubmitting || !!validateLineup()}
+                className="min-w-32"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                    Submitting...
+                  </>
+                ) : (
+                  "Submit Lineup"
+                )}
+              </Button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="mx-auto max-w-7xl px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Players */}
-        <div className="lg:col-span-2 space-y-3">
-          {players.map((player) => (
-            <PlayerRow
-              key={player.id}
-              player={player}
-              onStart={() => toggleStarting(player.id)}
-              onBench={() => toggleBench(player.id)}
-              onCaptain={() => setCaptain(player.id)}
-            />
-          ))}
+      <div className="mx-auto max-w-7xl px-4 py-6">
+        {error && (
+          <div className="mb-4 rounded-lg border-l-4 border-red-500 bg-red-50 p-4">
+            <div className="flex items-center">
+              <div className="shrink-0">
+                <X className="h-5 w-5 text-red-400" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Debug info - remove in production */}
+        <div className="mb-4 text-xs text-gray-500">
+          Captain: {captain ? `#${captain.number} ${captain.name}` : "None"} |
+          Starting players: {startingPlayers.length} | Total players:{" "}
+          {players.length}
         </div>
 
-        {/* Summary */}
-        <div className="sticky top-6 h-fit rounded-xl border bg-white p-4 space-y-4">
-          <h2 className="font-semibold">Lineup Summary</h2>
+        {/* Formation Section */}
+        {renderFormationLayout()}
 
-          {error && (
-            <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
-              {error}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Available Players */}
+          <div className="lg:col-span-2">
+            <div className="rounded-xl border border-gray-200 bg-white">
+              <div className="border-b px-4 py-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Users2 className="h-5 w-5 text-gray-400" />
+                    <h3 className="font-semibold">Available Players</h3>
+                    <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium">
+                      {availablePlayers.length} available
+                    </span>
+                  </div>
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={showUnavailable}
+                      onChange={(e) => setShowUnavailable(e.target.checked)}
+                      className="h-4 w-4 rounded border-gray-300"
+                    />
+                    Show unavailable
+                  </label>
+                </div>
+              </div>
+
+              <div className="p-4">
+                {fetchError ? (
+                  <div className="py-8 text-center">
+                    <p className="text-red-600 mb-2">Failed to load players</p>
+                    <Button onClick={() => mutate()}>Retry</Button>
+                  </div>
+                ) : availablePlayers.length === 0 ? (
+                  <div className="py-8 text-center">
+                    <p className="text-gray-500">All players assigned</p>
+                    <p className="text-sm text-gray-400 mt-1">
+                      Click on positions to reassign players
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {availablePlayers.map((player) => (
+                      <div
+                        key={player.id}
+                        className="group flex items-center justify-between rounded-lg border border-gray-200 p-3 hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-blue-600 to-blue-500 font-bold text-white">
+                            {player.number}
+                          </div>
+                          <div>
+                            <div className="font-semibold">{player.name}</div>
+                            <div className="text-xs text-gray-500">
+                              {player.position}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => addToBench(player)}
+                          >
+                            Bench
+                          </Button>
+                          <select
+                            className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm focus:border-blue-500 focus:outline-none"
+                            defaultValue=""
+                            onChange={(e) => {
+                              const pos = e.target.value as PlayerPosition;
+                              if (pos) assignPlayerToPosition(player, pos);
+                            }}
+                          >
+                            <option value="">Assign...</option>
+                            {positionSlots
+                              .filter((slot) => {
+                                const playerInSlot = players.find(
+                                  (p) =>
+                                    p.assignedPosition === slot.position &&
+                                    p.role === LineupRole.STARTING
+                                );
+                                return !playerInSlot;
+                              })
+                              .map((slot, idx) => (
+                                <option
+                                  key={`${slot}-${idx}`}
+                                  value={slot.position}
+                                >
+                                  {slot.position}
+                                </option>
+                              ))}
+                          </select>
+                        </div>
+                      </div>
+                    ))}
+
+                    {showUnavailable && unavailablePlayers.length > 0 && (
+                      <>
+                        <div className="col-span-full mt-4 mb-2 text-sm font-medium text-gray-500">
+                          Unavailable Players
+                        </div>
+                        {unavailablePlayers.map((player) => (
+                          <div
+                            key={player.id}
+                            className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 opacity-60"
+                          >
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300 font-bold text-gray-600">
+                              {player.number}
+                            </div>
+                            <div>
+                              <div className="font-semibold">{player.name}</div>
+                              <div className="text-xs text-gray-500">
+                                {player.position} • Unavailable
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-          )}
+          </div>
 
-          <SummarySection
-            title={`Starting XI (${startingPlayers.length}/11)`}
-            icon={<Users className="h-4 w-4" />}
-            players={startingPlayers}
-            showCaptain
-          />
+          {/* Bench & Summary */}
+          <div className="space-y-6">
+            {/* Bench */}
+            <div className="rounded-xl border border-gray-200 bg-white">
+              <div className="border-b px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <UserPlus className="h-5 w-5 text-gray-400" />
+                  <h3 className="font-semibold">Bench</h3>
+                  <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
+                    {benchPlayers.length} players
+                  </span>
+                </div>
+              </div>
+              <div className="p-4">
+                {benchPlayers.length === 0 ? (
+                  <div className="py-6 text-center">
+                    <p className="text-gray-500">No bench players</p>
+                    <p className="text-sm text-gray-400 mt-1">
+                      Click "Bench" on available players
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {benchPlayers.map((player) => (
+                      <div
+                        key={player.id}
+                        className="flex items-center justify-between rounded-lg bg-green-50 p-3"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500 font-bold text-white">
+                            {player.number}
+                          </div>
+                          <div>
+                            <div className="font-semibold">{player.name}</div>
+                            <div className="text-xs text-gray-600">
+                              {player.position}
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => removeFromBench(player.id)}
+                          className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
 
-          <SummarySection
-            title={`Bench (${benchPlayers.length})`}
-            icon={<UserPlus className="h-4 w-4" />}
-            players={benchPlayers}
-          />
+            {/* Summary */}
+            <div className="rounded-xl border border-gray-200 bg-white">
+              <div className="border-b px-4 py-3">
+                <h3 className="font-semibold">Lineup Summary</h3>
+              </div>
+              <div className="p-4 space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-600">Formation</div>
+                    <div className="font-medium">{selectedFormation}</div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-600">Starting XI</div>
+                    <div className="font-medium">
+                      {startingPlayers.length}/{positionSlots.length}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-600">Bench</div>
+                    <div className="font-medium">{benchPlayers.length}</div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-600">Captain</div>
+                    <div className="font-medium">
+                      {captain
+                        ? `#${captain.number} ${captain.name}`
+                        : "Not set"}
+                    </div>
+                  </div>
+                </div>
 
-          <Button size="lg" className="w-full" onClick={submitLineup}>
-            Submit Lineup
-          </Button>
-
-          <p className="text-xs text-gray-500">
-            Lineup will be reviewed before approval.
-          </p>
+                <div className="pt-4 border-t">
+                  <div className="mb-2 text-sm font-medium">Validation</div>
+                  <div className="space-y-2">
+                    {[
+                      {
+                        check: startingPlayers.length === positionSlots.length,
+                        label: "All positions filled",
+                      },
+                      {
+                        check: benchPlayers.length > 0,
+                        label: "At least 1 bench player",
+                      },
+                      { check: !!captain, label: "Captain selected" },
+                      {
+                        check: startingPlayers.some(
+                          (p) => p.assignedPosition === "GK"
+                        ),
+                        label: "Goalkeeper assigned",
+                      },
+                    ].map((item, idx) => (
+                      <div
+                        key={`${item}-${idx}`}
+                        className="flex items-center gap-2"
+                      >
+                        <div
+                          className={`h-3 w-3 rounded-full ${
+                            item.check ? "bg-green-500" : "bg-gray-300"
+                          }`}
+                        ></div>
+                        <span
+                          className={`text-sm ${
+                            item.check ? "text-green-700" : "text-gray-500"
+                          }`}
+                        >
+                          {item.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
-function PlayerRow({
+function PositionSlot({
+  position,
   player,
-  onStart,
-  onBench,
+  onAssign,
+  onRemove,
   onCaptain,
+  isCaptain,
 }: {
-  player: Player;
-  onStart: () => void;
-  onBench: () => void;
+  position: PlayerPosition;
+  player: Player | null;
+  onAssign: (player: Player) => void;
+  onRemove: () => void;
   onCaptain: () => void;
+  isCaptain: boolean;
 }) {
   return (
-    <div
-      className={cn(
-        "group relative flex items-center justify-between gap-4 rounded-xl px-4 py-3 transition-all duration-200",
-        "border border-gray-200 hover:border-gray-300 hover:shadow-sm",
-        player.isStarting &&
-          "border-l-4 border-l-blue-500 bg-linear-to-r from-blue-50/50 to-white shadow-sm",
-        player.isBench &&
-          "border-l-4 border-l-green-500 bg-linear-to-r from-green-50/50 to-white shadow-sm",
-        !player.isAvailable && "opacity-60 cursor-not-allowed",
-        player.isCaptain && "ring-1 ring-yellow-200 ring-offset-1"
-      )}
-    >
-      {/* Captain Badge */}
-      {player.isCaptain && (
-        <div className="absolute -left-2 top-1/2 -translate-y-1/2">
-          <div className="relative">
-            <div className="absolute inset-0 bg-yellow-400 rounded-full blur-sm"></div>
-            <div className="relative bg-yellow-500 p-1 rounded-full shadow-md">
-              <Crown className="h-3 w-3 text-white" />
+    <div className="relative">
+      <div
+        className={cn(
+          "relative flex h-20 w-20 flex-col items-center justify-center rounded-xl border-2 transition-all cursor-pointer",
+          player
+            ? "border-blue-500 bg-blue-50"
+            : "border-dashed border-gray-400 bg-white/10 hover:border-blue-400 hover:bg-white/20"
+        )}
+      >
+        {player ? (
+          <>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemove();
+              }}
+              className="absolute -right-2 -top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600"
+            >
+              <X className="h-3 w-3" />
+            </button>
+            <div className="flex flex-col items-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-blue-600 to-blue-500 font-bold text-white">
+                {player.number}
+              </div>
+              <div className="mt-1 text-xs font-semibold text-black truncate max-w-full px-1">
+                {player.name.split(" ")[0]}
+              </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Player Info */}
-      <div className="flex items-center gap-3 flex-1 min-w-0">
-        {/* Player Number */}
-        <div
-          className={cn(
-            "shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold",
-            player.isStarting
-              ? "bg-blue-500 text-white"
-              : player.isBench
-              ? "bg-green-500 text-white"
-              : player.isAvailable
-              ? "bg-gray-800 text-white"
-              : "bg-gray-300 text-gray-600"
-          )}
-        >
-          #{player.number}
-        </div>
-
-        {/* Name and Position */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <p className="font-semibold text-gray-900 truncate">
-              {player.name}
-            </p>
-            {!player.isAvailable && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                Unavailable
-              </span>
+            {isCaptain && (
+              <div className="absolute -top-1 left-1/2 -translate-x-1/2">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-yellow-400 rounded-full blur-sm"></div>
+                  <Crown className="h-6 w-6 text-yellow-500 relative" />
+                </div>
+              </div>
             )}
-          </div>
-          <p className="text-sm text-gray-500">{player.position}</p>
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex items-center gap-2 shrink-0">
-        {/* Start Button */}
-        <Button
-          size="sm"
-          variant={player.isStarting ? "default" : "outline"}
-          onClick={onStart}
-          disabled={!player.isAvailable}
-          className={cn(
-            "transition-all duration-200",
-            player.isStarting
-              ? "bg-blue-500 hover:bg-blue-600 text-white shadow-sm"
-              : "border-gray-300 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-600"
-          )}
-        >
-          {player.isStarting ? (
-            <>
-              <Check className="h-3.5 w-3.5 mr-1.5" />
-              Starting
-            </>
-          ) : (
-            "Start"
-          )}
-        </Button>
-
-        {/* Bench Button */}
-        <Button
-          size="sm"
-          variant={player.isBench ? "secondary" : "outline"}
-          onClick={onBench}
-          disabled={!player.isAvailable}
-          className={cn(
-            "transition-all duration-200",
-            player.isBench
-              ? "bg-green-500 hover:bg-green-600 text-white shadow-sm"
-              : "border-gray-300 hover:border-green-500 hover:bg-green-50 hover:text-green-600"
-          )}
-        >
-          {player.isBench ? (
-            <>
-              <Check className="h-3.5 w-3.5 mr-1.5" />
-              Bench
-            </>
-          ) : (
-            "Bench"
-          )}
-        </Button>
-
-        {/* Captain Button */}
-        {player.isStarting && (
-          <button
-            onClick={onCaptain}
-            className={cn(
-              "shrink-0 w-9 h-9 rounded-lg flex items-center justify-center",
-              "transition-all duration-200",
-              "border border-gray-300 hover:border-yellow-400",
-              player.isCaptain
-                ? "bg-yellow-500 hover:bg-yellow-600 text-white shadow-md"
-                : "hover:bg-yellow-50 hover:text-yellow-600"
+            {/* Captain button inside the slot for easier clicking */}
+            {!isCaptain && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCaptain();
+                }}
+                className="absolute top-1 left-1 -translate-x-1/2 bg-yellow-500 hover:bg-yellow-600 text-white text-xs px-2 py-1 rounded-full transition-colors"
+                title="Make captain"
+              >
+                Cap
+              </button>
             )}
-            title={player.isCaptain ? "Team Captain" : "Set as Captain"}
-            aria-label={player.isCaptain ? "Team Captain" : "Set as Captain"}
-          >
-            {player.isCaptain ? (
-              <Crown className="h-4 w-4" />
-            ) : (
-              <Star className="h-4 w-4" />
-            )}
-          </button>
-        )}
-
-        {/* Remove Button (only shows on hover for selected players) */}
-        {(player.isStarting || player.isBench) && (
-          <button
-            onClick={player.isStarting ? onStart : onBench}
-            className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-            title="Remove from lineup"
-            aria-label="Remove from lineup"
-          >
-            <div className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center border border-gray-200 hover:border-red-300 hover:bg-red-50 hover:text-red-600 transition-colors">
-              <X className="h-3.5 w-3.5" />
-            </div>
-          </button>
+          </>
+        ) : (
+          <>
+            <div className="text-lg font-bold text-white">{position}</div>
+            <div className="mt-1 text-xs text-white/70">Click to assign</div>
+          </>
         )}
       </div>
-
-      {/* Status Indicators */}
-      <div className="absolute right-2 top-2">
-        {!player.isAvailable && (
-          <div className="flex items-center gap-1">
-            <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
-            <span className="text-xs text-red-600 font-medium">OUT</span>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-function SummarySection({
-  title,
-  icon,
-  players,
-  showCaptain,
-}: {
-  title: string;
-  icon: React.ReactNode;
-  players: Player[];
-  showCaptain?: boolean;
-}) {
-  return (
-    <div>
-      <div className="mb-2 flex items-center gap-2 text-sm font-medium">
-        {icon}
-        {title}
-      </div>
-
-      <div className="space-y-1">
-        {players.length === 0 && (
-          <p className="text-xs text-gray-500 italic">None selected</p>
-        )}
-
-        {players.map((p) => (
-          <div
-            key={p.id}
-            className="flex items-center justify-between rounded bg-gray-50 px-2 py-1 text-sm"
-          >
-            <span>
-              {p.name} #{p.number}
-            </span>
-            {showCaptain && p.isCaptain && (
-              <Trophy className="h-4 w-4 text-yellow-500" />
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="text-center">
-      <p className="text-xl font-bold">{value}</p>
-      <p className="text-xs text-gray-500">{label}</p>
     </div>
   );
 }

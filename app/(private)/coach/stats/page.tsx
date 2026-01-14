@@ -1,29 +1,14 @@
 "use client";
-
 import { TrendingUp, TrendingDown, Minus, AlertTriangle } from "lucide-react";
-
-/* =========================
-   MOCK DATA
-========================= */
-
-const team = {
-  teamName: "Arsenal",
-  matchesPlayed: 3,
-  wins: 0,
-  draws: 0,
-  losses: 3,
-  goalsFor: 2,
-  goalsAgainst: 6,
-  goalDifference: -4,
-  yellowCards: 0,
-  redCards: 0,
-};
-
-/* =========================
-   PAGE
-========================= */
-
 export default function TeamStatusPage() {
+  const {
+    data: status,
+    error: errors,
+    isLoading: loadingsat,
+  } = useSWR("/api/public/team/status", fetcher, {
+    revalidateOnFocus: false,
+  });
+  const team = mapTeamStats(status?.data);
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-6xl px-4 py-6 space-y-6">
@@ -64,7 +49,7 @@ export default function TeamStatusPage() {
             label="Goal Difference"
             value={team.goalDifference}
             icon={<Minus className="h-4 w-4" />}
-            highlight={team.goalDifference < 0}
+            highlight={Number(team?.goalDifference) < 0}
           />
 
           <StatTile
@@ -83,12 +68,12 @@ export default function TeamStatusPage() {
           <div className="grid grid-cols-2 gap-4">
             <DisciplineItem
               label="Yellow Cards"
-              value={team.yellowCards}
+              value={team.yellowCards ?? 0}
               tone="yellow"
             />
             <DisciplineItem
               label="Red Cards"
-              value={team.redCards}
+              value={team.redCards ?? 0}
               tone="red"
             />
           </div>
@@ -102,7 +87,9 @@ export default function TeamStatusPage() {
    COMPONENTS
 ========================= */
 // components/ui/metrics.tsx
-import { cn } from "@/lib/utils";
+import { cn, fetcher } from "@/lib/utils";
+import useSWR from "swr";
+import { mapTeamStats } from "../../manager/teams/[id]/util";
 
 interface HeaderMetricProps {
   label: string;
