@@ -45,14 +45,14 @@ export default function ManagerTeams() {
   const filteredTeams = teams?.filter(
     (t) =>
       t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.coachName.toLowerCase().includes(searchTerm.toLowerCase())
+      t.coachName.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleSelectTeam = (teamId: string) => {
     setSelectedTeams((prev) =>
       prev.includes(teamId)
         ? prev.filter((id) => id !== teamId)
-        : [...prev, teamId]
+        : [...prev, teamId],
     );
   };
 
@@ -65,24 +65,24 @@ export default function ManagerTeams() {
   };
   const resendCredentail = async (id: string) => {
     setOpenModalId(false);
-    toast.loading("resting.....");
+    toast.loading("resting.....", { id: "22" });
     const res = await fetch(
       `/api/protected/manager/team/credential/resend?id=${id}`,
       {
         method: "POST",
-      }
+      },
     );
     const respon: ApiResponse = await res.json();
     if (respon.success) {
       toast.error(respon.message);
       return;
     }
-    toast.success("resent");
+    toast.success("resent", { id: "22" });
   };
   async function handleDelete(id: string) {
     if (
       !confirm(
-        "Are you sure you want to delete this team? This action cannot be undone."
+        "Are you sure you want to delete this team? This action cannot be undone.",
       )
     ) {
       return;
@@ -105,7 +105,7 @@ export default function ManagerTeams() {
     if (selectedTeams.length === 0) return;
     if (
       !confirm(
-        `Are you sure you want to delete ${selectedTeams.length} selected teams?`
+        `Are you sure you want to delete ${selectedTeams.length} selected teams?`,
       )
     ) {
       return;
@@ -207,7 +207,7 @@ export default function ManagerTeams() {
                 {teams?.length
                   ? Math.round(
                       teams.reduce((sum, team) => sum + team.playerCount, 0) /
-                        teams.length
+                        teams.length,
                     )
                   : 0}
               </p>

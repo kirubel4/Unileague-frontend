@@ -20,19 +20,26 @@ import {
   RotateCw,
   Trash2,
   Plus,
-  ListVideoIcon,
   StopCircle,
   TrendingUp,
   Calendar,
-  Shield,
   User,
   AlertCircle,
   PlayCircle,
+  ChevronUp,
+  ChevronDown,
+  Users,
+  Check,
+  X,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import useSWR from "swr";
 import { ApiResponse, fetcher, getCookie } from "@/lib/utils";
-import { mapMatchDetail, mapPlayerNames } from "./util";
+import {
+  lineUpMapperBench,
+  lineUpMapperStarting,
+  mapMatchDetail,
+} from "./util";
 import { Input } from "@/components/ui/input";
 import { toast, Toaster } from "sonner";
 interface Event {
@@ -59,6 +66,8 @@ export default function ManagerMatchesDetail() {
   const [startLoading, setStartLoading] = useState(false);
   let homePlayers: { name: string; id: string }[] = [];
   let awayPlayers: { name: string; id: string }[] = [];
+  let homePlayersBench: { name: string; id: string }[] = [];
+  let awayPlayersBench: { name: string; id: string }[] = [];
   const {
     data,
     isLoading,
@@ -75,19 +84,28 @@ export default function ManagerMatchesDetail() {
       data: homeTeam,
       isLoading: load,
       error: er,
-    } = useSWR("/api/public/player/team?id=" + matches?.homeTeam?.id, fetcher, {
-      revalidateOnFocus: false,
-    });
-    homePlayers = mapPlayerNames(homeTeam?.data);
-
+    } = useSWR(
+      `/api/public/match/line-up?mid=${matchId}&id=${matches?.homeTeam?.id}`,
+      fetcher,
+      {
+        revalidateOnFocus: false,
+      },
+    );
+    homePlayers = lineUpMapperStarting(homeTeam?.data);
+    homePlayersBench = lineUpMapperBench(homeTeam?.data);
     const {
       data: awayTeam,
       isLoading: loading,
       error: err,
-    } = useSWR("/api/public/player/team?id=" + matches?.awayTeam?.id, fetcher, {
-      revalidateOnFocus: false,
-    });
-    awayPlayers = mapPlayerNames(awayTeam?.data);
+    } = useSWR(
+      `/api/public/match/line-up?mid=${matchId}&id=${matches?.awayTeam?.id}`,
+      fetcher,
+      {
+        revalidateOnFocus: false,
+      },
+    );
+    awayPlayers = lineUpMapperStarting(awayTeam?.data);
+    awayPlayersBench = lineUpMapperBench(awayTeam?.data);
   }
 
   const refreshScore = async () => {
@@ -142,7 +160,7 @@ export default function ManagerMatchesDetail() {
       `/api/protected/manager/match/event/remove?id=${id}`,
       {
         method: "DELETE",
-      }
+      },
     );
     const resp: ApiResponse = await res.json();
     if (!resp.success) {
@@ -159,7 +177,7 @@ export default function ManagerMatchesDetail() {
       {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
     if (!res) {
       toast.error("no network");
@@ -218,7 +236,25 @@ export default function ManagerMatchesDetail() {
         return "border-l-4 border-l-gray-500 bg-gray-50/50";
     }
   };
-
+  const [showLineups, setShowLineups] = useState(false);
+  const lineupRequests = [
+    {
+      teamId: "team-a",
+      teamName: "Warriors FC",
+      players: [
+        { id: 1, name: "John Doe", position: "GK", number: 1 },
+        { id: 2, name: "Mike Smith", position: "DEF", number: 4 },
+      ],
+    },
+    {
+      teamId: "team-b",
+      teamName: "Strikers United",
+      players: [
+        { id: 4, name: "Alex Wong", position: "FWD", number: 10 },
+        { id: 5, name: "Chris Evans", position: "MID", number: 6 },
+      ],
+    },
+  ];
   return (
     <Layout role="manager" userName={userName}>
       {/* Header */}
@@ -244,64 +280,7 @@ export default function ManagerMatchesDetail() {
         </div>
 
         {/* Main Score Display */}
-        <Card className="border-0 shadow-lg overflow-hidden mb-8">
-          <CardContent className="p-0">
-            <div className="bg-gray-400 text-white">
-              <div className="container mx-auto px-8 py-10">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                  {/* Home Team */}
-                  <div className="text-center flex-1">
-                    <div className="flex items-center justify-center gap-4 mb-3">
-                      <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
-                        <Shield className="w-8 h-8" />
-                      </div>
-                      <div>
-                        <h2 className="text-2xl md:text-3xl font-bold">
-                          {matches?.homeTeam.name}
-                        </h2>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Score */}
-                  <div className="px-8 py-6 bg-white/10 backdrop-blur-sm rounded-2xl">
-                    <div className="text-5xl md:text-7xl font-bold text-center mb-2 tracking-tighter">
-                      {matches?.score.home}
-                      <span className="mx-4 text-3xl md:text-5xl font-light">
-                        :
-                      </span>
-                      {matches?.score.away}
-                    </div>
-
-                    {matches?.status === "LIVE" ? (
-                      <p className="lg:mt-5 text-white/80 text-center text-sm font-medium">
-                        Minute {matches?.scheduledDate}
-                      </p>
-                    ) : (
-                      <p className="text-white/80 lg:mb-5 text-center text-sm font-medium">
-                        FT
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Away Team */}
-                  <div className="text-center flex-1">
-                    <div className="flex items-center justify-center gap-4 mb-3">
-                      <div>
-                        <h2 className="text-2xl md:text-3xl font-bold">
-                          {matches?.awayTeam.name}
-                        </h2>
-                      </div>
-                      <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
-                        <Shield className="w-8 h-8" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <Card className="border-0 shadow-lg overflow-hidden mb-8"></Card>
 
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList
@@ -326,84 +305,160 @@ export default function ManagerMatchesDetail() {
                     Match Information
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Left Column: Venue & Time */}
                     <div className="space-y-4">
-                      <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-200">
+                      <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-100/80">
                         <MapPin className="w-5 h-5 text-muted-foreground mt-0.5 shrink-0" />
                         <div>
                           <p className="text-xs text-muted-foreground font-medium">
                             Venue
                           </p>
                           <p className="font-semibold text-foreground">
-                            {matches?.venue}
+                            {matches?.venue || "TBD"}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-200">
+                      <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-100/80">
                         <Clock className="w-5 h-5 text-muted-foreground mt-0.5 shrink-0" />
                         <div>
                           <p className="text-xs text-muted-foreground font-medium">
                             Start Time
                           </p>
                           <p className="font-semibold text-foreground">
-                            {matches?.scheduledDate}
+                            {matches?.scheduledDate || "N/A"}
                           </p>
                         </div>
                       </div>
                     </div>
+
+                    {/* Right Column: Referee & Status */}
                     <div className="space-y-4">
-                      <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-200">
-                        {/* <Whistle className="w-5 h-5 text-muted-foreground mt-0.5 shrink-0" /> */}
+                      <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-100/80">
+                        <div className="w-5 h-5 flex items-center justify-center text-muted-foreground mt-0.5 shrink-0">
+                          ⚽
+                        </div>
                         <div>
                           <p className="text-xs text-muted-foreground font-medium">
                             Referee
                           </p>
                           <p className="font-semibold text-foreground">
-                            {/* {matches?.} */}Referee
+                            Referee Name
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-200">
+                      <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-100/80">
                         <TrendingUp className="w-5 h-5 text-muted-foreground mt-0.5 shrink-0" />
                         <div>
                           <p className="text-xs text-muted-foreground font-medium">
                             Status
                           </p>
                           <p className="font-semibold text-primary capitalize">
-                            {matches?.status}
+                            {matches?.status || "Upcoming"}
                           </p>
                         </div>
                       </div>
                     </div>
-                    <Separator className="my-6 col-span-full" />
-                    <div className="flex items-center justify-between flex-col rounded-lg gap-4 border bg-muted/40 p-4">
-                      <div className="flex items-center gap-3">
-                        <div>
-                          <p className="text-sm font-medium">Match Control</p>
-                        </div>
-                      </div>
 
+                    <Separator className="my-2 col-span-full" />
+
+                    {/* Lineup Request Section */}
+                    <div className="col-span-full">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-between hover:bg-muted/50"
+                        onClick={() => setShowLineups(!showLineups)}
+                      >
+                        <span className="flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          Lineup Requests ({lineupRequests?.length || 0})
+                        </span>
+                        {showLineups ? (
+                          <ChevronUp className="w-4 h-4" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
+                      </Button>
+
+                      {showLineups && (
+                        <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-2">
+                          {lineupRequests && lineupRequests.length > 0 ? (
+                            lineupRequests.map((teamReq) => (
+                              <div
+                                key={teamReq.teamId}
+                                className="border rounded-lg p-4 bg-white shadow-sm"
+                              >
+                                <div className="flex justify-between items-center mb-3">
+                                  <h4 className="font-bold text-sm text-primary">
+                                    {teamReq.teamName}
+                                  </h4>
+                                  <div className="flex gap-2">
+                                    <Button
+                                      size="sm"
+                                      className="h-8 bg-green-600 hover:bg-green-700 text-white gap-1 px-3"
+                                    >
+                                      <Check className="w-3 h-3" /> Approve
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="destructive"
+                                      className="h-8 gap-1 px-3"
+                                    >
+                                      <X className="w-3 h-3" /> Reject
+                                    </Button>
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-1 gap-1">
+                                  {teamReq.players.map((player) => (
+                                    <div
+                                      key={player.id}
+                                      className="text-xs flex justify-between py-1 border-b border-gray-50 last:border-0"
+                                    >
+                                      <span>
+                                        <span className="font-mono text-muted-foreground mr-2">
+                                          {player.number}
+                                        </span>{" "}
+                                        {player.name}
+                                      </span>
+                                      <span className="text-[10px] bg-gray-100 px-1.5 rounded text-gray-600 uppercase font-bold">
+                                        {player.position}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-center text-sm text-muted-foreground py-4">
+                              No pending lineup requests.
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Match Control Section */}
+                    <div className="col-span-full flex items-center justify-between rounded-xl border bg-muted/30 p-4 mt-2">
+                      <p className="text-sm font-semibold">Match Control</p>
                       {matches?.status === "LIVE" ? (
                         <Button
                           variant="destructive"
                           size="sm"
                           onClick={endMatch}
                           disabled={endLoading || refreshing}
-                          className="gap-2"
+                          className="gap-2 shadow-lg shadow-red-100"
                         >
-                          <StopCircle className="w-4 h-4" />
-                          End Match
+                          <StopCircle className="w-4 h-4" /> End Match
                         </Button>
                       ) : (
                         <Button
                           size="sm"
                           onClick={statMatch}
                           disabled={startLoading || refreshing}
-                          className="gap-2 bg-primary"
+                          className="gap-2 bg-primary hover:bg-primary/90 shadow-lg shadow-blue-100"
                         >
-                          <PlayCircle className="w-4 h-4" />
-                          Start Match
+                          <PlayCircle className="w-4 h-4" /> Start Match
                         </Button>
                       )}
                     </div>
@@ -493,7 +548,7 @@ export default function ManagerMatchesDetail() {
                       <div
                         key={event.id}
                         className={`p-4 rounded-lg flex items-center justify-between transition-all hover:shadow-sm ${getEventColor(
-                          event.type
+                          event.type,
                         )}`}
                       >
                         <div className="flex items-center gap-4">

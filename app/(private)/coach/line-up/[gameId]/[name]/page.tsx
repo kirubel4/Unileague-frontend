@@ -1,11 +1,11 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { UserPlus, Crown, X, Users2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { toast, Toaster } from "sonner";
-import { cn, fetcher } from "@/lib/utils";
+import { ApiResponse, cn, fetcher } from "@/lib/utils";
 import useSWR from "swr";
 import { mapApiPlayersToPlayers } from "@/app/(private)/manager/teams/[id]/util";
 import {
@@ -14,13 +14,16 @@ import {
   MatchInfo,
   Player,
   PlayerPosition,
-} from "./utlity";
+} from "../utlity";
 export interface PositionSlot {
   position: PlayerPosition;
   player: Player | null;
 }
 
 export default function LineupBuilder() {
+  const param = useParams();
+  const gameId = param.gameId as string;
+  const opponentName = param.name as string;
   const router = useRouter();
   const [players, setPlayers] = useState<Player[]>([]);
   const [selectedFormation, setSelectedFormation] = useState("4-3-3");
@@ -30,12 +33,11 @@ export default function LineupBuilder() {
   const [showUnavailable, setShowUnavailable] = useState(false);
 
   const [matchInfo] = useState<MatchInfo>({
-    id: "match-123",
-    opponent: "FC Barcelona",
+    id: gameId,
+    opponent: opponentName,
     date: "2024-01-20",
     time: "15:00",
     location: "Home Stadium",
-    teamId: "team-456",
   });
 
   const {
@@ -328,19 +330,25 @@ export default function LineupBuilder() {
     }
 
     setIsSubmitting(true);
+    toast.loading("submitting line-up....");
     try {
       const lineupData = prepareLineupData();
       const payload = {
-        teamId: matchInfo.teamId,
         matchId: matchInfo.id,
         formation: selectedFormation,
-        requestById: "user-123",
         players: lineupData,
       };
 
       console.log("Submitting:", payload);
-      // await fetch("/api/lineup", { method: "POST", body: JSON.stringify(payload) });
-
+      const res = await fetch("/api/protected/coach/requestLine-up", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      const response: ApiResponse = await res.json();
+      if (!response.success) {
+        toast.error(response.message);
+        return;
+      }
       toast.success("Lineup submitted for approval!");
       setTimeout(() => router.push("/coach/line-up"), 1500);
     } catch (error) {
@@ -355,18 +363,18 @@ export default function LineupBuilder() {
   const renderFormationLayout = () => {
     const formation = FORMATIONS.find((f) => f.value === selectedFormation);
     if (!formation) return null;
-
+    const normalizePosition = (p: string) => p.replace(/\d+$/, "");
     // Group positions by line (GK, Defense, Midfield, Attack)
     const lines = {
-      GK: formation.positions.filter((p) => p === "GK"),
+      GK: formation.positions.filter((p) => normalizePosition(p) === "GK"),
       Defense: formation.positions.filter((p) =>
-        ["RB", "RCB", "LCB", "LB", "CB"].includes(p)
+        ["RB", "RCB", "LCB", "LB", "CB"].includes(normalizePosition(p))
       ),
       Midfield: formation.positions.filter((p) =>
-        ["CDM", "CM", "CAM", "RM", "LM"].includes(p)
+        ["CDM", "CM", "CAM", "RM", "LM"].includes(normalizePosition(p))
       ),
       Attack: formation.positions.filter((p) =>
-        ["RW", "LW", "ST", "CF"].includes(p)
+        ["RW", "LW", "ST", "CF"].includes(normalizePosition(p))
       ),
     };
 
@@ -409,114 +417,187 @@ export default function LineupBuilder() {
         </div>
 
         {/* Formation visualization */}
-        <div className="relative rounded-2xl bg-linear-to-br from-gray-900 to-gray-800 p-6">
-          {/* Soccer field background */}
-          <div className="absolute inset-4 rounded-xl border-2 border-white/20"></div>
-          <div className="absolute left-1/2 top-0 h-full w-0.5 -translate-x-1/2 bg-white/20"></div>
-          <div className="absolute left-1/2 top-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/20"></div>
+        <div className="relative rounded-2xl bg-linear-to-br from-green-600 via-green-500 to-green-600 p-8 h-125 w-full flex overflow-hidden">
+          {/* Field gradient and texture */}
+          <div className="absolute inset-0 bg-linear-to-b from-emerald-700/20 to-transparent"></div>
+          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_1px_1px,#005522_1px,transparent_0)] bg-size-[40px_40px]"></div>
 
-          {/* Position slots */}
-          <div className="relative grid grid-cols-1 gap-8">
-            {/* Goalkeeper */}
-            <div className="flex justify-center">
-              {lines.GK.map((pos) => {
-                const player = players.find(
-                  (p) =>
-                    p.assignedPosition === pos && p.role === LineupRole.STARTING
-                );
-                return (
-                  <PositionSlot
-                    key={pos}
-                    position={pos as PlayerPosition}
-                    player={player || null}
-                    onAssign={(player) =>
-                      assignPlayerToPosition(player, pos as PlayerPosition)
-                    }
-                    onRemove={() =>
-                      removePlayerFromPosition(pos as PlayerPosition)
-                    }
-                    onCaptain={() => player && setCaptain(player.id)}
-                    isCaptain={!!player?.isCaptain}
-                  />
-                );
-              })}
-            </div>
+          {/* Outer field border */}
+          <div className="absolute inset-0 rounded-xl border-4 border-white/90 shadow-2xl"></div>
 
-            {/* Defense */}
-            <div className="flex justify-center gap-4">
-              {lines.Defense.map((pos) => {
-                const player = players.find(
-                  (p) =>
-                    p.assignedPosition === pos && p.role === LineupRole.STARTING
-                );
-                return (
-                  <PositionSlot
-                    key={pos}
-                    position={pos as PlayerPosition}
-                    player={player || null}
-                    onAssign={(player) =>
-                      assignPlayerToPosition(player, pos as PlayerPosition)
-                    }
-                    onRemove={() =>
-                      removePlayerFromPosition(pos as PlayerPosition)
-                    }
-                    onCaptain={() => player && setCaptain(player.id)}
-                    isCaptain={!!player?.isCaptain}
-                  />
-                );
-              })}
-            </div>
+          {/* Halfway line */}
+          <div className="absolute left-1/2 top-0 h-full w-1 -translate-x-1/2 bg-white/90 shadow-lg"></div>
 
-            {/* Midfield */}
-            <div className="flex justify-center gap-4">
-              {lines.Midfield.map((pos, idx) => {
-                const player = players.find(
-                  (p) =>
-                    p.assignedPosition === pos && p.role === LineupRole.STARTING
-                );
-                return (
-                  <PositionSlot
-                    key={`${pos}-${idx}`} // Use string + index
-                    position={pos as PlayerPosition}
-                    player={player || null}
-                    onAssign={(player) =>
-                      assignPlayerToPosition(player, pos as PlayerPosition)
-                    }
-                    onRemove={() =>
-                      removePlayerFromPosition(pos as PlayerPosition)
-                    }
-                    onCaptain={() => player && setCaptain(player.id)}
-                    isCaptain={!!player?.isCaptain}
-                  />
-                );
-              })}
-            </div>
+          {/* Center circle */}
+          <div className="absolute left-1/2 top-1/2 h-36 w-36 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/90"></div>
+          <div className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/90"></div>
 
-            {/* Attack */}
-            <div className="flex justify-center gap-4">
-              {lines.Attack.map((pos, idx) => {
-                const player = players.find(
-                  (p) =>
-                    p.assignedPosition === pos && p.role === LineupRole.STARTING
-                );
-                return (
-                  <PositionSlot
-                    key={`${pos}-${idx}`}
-                    position={pos as PlayerPosition}
-                    player={player || null}
-                    onAssign={(player) =>
-                      assignPlayerToPosition(player, pos as PlayerPosition)
-                    }
-                    onRemove={() =>
-                      removePlayerFromPosition(pos as PlayerPosition)
-                    }
-                    onCaptain={() => player && setCaptain(player.id)}
-                    isCaptain={!!player?.isCaptain}
-                  />
-                );
-              })}
+          {/* Left Goal Area */}
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-16 h-48">
+            {/* Goal box */}
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-12 h-32 border-r-2 border-white/80"></div>
+            {/* Goal */}
+            <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-20 bg-linear-to-r from-gray-700 to-gray-800 rounded-r-lg shadow-lg">
+              <div className="absolute inset-0 bg-linear-to-r from-gray-900/50 to-transparent"></div>
+              <div className="absolute top-1/2 left-1/2 w-1 h-16 -translate-x-1/2 -translate-y-1/2 bg-gray-300/30"></div>
             </div>
           </div>
+
+          {/* Right Goal Area */}
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-16 h-48">
+            {/* Goal box */}
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-12 h-32 border-l-2 border-white/80"></div>
+            {/* Goal */}
+            <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-20 bg-linear-to-l from-gray-700 to-gray-800 rounded-l-lg shadow-lg">
+              <div className="absolute inset-0 bg-linear-to-l from-gray-900/50 to-transparent"></div>
+              <div className="absolute top-1/2 left-1/2 w-1 h-16 -translate-x-1/2 -translate-y-1/2 bg-gray-300/30"></div>
+            </div>
+          </div>
+
+          {/* Penalty arcs */}
+          <div className="absolute left-16 top-1/2 -translate-y-1/2 w-24 h-24 border-r-2 border-white/60 rounded-r-full opacity-70"></div>
+          <div className="absolute right-16 top-1/2 -translate-y-1/2 w-24 h-24 border-l-2 border-white/60 rounded-l-full opacity-70"></div>
+
+          {/* Formation columns with improved layout */}
+          <div className="flex w-full h-full z-10">
+            {/* GK Column with position indicator */}
+            <div className="flex flex-col justify-center items-center flex-1 relative">
+              <div className="flex flex-col justify-center gap-12 w-full px-2">
+                {lines.GK.map((pos) => {
+                  const player = players.find(
+                    (p) =>
+                      p.assignedPosition === pos &&
+                      p.role === LineupRole.STARTING
+                  );
+                  return (
+                    <div
+                      key={pos}
+                      className="relative hover:scale-105 transition-transform duration-200"
+                    >
+                      <PositionSlot
+                        position={pos as PlayerPosition}
+                        player={player || null}
+                        onAssign={(player) =>
+                          assignPlayerToPosition(player, pos as PlayerPosition)
+                        }
+                        onRemove={() =>
+                          removePlayerFromPosition(pos as PlayerPosition)
+                        }
+                        onCaptain={() => player && setCaptain(player.id)}
+                        isCaptain={!!player?.isCaptain}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Defense Column */}
+            <div className="flex flex-col justify-center items-center flex-1 relative">
+              <div className="flex flex-col justify-center gap-12 w-full px-2">
+                {lines.Defense.map((pos, idx) => {
+                  const player = players.find(
+                    (p) =>
+                      p.assignedPosition === pos &&
+                      p.role === LineupRole.STARTING
+                  );
+                  return (
+                    <div
+                      key={`${pos}-${idx}`}
+                      className="relative hover:scale-105 transition-transform duration-200"
+                    >
+                      <PositionSlot
+                        position={pos as PlayerPosition}
+                        player={player || null}
+                        onAssign={(player) =>
+                          assignPlayerToPosition(player, pos as PlayerPosition)
+                        }
+                        onRemove={() =>
+                          removePlayerFromPosition(pos as PlayerPosition)
+                        }
+                        onCaptain={() => player && setCaptain(player.id)}
+                        isCaptain={!!player?.isCaptain}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Midfield Column */}
+            <div className="flex flex-col justify-center items-center flex-1 relative">
+              <div className="flex flex-col justify-center gap-12 w-full px-2">
+                {lines.Midfield.map((pos, idx) => {
+                  const player = players.find(
+                    (p) =>
+                      p.assignedPosition === pos &&
+                      p.role === LineupRole.STARTING
+                  );
+                  return (
+                    <div
+                      key={`${pos}-${idx}`}
+                      className="relative hover:scale-105 transition-transform duration-200"
+                    >
+                      <PositionSlot
+                        position={pos as PlayerPosition}
+                        player={player || null}
+                        onAssign={(player) =>
+                          assignPlayerToPosition(player, pos as PlayerPosition)
+                        }
+                        onRemove={() =>
+                          removePlayerFromPosition(pos as PlayerPosition)
+                        }
+                        onCaptain={() => player && setCaptain(player.id)}
+                        isCaptain={!!player?.isCaptain}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Attack Column */}
+            <div className="flex flex-col justify-center items-center flex-1 relative">
+              <div className="flex flex-col justify-center gap-12 w-full px-2">
+                {lines.Attack.map((pos, idx) => {
+                  const player = players.find(
+                    (p) =>
+                      p.assignedPosition === pos &&
+                      p.role === LineupRole.STARTING
+                  );
+                  return (
+                    <div
+                      key={`${pos}-${idx}`}
+                      className="relative hover:scale-105 transition-transform duration-200"
+                    >
+                      <PositionSlot
+                        position={pos as PlayerPosition}
+                        player={player || null}
+                        onAssign={(player) =>
+                          assignPlayerToPosition(player, pos as PlayerPosition)
+                        }
+                        onRemove={() =>
+                          removePlayerFromPosition(pos as PlayerPosition)
+                        }
+                        onCaptain={() => player && setCaptain(player.id)}
+                        isCaptain={!!player?.isCaptain}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Field lines and details */}
+          <div className="absolute top-0 left-4 right-4 h-1 bg-white/60 mt-4"></div>
+          <div className="absolute bottom-0 left-4 right-4 h-1 bg-white/60 mb-4"></div>
+
+          {/* Corner flags (optional decorative elements) */}
+          <div className="absolute top-0 left-0 w-3 h-8 bg-red-600 rounded-b-lg"></div>
+          <div className="absolute top-0 right-0 w-3 h-8 bg-red-600 rounded-b-lg"></div>
+          <div className="absolute bottom-0 left-0 w-3 h-8 bg-red-600 rounded-t-lg"></div>
+          <div className="absolute bottom-0 right-0 w-3 h-8 bg-red-600 rounded-t-lg"></div>
         </div>
       </div>
     );

@@ -118,7 +118,9 @@ const LineupPage = () => {
 
                       {/* Action */}
                       <div className="pt-4 border-t">
-                        <Link href={`/coach/line-up/${game.id}`}>
+                        <Link
+                          href={`/coach/line-up/${game.id}/${game.teamB.name}`}
+                        >
                           <Button
                             size="lg"
                             className="w-full gap-2 group-hover:scale-[1.02] transition-transform"
