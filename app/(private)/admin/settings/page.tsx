@@ -1,22 +1,22 @@
-"use client";
-import { Layout } from "@/components/Layout";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useEffect, useState } from "react";
-import { Eye, EyeOff, Save, Bell, Lock, User } from "lucide-react";
-import { ApiResponse, fetcher, getCookie } from "@/lib/utils";
-import useSWR from "swr";
-import { toast, Toaster } from "sonner";
+'use client';
+import { Layout } from '@/components/Layout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useEffect, useState } from 'react';
+import { Eye, EyeOff, Save, Bell, Lock, User } from 'lucide-react';
+import { ApiResponse, fetcher, getCookie } from '@/lib/utils';
+import useSWR from 'swr';
+import { toast, Toaster } from 'sonner';
 export default function ManagerSettings() {
-  const userName = getCookie("uName") || "Admin";
+  const userName = getCookie('uName') || 'Admin';
   const [activeTab, setActiveTab] = useState<
-    "profile" | "security" | "notifications"
-  >("profile");
+    'profile' | 'security' | 'notifications'
+  >('profile');
   const [initialProfileData, setInitialProfileData] = useState({
-    username: "",
-    fullName: "",
-    email: "",
+    username: '',
+    fullName: '',
+    email: '',
   });
 
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -25,30 +25,30 @@ export default function ManagerSettings() {
   const [isSaving, setIsSaving] = useState(false);
 
   const [profileData, setProfileData] = useState({
-    username: "",
-    fullName: "",
-    email: "",
+    username: '',
+    fullName: '',
+    email: '',
   });
   const {
     data,
     isLoading,
     error,
     mutate: mutateMessage,
-  } = useSWR("/api/protected/manager/user", fetcher, {
+  } = useSWR('/api/protected/manager/user', fetcher, {
     revalidateOnFocus: false,
   });
   useEffect(() => {
     if (data?.data) {
       setProfileData({
-        username: data?.data.username ?? "",
-        fullName: data?.data.fullName ?? "",
-        email: data?.data.email ?? "",
+        username: data?.data.username ?? '',
+        fullName: data?.data.fullName ?? '',
+        email: data?.data.email ?? '',
       });
     }
     setInitialProfileData({
-      username: data?.data.username ?? "",
-      fullName: data?.data.fullName ?? "",
-      email: data?.data.email ?? "",
+      username: data?.data.username ?? '',
+      fullName: data?.data.fullName ?? '',
+      email: data?.data.email ?? '',
     });
   }, [data]);
   const hasProfileChanged =
@@ -57,9 +57,9 @@ export default function ManagerSettings() {
     profileData.email !== initialProfileData.email;
 
   const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
   });
 
   const [notificationSettings, setNotificationSettings] = useState({
@@ -73,16 +73,16 @@ export default function ManagerSettings() {
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setProfileData((prev) => ({ ...prev, [name]: value }));
+    setProfileData(prev => ({ ...prev, [name]: value }));
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setPasswordData((prev) => ({ ...prev, [name]: value }));
+    setPasswordData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleNotificationChange = (key: keyof typeof notificationSettings) => {
-    setNotificationSettings((prev) => ({
+    setNotificationSettings(prev => ({
       ...prev,
       [key]: !prev[key],
     }));
@@ -90,55 +90,77 @@ export default function ManagerSettings() {
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.loading("updating profile");
+    toast.loading('updating profile');
     setIsSaving(true);
-    const res = await fetch("/api/protected/manager/user/update", {
-      method: "POST",
+    const res = await fetch('/api/protected/manager/user/update', {
+      method: 'POST',
       body: JSON.stringify(profileData),
     });
     const response: ApiResponse = await res.json();
     if (!response.success) {
-      toast.error(response.message || "error updating profile");
+      toast.error(response.message || 'error updating profile');
       setIsSaving(false);
       return;
     }
-    toast.success("profile updated");
+    toast.success('profile updated');
     setIsSaving(false);
   };
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!passwordData.currentPassword || !passwordData.newPassword) {
-      alert("Please fill in all password fields");
+      toast.error('Please fill in all password fields');
       return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert("New passwords do not match");
+      toast.error('New passwords do not match');
       return;
     }
 
     if (passwordData.newPassword.length < 8) {
-      alert("New password must be at least 8 characters");
+      toast.error('New password must be at least 8 characters');
       return;
     }
 
     setIsSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    alert("Password changed successfully!");
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
-    setIsSaving(false);
+
+    try {
+      const res = await fetch('/api/protected/manager/user/update/password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        }),
+      });
+
+      const data: ApiResponse = await res.json();
+
+      if (res.ok && data.success) {
+        toast.success(data.message || 'Password changed successfully!');
+        setPasswordData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+        });
+      } else {
+        toast.error(data.message || 'Failed to change password');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Internal server error');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleNotificationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    alert("Notification settings updated successfully!");
+    await new Promise(resolve => setTimeout(resolve, 800));
+    alert('Notification settings updated successfully!');
     setIsSaving(false);
   };
 
@@ -156,17 +178,17 @@ export default function ManagerSettings() {
       {/* Tabs */}
       <div className="flex gap-4 mb-6 border-b border-border">
         {[
-          { id: "profile", label: "Profile", icon: User },
-          { id: "security", label: "Security", icon: Lock },
-          { id: "notifications", label: "Notifications", icon: Bell },
+          { id: 'profile', label: 'Profile', icon: User },
+          { id: 'security', label: 'Security', icon: Lock },
+          { id: 'notifications', label: 'Notifications', icon: Bell },
         ].map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             onClick={() => setActiveTab(id as any)}
             className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors flex items-center gap-2 ${
               activeTab === id
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
             <Icon className="w-4 h-4" />
@@ -176,7 +198,7 @@ export default function ManagerSettings() {
       </div>
 
       {/* Profile Tab */}
-      {activeTab === "profile" && (
+      {activeTab === 'profile' && (
         <div className="bg-white rounded-lg border border-border p-6">
           <h3 className="text-lg font-semibold mb-6 text-foreground">
             Profile Information
@@ -249,7 +271,7 @@ export default function ManagerSettings() {
                   id="tournament"
                   name="tournament"
                   type="text"
-                  value={"Super Admin Mange the Whole System"}
+                  value={'Super Admin Mange the Whole System'}
                   onChange={handleProfileChange}
                   disabled
                   className="rounded-lg h-10 bg-muted cursor-not-allowed"
@@ -264,7 +286,7 @@ export default function ManagerSettings() {
                 className="bg-primary hover:bg-blue-600 text-white rounded-lg h-10 gap-2"
               >
                 <Save className="w-4 h-4" />
-                {isSaving ? "Saving..." : "Save Changes"}
+                {isSaving ? 'Saving...' : 'Save Changes'}
               </Button>
             </div>
           </form>
@@ -272,7 +294,7 @@ export default function ManagerSettings() {
       )}
 
       {/* Security Tab */}
-      {activeTab === "security" && (
+      {activeTab === 'security' && (
         <div className="bg-white rounded-lg border border-border p-6">
           <h3 className="text-lg font-semibold mb-6 text-foreground">
             Change Password
@@ -290,7 +312,7 @@ export default function ManagerSettings() {
                 <Input
                   id="currentPassword"
                   name="currentPassword"
-                  type={showCurrentPassword ? "text" : "password"}
+                  type={showCurrentPassword ? 'text' : 'password'}
                   value={passwordData.currentPassword}
                   onChange={handlePasswordChange}
                   placeholder="Enter your current password"
@@ -322,7 +344,7 @@ export default function ManagerSettings() {
                 <Input
                   id="newPassword"
                   name="newPassword"
-                  type={showNewPassword ? "text" : "password"}
+                  type={showNewPassword ? 'text' : 'password'}
                   value={passwordData.newPassword}
                   onChange={handlePasswordChange}
                   placeholder="Enter new password"
@@ -357,7 +379,7 @@ export default function ManagerSettings() {
                 <Input
                   id="confirmPassword"
                   name="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
+                  type={showConfirmPassword ? 'text' : 'password'}
                   value={passwordData.confirmPassword}
                   onChange={handlePasswordChange}
                   placeholder="Confirm new password"
@@ -384,7 +406,7 @@ export default function ManagerSettings() {
                 className="bg-primary hover:bg-blue-600 text-white rounded-lg h-10 gap-2"
               >
                 <Lock className="w-4 h-4" />
-                {isSaving ? "Updating..." : "Update Password"}
+                {isSaving ? 'Updating...' : 'Update Password'}
               </Button>
             </div>
           </form>
@@ -392,7 +414,7 @@ export default function ManagerSettings() {
       )}
 
       {/* Notifications Tab */}
-      {activeTab === "notifications" && (
+      {activeTab === 'notifications' && (
         <div className="bg-white rounded-lg border border-border p-6">
           <h3 className="text-lg font-semibold mb-6 text-foreground">
             Notification Preferences
@@ -406,26 +428,26 @@ export default function ManagerSettings() {
               <div className="space-y-3">
                 {[
                   {
-                    key: "matchNotifications" as const,
-                    label: "Match Notifications",
+                    key: 'matchNotifications' as const,
+                    label: 'Match Notifications',
                     description:
-                      "Get notified about match schedules and results",
+                      'Get notified about match schedules and results',
                   },
                   {
-                    key: "playerTransfers" as const,
-                    label: "Player Transfers",
-                    description: "Receive updates on player transfers",
+                    key: 'playerTransfers' as const,
+                    label: 'Player Transfers',
+                    description: 'Receive updates on player transfers',
                   },
                   {
-                    key: "teamUpdates" as const,
-                    label: "Team Updates",
+                    key: 'teamUpdates' as const,
+                    label: 'Team Updates',
                     description:
-                      "Get notified about team registration and changes",
+                      'Get notified about team registration and changes',
                   },
                   {
-                    key: "newsNotifications" as const,
-                    label: "News & Announcements",
-                    description: "Receive tournament news and announcements",
+                    key: 'newsNotifications' as const,
+                    label: 'News & Announcements',
+                    description: 'Receive tournament news and announcements',
                   },
                 ].map(({ key, label, description }) => (
                   <label
@@ -457,15 +479,15 @@ export default function ManagerSettings() {
               <div className="space-y-3">
                 {[
                   {
-                    key: "emailNotifications" as const,
-                    label: "Email Notifications",
-                    description: "Receive notifications via email",
+                    key: 'emailNotifications' as const,
+                    label: 'Email Notifications',
+                    description: 'Receive notifications via email',
                   },
                   {
-                    key: "smsNotifications" as const,
-                    label: "SMS Notifications",
+                    key: 'smsNotifications' as const,
+                    label: 'SMS Notifications',
                     description:
-                      "Receive notifications via SMS (may incur charges)",
+                      'Receive notifications via SMS (may incur charges)',
                   },
                 ].map(({ key, label, description }) => (
                   <label
@@ -496,7 +518,7 @@ export default function ManagerSettings() {
                 className="bg-primary hover:bg-blue-600 text-white rounded-lg h-10 gap-2"
               >
                 <Bell className="w-4 h-4" />
-                {isSaving ? "Saving..." : "Save Preferences"}
+                {isSaving ? 'Saving...' : 'Save Preferences'}
               </Button>
             </div>
           </form>
