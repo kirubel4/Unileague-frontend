@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
   try {
     const username = request.cookies.get('uName')?.value;
+    const token = request.cookies.get("aToken")?.value;
     if (!username) {
       return NextResponse.json(
         { message: 'Missing username' },
@@ -24,6 +25,7 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
       },
 
       body: JSON.stringify({
