@@ -3,6 +3,7 @@ import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast, Toaster } from 'sonner';
 import { useEffect, useState } from "react";
 import { Eye, EyeOff, Save, Bell, Lock, User } from "lucide-react";
 import { ApiResponse, fetcher, getCookie } from "@/lib/utils";
@@ -107,30 +108,52 @@ export default function ManagerSettings() {
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!passwordData.currentPassword || !passwordData.newPassword) {
-      alert("Please fill in all password fields");
+      toast.error('Please fill in all password fields');
       return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert("New passwords do not match");
+      toast.error('New passwords do not match');
       return;
     }
 
     if (passwordData.newPassword.length < 8) {
-      alert("New password must be at least 8 characters");
+      toast.error('New password must be at least 8 characters');
       return;
     }
 
     setIsSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    alert("Password changed successfully!");
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
-    setIsSaving(false);
+
+    try {
+      const res = await fetch('/api/protected/manager/user/update/password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        }),
+      });
+
+      const data: ApiResponse = await res.json();
+
+      if (res.ok && data.success) {
+        toast.success(data.message || 'Password changed successfully!');
+        setPasswordData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+        });
+      } else {
+        toast.error(data.message || 'Failed to change password');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Internal server error');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleNotificationSubmit = async (e: React.FormEvent) => {
