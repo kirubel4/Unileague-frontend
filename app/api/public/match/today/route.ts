@@ -11,8 +11,9 @@ export async function GET(req: NextRequest) {
     } else if (cookiId) {
       tid = cookiId;
     }
+
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/matches/up-coming/${tid}/tournament`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/matches/today/${tid}`,
       {
         method: "GET",
         headers: {

@@ -5,15 +5,16 @@ import { fetcher, getCookie } from "@/lib/utils";
 import {
   Trophy,
   Users,
-  Zap,
   Clock,
   CheckCircle,
   Calendar,
-  BarChart3,
+  TableCellsMerge,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import useSWR from "swr";
-import { mapTeams, Team } from "./players/transfer/util";
+import { ApiMatch } from "./fixtures/page";
+
 type Tournament = {
   id: string;
   tournamentName: string;
@@ -33,12 +34,40 @@ type TournamentManager = {
   email: string;
 };
 
+const PENDING_ACTION_CONFIG = {
+  action: "Confirm match lineups",
+  icon: <TableCellsMerge className="w-5 h-5" />,
+};
+
 export default function ManagerDashboard() {
+  const router = useRouter();
   const userName = getCookie("uName") || "Manager";
   const { data: tournamentRes } = useSWR(
     `/api/public/tournament/detail`,
-    fetcher
+    fetcher,
   );
+  const { data: lineupReq } = useSWR(
+    "/api/protected/manager/match/line-up/pending",
+    fetcher,
+    { revalidateOnFocus: false },
+  );
+  const { data: upcoming } = useSWR(
+    "/api/public/match/up-coming/tournament",
+    fetcher,
+    { revalidateOnFocus: false },
+  );
+  const { data: todays } = useSWR("/api/public/match/today", fetcher, {
+    revalidateOnFocus: false,
+  });
+  const upComingMatches: ApiMatch[] = upcoming?.data;
+  const todayMatch: ApiMatch[] = todays?.data;
+  const pendingReq = lineupReq?.data;
+  const pendingActions = pendingReq?.map((req: any) => ({
+    action: PENDING_ACTION_CONFIG.action,
+    matchId: req?.matchId,
+    teamName: req?.team.teamName,
+    icon: PENDING_ACTION_CONFIG.icon,
+  }));
 
   const tournament: Tournament | null = tournamentRes?.data ?? null;
   const mappedTournament = tournament
@@ -58,7 +87,7 @@ export default function ManagerDashboard() {
   {
     mappedTournament?.name;
   }
-  console.log(tournament);
+
   const tournamentInfo = {
     name: "City League Championship 2024",
     logo: "⚽",
@@ -97,27 +126,6 @@ export default function ManagerDashboard() {
       homeTeam: "Strikers",
       awayTeam: "Victory Team",
       date: "Dec 20, 14:00",
-    },
-  ];
-
-  const pendingActions = [
-    {
-      action: "Confirm match lineups",
-      matches: 3,
-      dueDate: "Today",
-      icon: <Users className="w-5 h-5" />,
-    },
-    {
-      action: "Review player transfer requests",
-      matches: 2,
-      dueDate: "Dec 20",
-      icon: <Zap className="w-5 h-5" />,
-    },
-    {
-      action: "Publish match statistics",
-      matches: 5,
-      dueDate: "Dec 21",
-      icon: <BarChart3 className="w-5 h-5" />,
     },
   ];
 
@@ -169,7 +177,7 @@ export default function ManagerDashboard() {
               {Math.round(
                 (tournamentInfo.completedMatches /
                   tournamentInfo.totalMatches) *
-                  100
+                  100,
               )}
               %
             </span>
@@ -224,16 +232,16 @@ export default function ManagerDashboard() {
               </h2>
             </div>
 
-            {todayMatches.length > 0 ? (
+            {todayMatches?.length > 0 ? (
               <div className="space-y-4">
-                {todayMatches.map((match) => (
+                {todayMatch?.map((match) => (
                   <div
                     key={match.id}
                     className="border border-border rounded-lg p-4 hover:bg-muted transition-colors"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-sm font-semibold text-primary">
-                        {match.time}
+                        {match.scheduledDate}
                       </span>
                       <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full">
                         {match.status}
@@ -241,11 +249,11 @@ export default function ManagerDashboard() {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="font-medium text-foreground">
-                        {match.homeTeam}
+                        {match.homeTeam.teamName}
                       </span>
                       <span className="text-muted-foreground">vs</span>
                       <span className="font-medium text-foreground">
-                        {match.awayTeam}
+                        {match.awayTeam.teamName}
                       </span>
                     </div>
                   </div>
@@ -268,21 +276,21 @@ export default function ManagerDashboard() {
             </div>
 
             <div className="space-y-3">
-              {upcomingMatches.map((match) => (
+              {upComingMatches?.map((match: ApiMatch) => (
                 <div
                   key={match.id}
                   className="border border-border rounded-lg p-4 hover:bg-muted transition-colors"
                 >
                   <p className="text-xs text-muted-foreground mb-2">
-                    {match.date}
+                    {match.scheduledDate}
                   </p>
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-foreground">
-                      {match.homeTeam}
+                      {match.homeTeam.teamName}
                     </span>
                     <span className="text-muted-foreground text-sm">vs</span>
                     <span className="font-medium text-foreground">
-                      {match.awayTeam}
+                      {match.awayTeam.teamName}
                     </span>
                   </div>
                 </div>
@@ -298,10 +306,11 @@ export default function ManagerDashboard() {
           </h2>
 
           <div className="space-y-3">
-            {pendingActions.map((item, index) => (
+            {pendingActions?.map((item: any, index: any) => (
               <div
                 key={index}
                 className="border border-border rounded-lg p-4 hover:bg-muted transition-colors"
+                onClick={() => router.push(`/manager/matches/${item.matchId}`)}
               >
                 <div className="flex items-start gap-3 mb-2">
                   <div className="text-primary mt-1">{item.icon}</div>
@@ -310,7 +319,7 @@ export default function ManagerDashboard() {
                       {item.action}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Due: {item.dueDate}
+                      Team Name: {item.teamName}
                     </p>
                   </div>
                 </div>
