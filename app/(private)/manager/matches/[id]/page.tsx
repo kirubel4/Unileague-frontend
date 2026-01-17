@@ -31,6 +31,7 @@ import {
   Users,
   Check,
   X,
+  Shield,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import useSWR from "swr";
@@ -280,7 +281,64 @@ export default function ManagerMatchesDetail() {
         </div>
 
         {/* Main Score Display */}
-        <Card className="border-0 shadow-lg overflow-hidden mb-8"></Card>
+        <Card className="border-0 shadow-lg overflow-hidden mb-8">
+          <CardContent className="p-0">
+            <div className="bg-gray-400 text-white">
+              <div className="container mx-auto px-8 py-10">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                  {/* Home Team */}
+                  <div className="text-center flex-1">
+                    <div className="flex items-center justify-center gap-4 mb-3">
+                      <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
+                        <Shield className="w-8 h-8" />
+                      </div>
+                      <div>
+                        <h2 className="text-2xl md:text-3xl font-bold">
+                          {matches?.homeTeam.name}
+                        </h2>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Score */}
+                  <div className="px-8 py-6 bg-white/10 backdrop-blur-sm rounded-2xl">
+                    <div className="text-5xl md:text-7xl font-bold text-center mb-2 tracking-tighter">
+                      {matches?.score.home}
+                      <span className="mx-4 text-3xl md:text-5xl font-light">
+                        :
+                      </span>
+                      {matches?.score.away}
+                    </div>
+
+                    {matches?.status === "LIVE" ? (
+                      <p className="lg:mt-5 text-white/80 text-center text-sm font-medium">
+                        Minute {matches?.scheduledDate}
+                      </p>
+                    ) : (
+                      <p className="text-white/80 lg:mb-5 text-center text-sm font-medium">
+                        FT
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Away Team */}
+                  <div className="text-center flex-1">
+                    <div className="flex items-center justify-center gap-4 mb-3">
+                      <div>
+                        <h2 className="text-2xl md:text-3xl font-bold">
+                          {matches?.awayTeam.name}
+                        </h2>
+                      </div>
+                      <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
+                        <Shield className="w-8 h-8" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList
