@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Clock,
   MapPin,
@@ -38,6 +38,7 @@ import useSWR from "swr";
 import { ApiResponse, fetcher, getCookie } from "@/lib/utils";
 import {
   lineUpMapperBench,
+  lineUpMapperRequests,
   lineUpMapperStarting,
   mapMatchDetail,
 } from "./util";
@@ -56,7 +57,7 @@ export default function ManagerMatchesDetail() {
   const matchId = params.id as string;
 
   const [refreshing, setRefreshing] = useState(false);
-
+  const [showLineups, setShowLineups] = useState(false);
   const [eventPlayer, setEventPlayer] = useState("");
   const [min, setMin] = useState(0);
   const [eventTeam, setEventTeam] = useState("");
@@ -65,50 +66,140 @@ export default function ManagerMatchesDetail() {
   const [loading, setLoading] = useState(false);
   const [endLoading, setEndLoading] = useState(false);
   const [startLoading, setStartLoading] = useState(false);
-  let homePlayers: { name: string; id: string }[] = [];
-  let awayPlayers: { name: string; id: string }[] = [];
-  let homePlayersBench: { name: string; id: string }[] = [];
-  let awayPlayersBench: { name: string; id: string }[] = [];
+
   const {
     data,
     isLoading,
     error,
     mutate: mutateMatch,
-  } = useSWR("/api/public/match/detail?id=" + matchId, fetcher, {
-    revalidateOnFocus: false,
-  });
+  } = useSWR(
+    matchId ? `/api/public/match/detail?id=${matchId}` : null,
+    fetcher,
+    { revalidateOnFocus: false },
+  );
 
-  const matches = mapMatchDetail(data?.data);
+  const matches = useMemo(() => mapMatchDetail(data?.data), [data]);
+  const homeTeamId = matches?.homeTeam?.id;
+  const awayTeamId = matches?.awayTeam?.id;
+  const mid = matches?.id;
 
-  if (matches?.homeTeam && matches?.awayTeam) {
-    const {
-      data: homeTeam,
-      isLoading: load,
-      error: er,
-    } = useSWR(
-      `/api/public/match/line-up?mid=${matchId}&id=${matches?.homeTeam?.id}`,
-      fetcher,
-      {
-        revalidateOnFocus: false,
-      },
-    );
-    homePlayers = lineUpMapperStarting(homeTeam?.data);
-    homePlayersBench = lineUpMapperBench(homeTeam?.data);
-    const {
-      data: awayTeam,
-      isLoading: loading,
-      error: err,
-    } = useSWR(
-      `/api/public/match/line-up?mid=${matchId}&id=${matches?.awayTeam?.id}`,
-      fetcher,
-      {
-        revalidateOnFocus: false,
-      },
-    );
-    awayPlayers = lineUpMapperStarting(awayTeam?.data);
-    awayPlayersBench = lineUpMapperBench(awayTeam?.data);
-  }
+  const { data: homeReq, mutate: mutateHome } = useSWR(
+    homeTeamId && mid
+      ? `/api/protected/manager/match/line-up/requests?id=${homeTeamId}&mid=${mid}`
+      : null,
+    fetcher,
+  );
 
+  const { data: awayReq, mutate: mutateAway } = useSWR(
+    awayTeamId && mid
+      ? `/api/protected/manager/match/line-up/requests?id=${awayTeamId}&mid=${mid}`
+      : null,
+    fetcher,
+  );
+
+  const { data: homeLineup } = useSWR(
+    homeTeamId && mid
+      ? `/api/public/match/line-up?mid=${mid}&id=${homeTeamId}`
+      : null,
+    fetcher,
+    { revalidateOnFocus: false },
+  );
+  const homePlayers = useMemo(
+    () => lineUpMapperStarting(homeLineup?.data),
+    [homeLineup],
+  );
+
+  const homeBench = useMemo(
+    () => lineUpMapperBench(homeLineup?.data),
+    [homeLineup],
+  );
+
+  const { data: awayLineup } = useSWR(
+    awayTeamId && mid
+      ? `/api/public/match/line-up?mid=${mid}&id=${awayTeamId}`
+      : null,
+    fetcher,
+    { revalidateOnFocus: false },
+  );
+
+  const awayPlayers = useMemo(
+    () => lineUpMapperStarting(awayLineup?.data),
+    [awayLineup],
+  );
+
+  const awayBench = useMemo(
+    () => lineUpMapperBench(awayLineup?.data),
+    [awayLineup],
+  );
+  const homeLineupRequest = useMemo(
+    () => lineUpMapperRequests(homeReq?.data),
+    [homeReq],
+  );
+
+  const awayLineupRequest = useMemo(
+    () => lineUpMapperRequests(awayReq?.data),
+    [awayReq],
+  );
+
+  const lineupRequests = useMemo(() => {
+    const requests = [];
+    if (homeLineupRequest.players.length > 0) {
+      requests.push({
+        teamId: homeTeamId,
+        teamName: matches?.homeTeam?.name,
+        players: homeLineupRequest.players,
+        lineUpStatus: homeLineupRequest.status,
+        lineupId: homeLineupRequest.players[0].lineupId,
+      });
+    }
+
+    if (awayLineupRequest.players.length > 0) {
+      requests.push({
+        teamId: awayTeamId,
+        teamName: matches?.awayTeam?.name,
+        players: awayLineupRequest.players,
+        lineUpStatus: awayLineupRequest.status,
+        lineupId: awayLineupRequest.players[0].lineupId,
+      });
+    }
+
+    return requests;
+  }, [homeLineupRequest, awayLineupRequest, homeTeamId, awayTeamId, matches]);
+
+  const approveLineUp = async (lineUpId: string) => {
+    toast.loading("approving Line-Up", { id: "44" });
+    const res = await fetch("/api/protected/manager/match/line-up/approve", {
+      method: "PUT",
+      body: JSON.stringify({
+        lineUpId,
+      }),
+    });
+    const response: ApiResponse = await res.json();
+    if (!response.success) {
+      toast.error(response.message, { id: "44" });
+      return;
+    }
+    toast.success(response.message, { id: "44" });
+    await mutateHome();
+    await mutateAway();
+  };
+  const rejectLineUp = async (lineUpId: string) => {
+    toast.loading("approving Line-Up", { id: "44" });
+    const res = await fetch("/api/protected/manager/match/line-up/reject", {
+      method: "PUT",
+      body: JSON.stringify({
+        lineUpId,
+      }),
+    });
+    const response: ApiResponse = await res.json();
+    if (!response.success) {
+      toast.error(response.message, { id: "44" });
+      return;
+    }
+    toast.success(response.message, { id: "44" });
+    await mutateHome();
+    await mutateAway();
+  };
   const refreshScore = async () => {
     setRefreshing(true);
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -116,7 +207,6 @@ export default function ManagerMatchesDetail() {
 
     setRefreshing(false);
   };
-
   const addEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!eventPlayer.trim()) return;
@@ -237,25 +327,6 @@ export default function ManagerMatchesDetail() {
         return "border-l-4 border-l-gray-500 bg-gray-50/50";
     }
   };
-  const [showLineups, setShowLineups] = useState(false);
-  const lineupRequests = [
-    {
-      teamId: "team-a",
-      teamName: "Warriors FC",
-      players: [
-        { id: 1, name: "John Doe", position: "GK", number: 1 },
-        { id: 2, name: "Mike Smith", position: "DEF", number: 4 },
-      ],
-    },
-    {
-      teamId: "team-b",
-      teamName: "Strikers United",
-      players: [
-        { id: 4, name: "Alex Wong", position: "FWD", number: 10 },
-        { id: 5, name: "Chris Evans", position: "MID", number: 6 },
-      ],
-    },
-  ];
   return (
     <Layout role="manager" userName={userName}>
       {/* Header */}
@@ -430,7 +501,15 @@ export default function ManagerMatchesDetail() {
                       >
                         <span className="flex items-center gap-2">
                           <Users className="w-4 h-4" />
-                          Lineup Requests ({lineupRequests?.length || 0})
+                          Lineup Requests (
+                          {lineupRequests[0]?.players?.length > 0 &&
+                          lineupRequests[1]?.players?.length > 0
+                            ? 2
+                            : lineupRequests[0]?.players?.length > 0 ||
+                                lineupRequests[1]?.players?.length
+                              ? 1
+                              : 0}
+                          )
                         </span>
                         {showLineups ? (
                           <ChevronUp className="w-4 h-4" />
@@ -441,7 +520,10 @@ export default function ManagerMatchesDetail() {
 
                       {showLineups && (
                         <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-2">
-                          {lineupRequests && lineupRequests.length > 0 ? (
+                          {lineupRequests &&
+                          lineupRequests?.length &&
+                          (lineupRequests[0]?.players?.length > 0 ||
+                            lineupRequests[1]?.players?.length > 0) ? (
                             lineupRequests.map((teamReq) => (
                               <div
                                 key={teamReq.teamId}
@@ -453,12 +535,22 @@ export default function ManagerMatchesDetail() {
                                   </h4>
                                   <div className="flex gap-2">
                                     <Button
+                                      onClick={() =>
+                                        approveLineUp(
+                                          teamReq.players[0].lineupId,
+                                        )
+                                      }
                                       size="sm"
                                       className="h-8 bg-green-600 hover:bg-green-700 text-white gap-1 px-3"
                                     >
                                       <Check className="w-3 h-3" /> Approve
                                     </Button>
                                     <Button
+                                      onClick={() =>
+                                        rejectLineUp(
+                                          teamReq.players[0].lineupId,
+                                        )
+                                      }
                                       size="sm"
                                       variant="destructive"
                                       className="h-8 gap-1 px-3"
@@ -468,7 +560,7 @@ export default function ManagerMatchesDetail() {
                                   </div>
                                 </div>
                                 <div className="grid grid-cols-1 gap-1">
-                                  {teamReq.players.map((player) => (
+                                  {teamReq?.players?.map((player: any) => (
                                     <div
                                       key={player.id}
                                       className="text-xs flex justify-between py-1 border-b border-gray-50 last:border-0"
@@ -771,12 +863,12 @@ export default function ManagerMatchesDetail() {
                         </SelectTrigger>
                         <SelectContent>
                           {eventTeamSide === "home"
-                            ? homePlayers.map((player) => (
+                            ? homePlayers.map((player: any) => (
                                 <SelectItem key={player.id} value={player.id}>
                                   {player.name}
                                 </SelectItem>
                               ))
-                            : awayPlayers.map((player) => (
+                            : awayPlayers.map((player: any) => (
                                 <SelectItem key={player.id} value={player.id}>
                                   {player.name}
                                 </SelectItem>

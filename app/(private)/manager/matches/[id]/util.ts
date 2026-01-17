@@ -22,7 +22,7 @@ export type PlayerMatchStat = {
 
 export type MatchDetail = {
   id: string;
-  status: "UPCOMING" | "LIVE" | "FINISHED";
+  status: "SCHEDULED" | "LIVE" | "FINISHED";
   scheduledDate: string;
   venue: string;
 
@@ -112,4 +112,39 @@ export function lineUpMapperBench(apiResponse: any) {
     role: p?.role,
     isCaptain: p?.isCaptain,
   }));
+}
+type LineupRequestPlayer = {
+  id: string;
+  name: string;
+  number: number;
+  position: string;
+  role: string;
+  isCaptain: boolean;
+  lineupId: string;
+};
+
+type LineupRequest = {
+  status: "WAITING" | "APPROVED" | "REJECTED" | "REQUESTED" | null;
+  players: LineupRequestPlayer[];
+};
+export function lineUpMapperRequests(apiResponse: any): LineupRequest {
+  if (!apiResponse || !Array.isArray(apiResponse.players)) {
+    return {
+      status: null,
+      players: [],
+    };
+  }
+
+  return {
+    status: apiResponse.state ?? null,
+    players: apiResponse.players.map((p: any) => ({
+      id: p.player?.id ?? "",
+      name: p.player?.name ?? "",
+      number: p.player?.number ?? 0,
+      position: p.position ?? "",
+      role: p.role ?? "",
+      lineupId: p.lineupId,
+      isCaptain: Boolean(p.isCaptain),
+    })),
+  };
 }
