@@ -451,7 +451,7 @@ export default function ManagerMatchesDetail() {
                         >
                           <StopCircle className="w-4 h-4" /> End Match
                         </Button>
-                      ) : (
+                      ) : matches.status !== "FINISHED" ? (
                         <Button
                           size="sm"
                           onClick={statMatch}
@@ -460,6 +460,8 @@ export default function ManagerMatchesDetail() {
                         >
                           <PlayCircle className="w-4 h-4" /> Start Match
                         </Button>
+                      ) : (
+                        <div></div>
                       )}
                     </div>
                   </div>

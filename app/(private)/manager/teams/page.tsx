@@ -65,7 +65,7 @@ export default function ManagerTeams() {
   };
   const resendCredentail = async (id: string) => {
     setOpenModalId(false);
-    toast.loading("resting.....", { id: "22" });
+    toast.loading("resetting.....", { id: "22" });
     const res = await fetch(
       `/api/protected/manager/team/credential/resend?id=${id}`,
       {
@@ -77,7 +77,7 @@ export default function ManagerTeams() {
       toast.error(respon.message);
       return;
     }
-    toast.success("resent", { id: "22" });
+    toast.success(respon?.message, { id: "22" });
   };
   async function handleDelete(id: string) {
     if (
