@@ -15,6 +15,7 @@ import {
   AlertCircle,
   MessageSquare,
   ChevronRight,
+  History,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./button";
@@ -46,6 +47,11 @@ const coachMenu = [
     label: "Team Images",
     path: "/coach/images",
     icon: Image,
+  },
+  {
+    label: "Line-Up Requests",
+    path: "/coach/lineupHistory",
+    icon: History,
   },
   {
     label: "All Games",
@@ -191,7 +197,7 @@ export function Sidebar({ role }: SidebarProps) {
       <aside
         className={cn(
           "hidden lg:flex fixed left-0 top-16 h-[calc(100vh-64px)] bg-white border-r border-gray-200 transition-all duration-300 z-40",
-          isOpen ? "w-64" : "w-20"
+          isOpen ? "w-64" : "w-20",
         )}
       >
         <div className="flex flex-col w-full h-full">
@@ -221,14 +227,14 @@ export function Sidebar({ role }: SidebarProps) {
                     active
                       ? "bg-primary/10 text-primary"
                       : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
-                    isOpen ? "px-3 py-2.5" : "px-2.5 py-2.5 justify-center"
+                    isOpen ? "px-3 py-2.5" : "px-2.5 py-2.5 justify-center",
                   )}
                 >
                   <div className="relative">
                     <Icon
                       className={cn(
                         "w-5 h-5",
-                        (active || isHovered) && "scale-105"
+                        (active || isHovered) && "scale-105",
                       )}
                     />
                   </div>
@@ -275,7 +281,7 @@ export function Sidebar({ role }: SidebarProps) {
             onClick={toggleSidebar}
             className={cn(
               "absolute -right-3 top-1/2 rotate-180 transform -translate-y-1/2 bg-white border border-gray-200 shadow-sm rounded-full w-6 h-6 hover:bg-gray-50 z-50",
-              !isOpen && "rotate-360"
+              !isOpen && "rotate-360",
             )}
           >
             <ChevronRight className="w-3 h-3" />
@@ -328,7 +334,7 @@ export function Sidebar({ role }: SidebarProps) {
                         "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
                         active
                           ? "bg-primary/10 text-primary font-medium"
-                          : "text-gray-700 hover:bg-gray-100"
+                          : "text-gray-700 hover:bg-gray-100",
                       )}
                     >
                       <Icon className="w-5 h-5" />
