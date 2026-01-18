@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(request: NextRequest) {
   try {
-    const body = await request.json();
     const token = request.cookies.get("aToken")?.value;
     const id = request.nextUrl.searchParams.get("id");
 
@@ -11,7 +10,7 @@ export async function DELETE(request: NextRequest) {
     if (!backend) {
       return NextResponse.json(
         { message: "Missing NEXT_PUBLIC_BACKEND_URL" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -21,9 +20,8 @@ export async function DELETE(request: NextRequest) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(body),
     });
-
+    console.log(res);
     const data: ApiResponse = await res.json();
 
     return NextResponse.json(data, { status: res.status });
@@ -31,7 +29,7 @@ export async function DELETE(request: NextRequest) {
     console.error("Proxy create error:", error);
     return NextResponse.json(
       { message: "Internal Server Error", error: String(error) },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

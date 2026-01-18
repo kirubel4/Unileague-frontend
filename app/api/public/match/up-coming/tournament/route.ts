@@ -2,15 +2,23 @@ import { ApiResponse, forwardApiResponse } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest) {
   try {
-    const id = req.nextUrl.searchParams.get("id");
+    let tid;
+    const cookiId = req.cookies.get("tid")?.value;
+    const paramId = req.nextUrl.searchParams.get("id");
+
+    if (paramId) {
+      tid = paramId;
+    } else if (cookiId) {
+      tid = cookiId;
+    }
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/matches/up-coming/${id}/tournament`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/matches/up-coming/${tid}/tournament`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
     const data: ApiResponse = await res.json();
 

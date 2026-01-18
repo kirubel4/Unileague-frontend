@@ -61,6 +61,7 @@ export interface Player {
   name: string;
   number: number;
   position: string;
+  isAvailable?: true;
 }
 
 export interface TeamStats {
@@ -144,7 +145,7 @@ export function TeamDetail({
     revalidateOnFocus: false,
   });
   const { data, isLoading: load } = useSWR(
-    `/api/public/match/recent/team?id=${id}`,
+    `/api/public/match/up-coming/team?id=${id}`,
     fetcher,
     {
       revalidateOnFocus: false,
@@ -332,17 +333,17 @@ export function TeamDetail({
 
                     <div>
                       <h2 className="text-lg font-bold text-gray-900">
-                        Recent Matches
+                        Upcoming Matches
                       </h2>
                       <p className="text-sm text-gray-500">
-                        Results from recently completed fixtures
+                        scheduled fixtures in next Days
                       </p>
                     </div>
                   </div>
 
                   {/* Optional badge */}
                   <span className="text-xs font-medium px-3 py-1 rounded-full bg-gray-100 text-gray-600">
-                    Last Week
+                    this Week
                   </span>
                 </div>
 

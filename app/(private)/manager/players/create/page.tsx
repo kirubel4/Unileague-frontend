@@ -37,7 +37,19 @@ export default function ManagerPlayersCreate() {
 
   const teams: Team[] = mapTeams(data || { data: [] });
 
-  const positions = ["Goalkeeper", "Defender", "Midfielder", "Forward"];
+  const positions = [
+    "GK",
+    "RB",
+    "RCB",
+    "LCB",
+    "LB",
+    "CDM",
+    "CM",
+    "CAM",
+    "RW",
+    "LW",
+    "ST",
+  ];
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>

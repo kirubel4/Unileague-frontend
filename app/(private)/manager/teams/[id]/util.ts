@@ -81,6 +81,9 @@ export interface TeamStats {
   points: number;
   position: number;
   form: MatchResult[];
+  yellowCards?: number;
+  redCards?: number;
+  teamName?: string;
 }
 export interface TeamStatsApiResponse {
   id?: string;
@@ -103,7 +106,9 @@ export function mapTeamStats(apiData?: TeamStatsApiResponse): TeamStats {
   const losses = apiData?.losses ?? 0;
   const goalsFor = apiData?.goalsFor ?? 0;
   const goalsAgainst = apiData?.goalsAgainst ?? 0;
-
+  const yellowCards = apiData?.yellowCards ?? 0;
+  const redCards = apiData?.readCards ?? 0;
+  const teamName = apiData?.teamName ?? "Undefine";
   // Goal difference formatting (+ / -)
   const goalDiffNumber = apiData?.goalDifference ?? goalsFor - goalsAgainst;
 
@@ -121,7 +126,9 @@ export function mapTeamStats(apiData?: TeamStatsApiResponse): TeamStats {
     goalsFor,
     goalsAgainst,
     goalDifference,
-
+    yellowCards,
+    redCards,
+    teamName,
     // Not provided by backend → safe defaults
     points,
     position: 0, // unknown ranking
