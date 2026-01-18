@@ -16,17 +16,15 @@ export interface LineupRequest {
   } | null;
   match: {
     id: string;
-    date: Date;
+    scheduledDate: Date;
     venue: string;
     homeTeam: {
       id: string;
       teamName: string;
-      logo?: string;
     };
     awayTeam: {
       id: string;
       teamName: string;
-      logo?: string;
     };
   };
 }
@@ -41,7 +39,7 @@ export interface LineupRequestResponse {
   } | null;
   match: {
     id: string;
-    date: Date;
+    scheduledDate: Date;
     venue: string;
     homeTeam: {
       id: string;
@@ -59,23 +57,21 @@ export function mapLineupRequestResponseToLineupRequest(
 ): LineupRequest {
   return {
     id: response.id,
-    state: response.state as any, // This maps $Enums.LineupReq to LineupReq
+    state: response.state,
     submittedAt: response.submittedAt ? new Date(response.submittedAt) : null,
     approvedAt: response.approvedAt ? new Date(response.approvedAt) : null,
     approvedBy: response.approvedBy,
     match: {
       id: response.match.id,
-      date: new Date(response.match.date),
+      scheduledDate: new Date(response.match.scheduledDate),
       venue: response.match.venue,
       homeTeam: {
         id: response.match.homeTeam.id,
         teamName: response.match.homeTeam.teamName,
-        logo: `/teams/${response.match.homeTeam.id}/logo.png`, // Adjust path as needed
       },
       awayTeam: {
         id: response.match.awayTeam.id,
         teamName: response.match.awayTeam.teamName,
-        logo: `/teams/${response.match.awayTeam.id}/logo.png`, // Adjust path as needed
       },
     },
   };

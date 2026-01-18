@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(res);
+
     const data: ApiResponse = await res.json();
 
     return NextResponse.json(data, { status: res.status });

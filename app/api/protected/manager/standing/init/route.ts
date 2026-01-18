@@ -1,11 +1,12 @@
 import { ApiResponse } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const body = await request.json();
     const token = request.cookies.get("aToken")?.value;
-    const teamId = request.cookies.get("tMid")?.value;
+
+    const id = request.cookies.get("tid")?.value;
+
     const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backend) {
       return NextResponse.json(
@@ -13,18 +14,16 @@ export async function POST(request: NextRequest) {
         { status: 500 },
       );
     }
-    body.teamId = teamId;
-    body.requestById = teamId;
-
-    const res = await fetch(`${backend}/coach/request/line-up/`, {
-      method: "POST",
+    const res = await fetch(`${backend}/manager/tournament/${id}/init`, {
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(body),
     });
+
     const data: ApiResponse = await res.json();
+
     return NextResponse.json(data, { status: res.status });
   } catch (error) {
     console.error("Proxy create error:", error);

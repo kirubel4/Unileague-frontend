@@ -6,118 +6,39 @@ import { Search, Filter, Download } from "lucide-react";
 import { LineupReq, LineupRequest } from "./type";
 import { RequestFilters } from "@/components/pages/RequestFilters";
 import { RequestCard } from "@/components/pages/RequestCard";
+import { ApiResponse } from "@/lib/utils";
 
-// Mock data function
-const generateMockLineupRequests = (): LineupRequest[] => {
-  const teams = [
-    { id: "1", name: "Manchester United", short: "MUN" },
-    { id: "2", name: "Liverpool FC", short: "LIV" },
-    { id: "3", name: "Chelsea FC", short: "CHE" },
-    { id: "4", name: "Arsenal FC", short: "ARS" },
-    { id: "5", name: "Manchester City", short: "MCI" },
-    { id: "6", name: "Tottenham Hotspur", short: "TOT" },
-    { id: "7", name: "Leicester City", short: "LEI" },
-    { id: "8", name: "West Ham United", short: "WHU" },
-  ];
+async function fetchLineUpHistory() {
+  const res = await fetch("/api/protected/coach/lineUpHistory");
+  const response: ApiResponse = await res.json();
+  const data: LineupRequest[] = response?.data ?? [];
 
-  const venues = [
-    "Old Trafford",
-    "Anfield",
-    "Stamford Bridge",
-    "Emirates Stadium",
-    "Etihad Stadium",
-    "Tottenham Hotspur Stadium",
-    "King Power Stadium",
-    "London Stadium",
-  ];
-
-  const approvers = [
-    { username: "admin.john" },
-    { username: "referee.mike" },
-    { username: "manager.sarah" },
-    { username: "director.tom" },
-    { username: "coordinator.lisa" },
-  ];
-
-  const statuses = [
-    LineupReq.WAITING,
-    LineupReq.REQUESTED,
-    LineupReq.APPROVED,
-    LineupReq.REJECTED,
-  ];
-
-  const requests: LineupRequest[] = [];
-
-  for (let i = 1; i <= 15; i++) {
-    const homeTeam = teams[Math.floor(Math.random() * teams.length)];
-    let awayTeam;
-    do {
-      awayTeam = teams[Math.floor(Math.random() * teams.length)];
-    } while (awayTeam.id === homeTeam.id);
-
-    const status = statuses[Math.floor(Math.random() * statuses.length)];
-    const submittedDate = new Date();
-    submittedDate.setDate(
-      submittedDate.getDate() - Math.floor(Math.random() * 30),
-    );
-
-    const approvedDate =
-      status === LineupReq.APPROVED || status === LineupReq.REJECTED
-        ? new Date(submittedDate.getTime() + Math.random() * 86400000 * 2) // Within 2 days
-        : null;
-
-    requests.push({
-      id: `req-${i}`,
-      state: status,
-      submittedAt: submittedDate,
-      approvedAt: approvedDate,
-      approvedBy:
-        status === LineupReq.APPROVED || status === LineupReq.REJECTED
-          ? approvers[Math.floor(Math.random() * approvers.length)]
-          : null,
-      match: {
-        id: `match-${i}`,
-        date: new Date(Date.now() + Math.random() * 86400000 * 14), // Within 14 days
-        venue: venues[Math.floor(Math.random() * venues.length)],
-        homeTeam: {
-          id: homeTeam.id,
-          teamName: homeTeam.name,
-          logo: `/teams/${homeTeam.id}/logo.png`,
-        },
-        awayTeam: {
-          id: awayTeam.id,
-          teamName: awayTeam.name,
-          logo: `/teams/${awayTeam.id}/logo.png`,
-        },
-      },
-    });
-  }
-
-  // Sort by date (most recent first)
-  return requests.sort(
-    (a, b) => b.submittedAt!.getTime() - a.submittedAt!.getTime(),
-  );
-};
-
+  return data;
+}
 export default function LineupRequestsPage() {
-  const [requests, setRequests] = useState<LineupRequest[]>([]);
-  const [filteredRequests, setFilteredRequests] = useState<LineupRequest[]>([]);
+  const [requests, setRequests] = useState<LineupRequest[] | []>([]);
+  const [filteredRequests, setFilteredRequests] = useState<
+    LineupRequest[] | []
+  >([]);
   const [activeFilter, setActiveFilter] = useState<LineupReq | "ALL">("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load mock data on component mount
   useEffect(() => {
-    // Simulate API loading delay
-    const timer = setTimeout(() => {
-      const mockData = generateMockLineupRequests();
-      setRequests(mockData);
-      setFilteredRequests(mockData); // Initially show all
-      setIsLoading(false);
-    }, 800); // 800ms delay to simulate network request
-
-    return () => clearTimeout(timer);
+    loadData();
   }, []);
+
+  const loadData = async () => {
+    try {
+      const apiData = await fetchLineUpHistory();
+      setRequests(apiData);
+      setFilteredRequests(apiData);
+    } catch (error) {
+      console.error("Failed to load lineup history", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Filter requests whenever filter criteria or search query changes
   useEffect(() => {
@@ -158,6 +79,10 @@ export default function LineupRequestsPage() {
   };
 
   const stats = getStats();
+  const handleRefreshData = async () => {
+    setIsLoading(true);
+    await loadData();
+  };
 
   // Handle loading state
   if (isLoading) {
@@ -171,20 +96,10 @@ export default function LineupRequestsPage() {
     );
   }
 
-  const handleRefreshData = () => {
-    setIsLoading(true);
-    const mockData = generateMockLineupRequests();
-    setRequests(mockData);
-    setFilteredRequests(mockData);
-    setIsLoading(false);
-  };
-
   const handleExportData = () => {
     const dataStr = JSON.stringify(filteredRequests, null, 2);
     const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
-
     const exportFileDefaultName = `lineup-requests-${new Date().toISOString().split("T")[0]}.json`;
-
     const linkElement = document.createElement("a");
     linkElement.setAttribute("href", dataUri);
     linkElement.setAttribute("download", exportFileDefaultName);
@@ -214,7 +129,9 @@ export default function LineupRequestsPage() {
                 onClick={() => {
                   // Sort functionality
                   const sorted = [...filteredRequests].sort(
-                    (a, b) => a.match.date.getTime() - b.match.date.getTime(),
+                    (a, b) =>
+                      new Date(a.match.scheduledDate).getTime() -
+                      new Date(b.match.scheduledDate).getTime(),
                   );
                   setFilteredRequests(sorted);
                 }}
@@ -260,24 +177,15 @@ export default function LineupRequestsPage() {
                     ? "Try adjusting your search or filter"
                     : "No lineup requests have been created yet"}
                 </p>
-                {searchQuery || activeFilter !== "ALL" ? (
-                  <button
-                    onClick={() => {
-                      setSearchQuery("");
-                      setActiveFilter("ALL");
-                    }}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Clear Filters
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleRefreshData}
-                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
-                  >
-                    Generate New Mock Data
-                  </button>
-                )}
+                <button
+                  onClick={() => {
+                    setSearchQuery("");
+                    setActiveFilter("ALL");
+                  }}
+                  className="px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Clear Filters
+                </button>
               </div>
             </div>
           ) : (

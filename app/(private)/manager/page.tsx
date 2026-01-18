@@ -27,6 +27,7 @@ type Tournament = {
   teamCount: number;
   playerCount: number;
   managers: TournamentManager[];
+  logo?: string;
 };
 type TournamentManager = {
   id: string;
@@ -60,7 +61,7 @@ export default function ManagerDashboard() {
     revalidateOnFocus: false,
   });
   const upComingMatches: ApiMatch[] = upcoming?.data;
-  const todayMatch: ApiMatch[] = todays?.data;
+  const todayMatches: ApiMatch[] = todays?.data;
   const pendingReq = lineupReq?.data;
   const pendingActions = pendingReq?.map((req: any) => ({
     action: PENDING_ACTION_CONFIG.action,
@@ -81,53 +82,15 @@ export default function ManagerDashboard() {
         status: tournament.status,
         teams: tournament.teamCount,
         players: tournament.playerCount,
+        logo:
+          tournament.logo ??
+          "https://images.unsplash.com/photo-1536935338788-846bb9981813?w=1600&h=600&fit=crop",
         managers: tournament.managers || [],
       }
     : null;
   {
     mappedTournament?.name;
   }
-
-  const tournamentInfo = {
-    name: "City League Championship 2024",
-    logo: "⚽",
-    teams: 16,
-    players: 240,
-    completedMatches: 18,
-    totalMatches: 32,
-  };
-
-  const todayMatches = [
-    {
-      id: 1,
-      homeTeam: "Tigers United",
-      awayTeam: "Phoenix FC",
-      time: "14:00",
-      status: "Scheduled",
-    },
-    {
-      id: 2,
-      homeTeam: "Eagles Sports",
-      awayTeam: "Lions Club",
-      time: "16:30",
-      status: "Scheduled",
-    },
-  ];
-
-  const upcomingMatches = [
-    {
-      id: 3,
-      homeTeam: "Champions FC",
-      awayTeam: "Warriors",
-      date: "Tomorrow, 15:00",
-    },
-    {
-      id: 4,
-      homeTeam: "Strikers",
-      awayTeam: "Victory Team",
-      date: "Dec 20, 14:00",
-    },
-  ];
 
   const quickStats = [
     {
@@ -155,46 +118,25 @@ export default function ManagerDashboard() {
       {/* Tournament Header */}
       <div className="bg-white rounded-lg border border-border p-6 mb-8">
         <div className="flex items-center gap-4">
-          <div className="text-5xl">{tournamentInfo.logo}</div>
+          <div className="relative w-20 h-20 rounded-xl overflow-hidden border bg-muted">
+            <img
+              src={mappedTournament?.logo}
+              alt="Tournament Logo"
+              className="w-full h-full object-cover"
+            />
+          </div>
+
           <div>
             <h1 className="text-3xl font-bold text-foreground">
               {mappedTournament?.name}
             </h1>
-            <p className="text-muted-foreground mt-1">
-              Match Progress: {tournamentInfo.completedMatches} of{" "}
-              {tournamentInfo.totalMatches} matches completed
+            <p className="text-sm text-muted-foreground">
+              {mappedTournament?.location}
             </p>
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="mt-6">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-muted-foreground">
-              Tournament Progress
-            </span>
-            <span className="text-sm font-medium text-foreground">
-              {Math.round(
-                (tournamentInfo.completedMatches /
-                  tournamentInfo.totalMatches) *
-                  100,
-              )}
-              %
-            </span>
-          </div>
-          <div className="w-full bg-muted rounded-full h-2">
-            <div
-              className="bg-green-500 h-2 rounded-full transition-all duration-500"
-              style={{
-                width: `${
-                  (tournamentInfo.completedMatches /
-                    tournamentInfo.totalMatches) *
-                  100
-                }%`,
-              }}
-            />
-          </div>
-        </div>
       </div>
 
       {/* Quick Stats */}
@@ -234,7 +176,7 @@ export default function ManagerDashboard() {
 
             {todayMatches?.length > 0 ? (
               <div className="space-y-4">
-                {todayMatch?.map((match) => (
+                {todayMatches?.map((match) => (
                   <div
                     key={match.id}
                     className="border border-border rounded-lg p-4 hover:bg-muted transition-colors"
@@ -278,6 +220,7 @@ export default function ManagerDashboard() {
             <div className="space-y-3">
               {upComingMatches?.map((match: ApiMatch) => (
                 <div
+                  onClick={() => router.push}
                   key={match.id}
                   className="border border-border rounded-lg p-4 hover:bg-muted transition-colors"
                 >
@@ -306,6 +249,7 @@ export default function ManagerDashboard() {
           </h2>
 
           <div className="space-y-3">
+            {pendingActions?.length <= 0 && <div>No Pending Actions!!</div>}
             {pendingActions?.map((item: any, index: any) => (
               <div
                 key={index}

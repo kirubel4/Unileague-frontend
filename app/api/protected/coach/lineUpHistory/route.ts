@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json("Team Id is required", { status: 400 });
     }
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/coach/match/line-up/history/${tid}`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/coach/line-up/record/${tid}`,
       {
         method: "GET",
         headers: {
@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
         },
       },
     );
+
     const data: ApiResponse = await res.json();
 
     return NextResponse.json(data);
