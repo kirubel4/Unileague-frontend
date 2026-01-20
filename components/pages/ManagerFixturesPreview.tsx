@@ -12,9 +12,11 @@ type Props = {
   setMatches: (m: MatchWeekPreview[]) => void;
   onNext: () => void;
   onBack: () => void;
+  error?: string | undefined;
 };
 
 export default function ManagerFixturesPreview({
+  error,
   format,
   selectedTeams,
   matches,
@@ -31,6 +33,9 @@ export default function ManagerFixturesPreview({
           <p className="text-muted-foreground mb-4">
             No fixtures generated yet. Please complete the setup first.
           </p>
+          <>
+            <p>{error}</p>
+          </>
           <Button onClick={onBack}>Go Back</Button>
         </div>
       </Layout>

@@ -5,6 +5,7 @@ import { fetcher, getCookie } from "@/lib/utils";
 
 import Link from "next/link";
 import { useState } from "react";
+import { Toaster } from "sonner";
 import useSWR from "swr";
 export type LeagueConfig = {
   rounds: number;
@@ -30,10 +31,12 @@ type Props = {
   setSelectedTeams: React.Dispatch<React.SetStateAction<Team[]>>;
   onNext: () => void;
   isLoading: boolean;
+  error?: string |undefined;
 };
 
 export default function ManagerFixturesSetup({
   teams,
+  error: err,
   format,
   setFormat,
   selectedTeams,
@@ -53,12 +56,12 @@ export default function ManagerFixturesSetup({
   const [matchesPerWeek, setMatchesPerWeek] = useState(1);
 
   const Teams: Team[] = mapTeams(data || { data: [] });
-  console.log(Teams);
+
   const toggleTeam = (team: Team) => {
     setSelectedTeams((prev) =>
       prev.some((t) => t.id === team.id)
         ? prev.filter((t) => t.id !== team.id)
-        : [...prev, team]
+        : [...prev, team],
     );
   };
 
@@ -72,6 +75,7 @@ export default function ManagerFixturesSetup({
   return (
     <Layout role="manager" userName={userName}>
       {/* Header */}
+      <Toaster />
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold">Setup Fixtures</h1>
         <p className="text-muted-foreground mt-1">
