@@ -15,7 +15,7 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // ⭐ NEW STATE (added)
+ 
   const [isCoach, setIsCoach] = useState(false);
   const [role, setRole] = useState<'admin' | 'coach'>('admin');
 
@@ -30,9 +30,8 @@ export default function Login() {
         return;
       }
 
-      // ⭐ If coach → call coach API
       if (role === 'coach') {
-        const res = await fetch('/api/coach/login', {
+        const res = await fetch('/api/auth/coach', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -52,7 +51,6 @@ export default function Login() {
         return;
       }
 
-      // ⭐ Original code untouched for admin/manager
       const res = await fetch('/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         path: "/",
-        maxAge: 60 * 120, // 2 hours
+        maxAge: 60 * 120, // 2 hours-
       });
       response.cookies.set("rToken", apiResponse.data.rToken, {
         httpOnly: true,
