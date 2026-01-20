@@ -78,14 +78,14 @@ export function TopBar({
             href="/"
             className="flex items-center gap-2 md:gap-3 group transition-all duration-200 min-w-0"
           >
-            <div className="relative w-8 h-8 md:w-9 md:h-9 bg-gradient-to-br from-primary to-primary/80 rounded-lg md:rounded-xl flex items-center justify-center shadow-sm md:shadow-md group-hover:shadow transition-shadow duration-200 shrink-0">
+            <div className="relative w-8 h-8 md:w-9 md:h-9 bg-linear-to-br from-primary to-primary/80 rounded-lg md:rounded-xl flex items-center justify-center shadow-sm md:shadow-md group-hover:shadow transition-shadow duration-200 shrink-0">
               <span className="text-white font-bold text-base md:text-lg">
                 ⚽
               </span>
               <div className="absolute -inset-1 bg-primary/20 rounded-lg md:rounded-xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-lg md:text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
+              <span className="text-lg md:text-xl font-bold bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
                 UniLeague-Hub
               </span>
               <span className="text-xs text-gray-500 font-medium tracking-wide hidden sm:block">
@@ -131,14 +131,14 @@ export function TopBar({
           href="/"
           className="flex items-center gap-2 md:gap-3 group transition-all duration-200 min-w-0"
         >
-          <div className="relative w-8 h-8 md:w-9 md:h-9 bg-gradient-to-br from-primary to-primary/80 rounded-lg md:rounded-xl flex items-center justify-center shadow-sm md:shadow-md group-hover:shadow transition-shadow duration-200 shrink-0">
+          <div className="relative w-8 h-8 md:w-9 md:h-9 bg-linear-to-br from-primary to-primary/80 rounded-lg md:rounded-xl flex items-center justify-center shadow-sm md:shadow-md group-hover:shadow transition-shadow duration-200 shrink-0">
             <span className="text-white font-bold text-base md:text-lg">
               ⚽
             </span>
             <div className="absolute -inset-1 bg-primary/20 rounded-lg md:rounded-xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-lg md:text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
+            <span className="text-lg md:text-xl font-bold bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
               UniLeague-Hub
             </span>
             <span className="text-xs text-gray-500 font-medium tracking-wide hidden sm:block">
@@ -183,7 +183,7 @@ export function TopBar({
               aria-expanded={showUserMenu}
             >
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-semibold text-gray-900 truncate max-w-[120px] md:max-w-none">
+                <p className="text-sm font-semibold text-gray-900 truncate max-w-30 md:max-w-none">
                   {currentUserName}
                 </p>
                 <p className="text-xs text-gray-500 font-medium truncate">
@@ -193,7 +193,7 @@ export function TopBar({
 
               {/* Mobile - Show initials badge */}
               <div className="sm:hidden relative">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center shadow-sm">
+                <div className="w-8 h-8 bg-linear-to-br from-primary to-primary/80 rounded-full flex items-center justify-center shadow-sm">
                   <span className="text-white text-sm font-semibold">
                     {getDisplayName()}
                   </span>
@@ -202,7 +202,7 @@ export function TopBar({
 
               {/* Desktop - Show user icon */}
               <div className="relative hidden sm:block">
-                <div className="w-9 h-9 md:w-10 md:h-10 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center shadow-sm group-hover:shadow transition-shadow">
+                <div className="w-9 h-9 md:w-10 md:h-10 bg-linear-to-br from-primary to-primary/80 rounded-full flex items-center justify-center shadow-sm group-hover:shadow transition-shadow">
                   <User className="w-4 h-4 md:w-5 md:h-5 text-white" />
                 </div>
                 <div className="absolute inset-0 bg-primary/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
