@@ -3,7 +3,7 @@ import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast, Toaster } from 'sonner';
+import { toast, Toaster } from "sonner";
 import { useEffect, useState } from "react";
 import { Eye, EyeOff, Save, Bell, Lock, User } from "lucide-react";
 import { ApiResponse, fetcher, getCookie } from "@/lib/utils";
@@ -110,26 +110,26 @@ export default function ManagerSettings() {
     e.preventDefault();
 
     if (!passwordData.currentPassword || !passwordData.newPassword) {
-      toast.error('Please fill in all password fields');
+      toast.error("Please fill in all password fields");
       return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error('New passwords do not match');
+      toast.error("New passwords do not match");
       return;
     }
 
     if (passwordData.newPassword.length < 8) {
-      toast.error('New password must be at least 8 characters');
+      toast.error("New password must be at least 8 characters");
       return;
     }
 
     setIsSaving(true);
 
     try {
-      const res = await fetch('/api/protected/manager/user/update/password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/protected/manager/user/update/password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           currentPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword,
@@ -139,18 +139,18 @@ export default function ManagerSettings() {
       const data: ApiResponse = await res.json();
 
       if (res.ok && data.success) {
-        toast.success(data.message || 'Password changed successfully!');
+        toast.success(data.message || "Password changed successfully!");
         setPasswordData({
-          currentPassword: '',
-          newPassword: '',
-          confirmPassword: '',
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
         });
       } else {
-        toast.error(data.message || 'Failed to change password');
+        toast.error(data.message || "Failed to change password");
       }
     } catch (err) {
       console.error(err);
-      toast.error('Internal server error');
+      toast.error("Internal server error");
     } finally {
       setIsSaving(false);
     }
@@ -195,9 +195,17 @@ export default function ManagerSettings() {
           </button>
         ))}
       </div>
+      {isLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/70">
+          <div className="text-center">
+            <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+            <p className="text-sm text-gray-600">Loading user data...</p>
+          </div>
+        </div>
+      )}
 
       {/* Profile Tab */}
-      {activeTab === "profile" && (
+      {activeTab === "profile" && !isLoading && (
         <div className="bg-white rounded-lg border border-border p-6">
           <h3 className="text-lg font-semibold mb-6 text-foreground">
             Profile Information
@@ -271,7 +279,7 @@ export default function ManagerSettings() {
                   name="tournament"
                   type="text"
                   value={
-                    data?.data.tournaments[0].tournamentName
+                    data?.data.tournaments[0]?.tournamentName
                       ? data?.data.tournaments[0].tournamentName
                       : "not assign to any tournament"
                   }

@@ -20,113 +20,6 @@ import {
   mapTeams,
   mapTeamsPublic,
 } from "@/app/(private)/manager/players/transfer/util";
-
-// Mock tournaments data for filtering
-// const TOURNAMENTS = [
-//   { id: "1", name: "Winter Championship 2024", year: 2024 },
-//   { id: "2", name: "Summer League 2024", year: 2024 },
-//   { id: "3", name: "3rd Year Cup 2023", year: 2023 },
-//   { id: "4", name: "4th Year Cup 2024", year: 2024 },
-//   { id: "5", name: "5th Year Cup 2024", year: 2024 },
-//   { id: "6", name: "CSE Major Tournament 2023", year: 2023 },
-//   { id: "7", name: "ECE Major Tournament 2024", year: 2024 },
-//   { id: "8", name: "All Departments Cup 2024", year: 2024 },
-// ];
-
-// Mock teams data with tournament association
-const TEAMS = [
-  {
-    id: "1",
-    name: "Software FC (CSE 3rd Year)",
-
-    tournamentId: "3",
-    tournamentName: "3rd Year Cup 2023",
-    year: 2023,
-    logo: "💻",
-    coach: "Dr. Michael Chen",
-    location: "Computer Science Dept",
-  },
-  {
-    id: "2",
-    name: "ECE Voltage",
-
-    tournamentName: "Summer League 2024",
-    year: 2024,
-    logo: "⚡",
-    coach: "Prof. Sarah Johnson",
-    location: "ECE Department",
-  },
-  {
-    id: "3",
-    name: "Mechanical Mavericks",
-
-    tournamentId: "1",
-    tournamentName: "Winter Championship 2024",
-    year: 2024,
-    logo: "⚙️",
-    coach: "Dr. Robert Kim",
-    location: "Mechanical Engineering",
-  },
-  {
-    id: "4",
-    name: "Civil Constructors",
-    tournamentId: "8",
-    tournamentName: "All Departments Cup 2024",
-    year: 2024,
-    logo: "🏗️",
-    coach: "Prof. David Miller",
-    location: "Civil Engineering",
-  },
-  {
-    id: "5",
-    name: "BioTech United (5th Year)",
-    tournamentId: "5",
-    tournamentName: "5th Year Cup 2024",
-    year: 2024,
-    logo: "🧬",
-    coach: "Dr. Lisa Wang",
-    location: "Biotechnology Dept",
-  },
-  {
-    id: "6",
-    name: "Architecture FC",
-    tournamentId: "4",
-    tournamentName: "4th Year Cup 2024",
-    year: 2024,
-    logo: "🏛️",
-    coach: "Prof. Alex Turner",
-    location: "Architecture Dept",
-  },
-  {
-    id: "7",
-    name: "Chemical Engineers",
-    tournamentId: "6",
-    tournamentName: "CSE Major Tournament 2023",
-    year: 2023,
-    logo: "🧪",
-    coach: "Dr. James Wilson",
-    location: "Chemical Engineering",
-  },
-  {
-    id: "8",
-    name: "Physics Phantoms",
-    tournamentId: "7",
-    tournamentName: "ECE Major Tournament 2024",
-    year: 2024,
-    logo: "⚛️",
-    coach: "Prof. Emma Davis",
-    location: "Physics Department",
-  },
-];
-
-// Extract unique years
-const ALL_YEARS = Array.from(new Set(TEAMS.map((t) => t.year))).sort(
-  (a, b) => b - a
-);
-const ALL_TOURNAMENTS = Array.from(
-  new Set(TEAMS.map((t) => t.tournamentName))
-).sort();
-
 export default function TeamsPage() {
   const router = useRouter();
   const [selectedYear, setSelectedYear] = useState<number | "ALL">("ALL");
@@ -155,7 +48,7 @@ export default function TeamsPage() {
 
     if (selectedTournament !== "ALL") {
       filtered = filtered.filter(
-        (team) => team.tournamentName === selectedTournament
+        (team) => team.tournamentName === selectedTournament,
       );
     }
 
@@ -163,7 +56,7 @@ export default function TeamsPage() {
       filtered = filtered.filter(
         (team) =>
           team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          team.coachName.toLowerCase().includes(searchQuery.toLowerCase())
+          team.coachName.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
 
@@ -262,7 +155,7 @@ export default function TeamsPage() {
                 (tournament) =>
                   selectedYear === "ALL" ||
                   new Date(tournament.startingDate).getFullYear() ===
-                    selectedYear
+                    selectedYear,
               ).map((tournament) => (
                 <button
                   key={tournament.id}
@@ -391,7 +284,7 @@ export default function TeamsPage() {
           ) : (
             // Teams grid with data
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {teams.map((team) => (
+              {teams?.map((team) => (
                 <Link
                   key={team.id}
                   href={`/teams/${team.id}`}

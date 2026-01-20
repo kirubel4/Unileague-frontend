@@ -5,15 +5,16 @@ import { fetcher, getCookie } from "@/lib/utils";
 import {
   Trophy,
   Users,
-  Zap,
   Clock,
   CheckCircle,
   Calendar,
-  BarChart3,
+  TableCellsMerge,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import useSWR from "swr";
-import { mapTeams, Team } from "./players/transfer/util";
+import { ApiMatch } from "./fixtures/page";
+
 type Tournament = {
   id: string;
   tournamentName: string;
@@ -26,6 +27,7 @@ type Tournament = {
   teamCount: number;
   playerCount: number;
   managers: TournamentManager[];
+  logo?: string;
 };
 type TournamentManager = {
   id: string;
@@ -33,12 +35,40 @@ type TournamentManager = {
   email: string;
 };
 
+const PENDING_ACTION_CONFIG = {
+  action: "Confirm match lineups",
+  icon: <TableCellsMerge className="w-5 h-5" />,
+};
+
 export default function ManagerDashboard() {
+  const router = useRouter();
   const userName = getCookie("uName") || "Manager";
   const { data: tournamentRes } = useSWR(
     `/api/public/tournament/detail`,
-    fetcher
+    fetcher,
   );
+  const { data: lineupReq } = useSWR(
+    "/api/protected/manager/match/line-up/pending",
+    fetcher,
+    { revalidateOnFocus: false },
+  );
+  const { data: upcoming } = useSWR(
+    "/api/public/match/up-coming/tournament",
+    fetcher,
+    { revalidateOnFocus: false },
+  );
+  const { data: todays } = useSWR("/api/public/match/today", fetcher, {
+    revalidateOnFocus: false,
+  });
+  const upComingMatches: ApiMatch[] = upcoming?.data;
+  const todayMatches: ApiMatch[] = todays?.data;
+  const pendingReq = lineupReq?.data;
+  const pendingActions = pendingReq?.map((req: any) => ({
+    action: PENDING_ACTION_CONFIG.action,
+    matchId: req?.matchId,
+    teamName: req?.team.teamName,
+    icon: PENDING_ACTION_CONFIG.icon,
+  }));
 
   const tournament: Tournament | null = tournamentRes?.data ?? null;
   const mappedTournament = tournament
@@ -52,74 +82,15 @@ export default function ManagerDashboard() {
         status: tournament.status,
         teams: tournament.teamCount,
         players: tournament.playerCount,
+        logo:
+          tournament.logo ??
+          "https://images.unsplash.com/photo-1536935338788-846bb9981813?w=1600&h=600&fit=crop",
         managers: tournament.managers || [],
       }
     : null;
   {
     mappedTournament?.name;
   }
-  console.log(tournament);
-  const tournamentInfo = {
-    name: "City League Championship 2024",
-    logo: "⚽",
-    teams: 16,
-    players: 240,
-    completedMatches: 18,
-    totalMatches: 32,
-  };
-
-  const todayMatches = [
-    {
-      id: 1,
-      homeTeam: "Tigers United",
-      awayTeam: "Phoenix FC",
-      time: "14:00",
-      status: "Scheduled",
-    },
-    {
-      id: 2,
-      homeTeam: "Eagles Sports",
-      awayTeam: "Lions Club",
-      time: "16:30",
-      status: "Scheduled",
-    },
-  ];
-
-  const upcomingMatches = [
-    {
-      id: 3,
-      homeTeam: "Champions FC",
-      awayTeam: "Warriors",
-      date: "Tomorrow, 15:00",
-    },
-    {
-      id: 4,
-      homeTeam: "Strikers",
-      awayTeam: "Victory Team",
-      date: "Dec 20, 14:00",
-    },
-  ];
-
-  const pendingActions = [
-    {
-      action: "Confirm match lineups",
-      matches: 3,
-      dueDate: "Today",
-      icon: <Users className="w-5 h-5" />,
-    },
-    {
-      action: "Review player transfer requests",
-      matches: 2,
-      dueDate: "Dec 20",
-      icon: <Zap className="w-5 h-5" />,
-    },
-    {
-      action: "Publish match statistics",
-      matches: 5,
-      dueDate: "Dec 21",
-      icon: <BarChart3 className="w-5 h-5" />,
-    },
-  ];
 
   const quickStats = [
     {
@@ -147,46 +118,25 @@ export default function ManagerDashboard() {
       {/* Tournament Header */}
       <div className="bg-white rounded-lg border border-border p-6 mb-8">
         <div className="flex items-center gap-4">
-          <div className="text-5xl">{tournamentInfo.logo}</div>
+          <div className="relative w-20 h-20 rounded-xl overflow-hidden border bg-muted">
+            <img
+              src={mappedTournament?.logo}
+              alt="Tournament Logo"
+              className="w-full h-full object-cover"
+            />
+          </div>
+
           <div>
             <h1 className="text-3xl font-bold text-foreground">
               {mappedTournament?.name}
             </h1>
-            <p className="text-muted-foreground mt-1">
-              Match Progress: {tournamentInfo.completedMatches} of{" "}
-              {tournamentInfo.totalMatches} matches completed
+            <p className="text-sm text-muted-foreground">
+              {mappedTournament?.location}
             </p>
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="mt-6">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-muted-foreground">
-              Tournament Progress
-            </span>
-            <span className="text-sm font-medium text-foreground">
-              {Math.round(
-                (tournamentInfo.completedMatches /
-                  tournamentInfo.totalMatches) *
-                  100
-              )}
-              %
-            </span>
-          </div>
-          <div className="w-full bg-muted rounded-full h-2">
-            <div
-              className="bg-green-500 h-2 rounded-full transition-all duration-500"
-              style={{
-                width: `${
-                  (tournamentInfo.completedMatches /
-                    tournamentInfo.totalMatches) *
-                  100
-                }%`,
-              }}
-            />
-          </div>
-        </div>
       </div>
 
       {/* Quick Stats */}
@@ -224,16 +174,16 @@ export default function ManagerDashboard() {
               </h2>
             </div>
 
-            {todayMatches.length > 0 ? (
+            {todayMatches?.length > 0 ? (
               <div className="space-y-4">
-                {todayMatches.map((match) => (
+                {todayMatches?.map((match) => (
                   <div
                     key={match.id}
                     className="border border-border rounded-lg p-4 hover:bg-muted transition-colors"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-sm font-semibold text-primary">
-                        {match.time}
+                        {match.scheduledDate}
                       </span>
                       <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full">
                         {match.status}
@@ -241,11 +191,11 @@ export default function ManagerDashboard() {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="font-medium text-foreground">
-                        {match.homeTeam}
+                        {match.homeTeam.teamName}
                       </span>
                       <span className="text-muted-foreground">vs</span>
                       <span className="font-medium text-foreground">
-                        {match.awayTeam}
+                        {match.awayTeam.teamName}
                       </span>
                     </div>
                   </div>
@@ -268,21 +218,22 @@ export default function ManagerDashboard() {
             </div>
 
             <div className="space-y-3">
-              {upcomingMatches.map((match) => (
+              {upComingMatches?.map((match: ApiMatch) => (
                 <div
+                  onClick={() => router.push}
                   key={match.id}
                   className="border border-border rounded-lg p-4 hover:bg-muted transition-colors"
                 >
                   <p className="text-xs text-muted-foreground mb-2">
-                    {match.date}
+                    {match.scheduledDate}
                   </p>
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-foreground">
-                      {match.homeTeam}
+                      {match.homeTeam.teamName}
                     </span>
                     <span className="text-muted-foreground text-sm">vs</span>
                     <span className="font-medium text-foreground">
-                      {match.awayTeam}
+                      {match.awayTeam.teamName}
                     </span>
                   </div>
                 </div>
@@ -298,10 +249,12 @@ export default function ManagerDashboard() {
           </h2>
 
           <div className="space-y-3">
-            {pendingActions.map((item, index) => (
+            {pendingActions?.length <= 0 && <div>No Pending Actions!!</div>}
+            {pendingActions?.map((item: any, index: any) => (
               <div
                 key={index}
                 className="border border-border rounded-lg p-4 hover:bg-muted transition-colors"
+                onClick={() => router.push(`/manager/matches/${item.matchId}`)}
               >
                 <div className="flex items-start gap-3 mb-2">
                   <div className="text-primary mt-1">{item.icon}</div>
@@ -310,7 +263,7 @@ export default function ManagerDashboard() {
                       {item.action}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Due: {item.dueDate}
+                      Team Name: {item.teamName}
                     </p>
                   </div>
                 </div>

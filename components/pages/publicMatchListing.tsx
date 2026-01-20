@@ -119,8 +119,8 @@ export const MatchCard = ({ match }: MatchCardProps) => {
         isLive
           ? "border-l-4 border-l-red-500"
           : isUpcoming
-          ? "border-l-4 border-l-blue-500"
-          : "border-gray-200"
+            ? "border-l-4 border-l-blue-500"
+            : "border-gray-200"
       }`}
     >
       {/* Status Bar */}
@@ -129,8 +129,8 @@ export const MatchCard = ({ match }: MatchCardProps) => {
           isLive || isCompleted
             ? "bg-linear-to-r from-red-50 to-orange-50"
             : isUpcoming
-            ? "bg-linear-to-r from-blue-50 to-cyan-50"
-            : "bg-gray-50"
+              ? "bg-linear-to-r from-blue-50 to-cyan-50"
+              : "bg-gray-50"
         }`}
       >
         <div className="flex items-center gap-2">
@@ -199,8 +199,8 @@ export const MatchCard = ({ match }: MatchCardProps) => {
                 isLive
                   ? "bg-red-100 text-red-700"
                   : isUpcoming
-                  ? "bg-blue-100 text-blue-700"
-                  : "bg-gray-100 text-gray-700"
+                    ? "bg-blue-100 text-blue-700"
+                    : "bg-gray-100 text-gray-700"
               }`}
             >
               {isLive ? "In Progress" : isUpcoming ? "Upcoming" : "Finished"}
@@ -242,8 +242,8 @@ export const MatchCard = ({ match }: MatchCardProps) => {
               isLive
                 ? "bg-linear-to-r from-red-500 to-orange-500 text-white hover:shadow-lg"
                 : isUpcoming
-                ? "bg-linear-to-r from-blue-500 to-green-500 text-white hover:shadow-lg"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? "bg-linear-to-r from-blue-500 to-green-500 text-white hover:shadow-lg"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
             {isLive && "Watch Live"}
@@ -270,14 +270,17 @@ export const MatchCard = ({ match }: MatchCardProps) => {
 
 const UpcomingMatchesSection = ({ matches }: { matches: Match[] }) => {
   // Group upcoming matches by date
-  const groupedMatches = matches.reduce((acc, match) => {
-    const date = match.date;
-    if (!acc[date]) {
-      acc[date] = [];
-    }
-    acc[date].push(match);
-    return acc;
-  }, {} as Record<string, Match[]>);
+  const groupedMatches = matches.reduce(
+    (acc, match) => {
+      const date = match.date;
+      if (!acc[date]) {
+        acc[date] = [];
+      }
+      acc[date].push(match);
+      return acc;
+    },
+    {} as Record<string, Match[]>,
+  );
 
   return (
     <div className="space-y-8">
@@ -345,9 +348,16 @@ export default function MatchesListing() {
         upcomingCount={upcomingMatches.length}
       />
 
-      {/* Content Area */}
+      {isLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/70">
+          <div className="text-center">
+            <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+            <p className="text-sm text-gray-600">Loading matches...</p>
+          </div>
+        </div>
+      )}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-        {activeTab === "live" ? (
+        {activeTab === "live" && !isLoading ? (
           <div className="space-y-6">
             {liveMatches.length > 0 ? (
               <>

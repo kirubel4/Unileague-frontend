@@ -4,15 +4,11 @@ import { cn } from "@/lib/utils";
 
 interface LayoutProps {
   children: React.ReactNode;
-  role?: "super_admin" | "manager";
+  role?: "super_admin" | "manager" | "coach";
   userName?: string;
 }
 
-export function Layout({
-  children,
-  role = "super_admin",
-  userName = "Admin User",
-}: LayoutProps) {
+export function Layout({ children, role, userName }: LayoutProps) {
   const userRoleDisplay = role === "super_admin" ? "Super Admin" : "Manager";
 
   return (

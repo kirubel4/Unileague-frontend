@@ -1,8 +1,11 @@
 "use client";
 import { Layout } from "@/components/Layout";
-import { fetcher, getCookie } from "@/lib/utils";
+import { ApiResponse, fetcher, getCookie } from "@/lib/utils";
 import useSWR from "swr";
 import { mapApiDataToTable } from "./util";
+import { toast, Toaster } from "sonner";
+import { Button } from "@/components/ui/button";
+import { ListStartIcon } from "lucide-react";
 type ManagerStandingsProps = {
   id?: string;
 };
@@ -16,17 +19,71 @@ export default function ManagerStandings({ id }: ManagerStandingsProps) {
   const { data, isLoading, error } = useSWR(endpoint, fetcher, {
     revalidateOnFocus: false,
   });
+  const initStanding = async () => {
+    toast.loading("initializing tournament standing", { id: "12" });
+    const res = await fetch("/api/protected/manager/standing/init", {
+      method: "GET",
+    });
+    const response: ApiResponse = await res.json();
+    if (!response.success) {
+      toast.error(response.message, { id: "12" });
+      return;
+    }
+    toast.success(response.message || "initialized successfully", { id: "12" });
+  };
   const standing = mapApiDataToTable(data?.data || []);
+
   const Content = (
     <>
       <div className="mb-8">
+        <Toaster />
         <h1 className="text-3xl font-bold text-foreground">Standings</h1>
         <p className="text-muted-foreground mt-2">
           Current tournament rankings and statistics
         </p>
       </div>
-
-      {/* Table */}
+      {!id ? (
+        <div className="flex justify-end mb-6">
+          <Button
+            onClick={initStanding}
+            className="
+      relative overflow-hidden
+      gap-2 px-6 py-2.5
+      rounded-lg
+      bg-linear-to-r from-blue-600 to-indigo-600
+      text-white font-semibold
+      shadow-md
+      hover:shadow-lg hover:from-blue-700 hover:to-indigo-700
+      active:scale-[0.98]
+      transition-all
+    "
+          >
+            <ListStartIcon className="w-4 h-4" />
+            <span>
+              {standing.length > 0
+                ? "Reinitialize Standing"
+                : "Initialize Standing"}
+            </span>
+          </Button>
+        </div>
+      ) : (
+        <div />
+      )}
+      {isLoading && (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading lineup requests...</p>
+          </div>
+        </div>
+      )}
+      {error && (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <p className="text-red-600">Error Fetching Standing</p>
+          </div>
+        </div>
+      )}
       <div className="bg-white rounded-lg border border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -69,8 +126,8 @@ export default function ManagerStandings({ id }: ManagerStandingsProps) {
                     idx < 2
                       ? "bg-green-50"
                       : idx < 4
-                      ? "bg-blue-50"
-                      : "hover:bg-muted"
+                        ? "bg-blue-50"
+                        : "hover:bg-muted"
                   } transition-colors`}
                 >
                   <td className="py-3 px-4 text-center">
@@ -79,10 +136,10 @@ export default function ManagerStandings({ id }: ManagerStandingsProps) {
                         row.rank === 1
                           ? "bg-yellow-400 text-white"
                           : row.rank === 2
-                          ? "bg-gray-300 text-white"
-                          : row.rank === 3
-                          ? "bg-orange-400 text-white"
-                          : "bg-muted text-muted-foreground"
+                            ? "bg-gray-300 text-white"
+                            : row.rank === 3
+                              ? "bg-orange-400 text-white"
+                              : "bg-muted text-muted-foreground"
                       }`}
                     >
                       {row.rank}

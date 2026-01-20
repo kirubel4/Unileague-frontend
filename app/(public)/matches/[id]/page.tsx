@@ -24,10 +24,19 @@ import { Card } from "@/components/ui/card";
 import useSWR from "swr";
 import { fetcher } from "@/lib/utils";
 import { mapMatchApiToMatchData, MatchEvent } from "./utility";
-import { mapPlayerNames } from "@/app/(private)/manager/matches/[id]/util";
+import {
+  lineUpMapperBench,
+  lineUpMapperStarting,
+  mapPlayerNames,
+} from "@/app/(private)/manager/matches/[id]/util";
 
-// Mock match data structure (based on what your API will provide)
-
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+};
 export default function MatchDetailPage() {
   const parm = useParams();
   const id = parm.id as string;
@@ -44,36 +53,71 @@ export default function MatchDetailPage() {
 
   const matches = mapMatchApiToMatchData(data ?? []);
   let homePlayers, awayPlayers;
+  let homePlayersBench: { name: string; id: string }[] = [];
+  let awayPlayersBench: { name: string; id: string }[] = [];
   if (matches?.homeTeam && matches?.awayTeam) {
     const {
       data: homeTeam,
       isLoading: load,
       error: er,
-    } = useSWR("/api/public/player/team?id=" + matches?.homeTeam?.id, fetcher, {
-      revalidateOnFocus: false,
-    });
-    homePlayers = mapPlayerNames(homeTeam?.data);
-
+    } = useSWR(
+      `/api/public/match/line-up?mid=${id}&id=${matches?.homeTeam?.id}`,
+      fetcher,
+      {
+        revalidateOnFocus: false,
+      },
+    );
+    homePlayers = lineUpMapperStarting(homeTeam?.data);
+    homePlayersBench = lineUpMapperBench(homeTeam?.data);
     const {
       data: awayTeam,
       isLoading: loading,
       error: err,
-    } = useSWR("/api/public/player/team?id=" + matches?.awayTeam?.id, fetcher, {
-      revalidateOnFocus: false,
-    });
-    awayPlayers = mapPlayerNames(awayTeam?.data);
+    } = useSWR(
+      `/api/public/match/line-up?mid=${id}&id=${matches?.awayTeam?.id}`,
+      fetcher,
+      {
+        revalidateOnFocus: false,
+      },
+    );
+    awayPlayers = lineUpMapperStarting(awayTeam?.data);
+    awayPlayersBench = lineUpMapperBench(awayTeam?.data);
   }
-
+  const formatDate = (dateTime: string) => {
+    return new Date(dateTime).toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
   const formatDateTime = (dateTime: string) => {
-    const date = new Date(dateTime);
+    // Expected format: "03:00 22/01/25"
+    const [time, date] = dateTime.split(" ");
+    const [hour, minute] = time.split(":").map(Number);
+    const [day, month, year] = date.split("/").map(Number);
+
+    // Convert YY → YYYY (assumes 20xx)
+    const fullYear = 2000 + year;
+
+    const parsedDate = new Date(
+      fullYear,
+      month - 1, // JS months are 0-based
+      day,
+      hour,
+      minute,
+    );
+
+    if (isNaN(parsedDate.getTime())) {
+      throw new Error("Invalid date input");
+    }
+
     return {
-      date: date.toLocaleDateString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
+      date: parsedDate.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
       }),
-      time: date.toLocaleTimeString("en-US", {
+      time: parsedDate.toLocaleTimeString("en-GB", {
         hour: "2-digit",
         minute: "2-digit",
       }),
@@ -176,8 +220,8 @@ export default function MatchDetailPage() {
                   matches?.status === "ONGOING"
                     ? " text-red-400 animate-pulse"
                     : matches?.status === "UPCOMING"
-                    ? " text-white"
-                    : " text-white"
+                      ? " text-white"
+                      : " text-white"
                 }
               `}
                     >
@@ -190,8 +234,8 @@ export default function MatchDetailPage() {
                         {matches?.status === "ONGOING"
                           ? "LIVE"
                           : matches?.status === "UPCOMING"
-                          ? "UPCOMING"
-                          : "FT"}
+                            ? "UPCOMING"
+                            : "FT"}
                       </span>
                     </div>
 
@@ -385,7 +429,7 @@ export default function MatchDetailPage() {
                           (event) =>
                             event.type === "GOAL" ||
                             event.type === "CARD" ||
-                            event.type === "SUBSTITUTION"
+                            event.type === "SUBSTITUTION",
                         )
                         .map((event) => {
                           const {
@@ -410,8 +454,8 @@ export default function MatchDetailPage() {
                                   {event.type === "GOAL"
                                     ? "Goal"
                                     : event.type === "CARD"
-                                    ? "Yellow Card"
-                                    : "Yellow Card"}
+                                      ? "Yellow Card"
+                                      : "Yellow Card"}
                                   {event.details && ` • ${event.details}`}
                                 </div>
                               </div>
@@ -650,7 +694,7 @@ export default function MatchDetailPage() {
                     Starting XI
                   </h4>
                   <div className="space-y-2">
-                    {homePlayers?.map((player) => (
+                    {homePlayers?.map((player: any) => (
                       <div
                         key={player.id}
                         className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
@@ -706,7 +750,7 @@ export default function MatchDetailPage() {
                     Starting XI
                   </h4>
                   <div className="space-y-2">
-                    {awayPlayers?.map((player) => (
+                    {awayPlayers?.map((player: any) => (
                       <div
                         key={player.id}
                         className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"

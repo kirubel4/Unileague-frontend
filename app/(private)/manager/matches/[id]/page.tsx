@@ -13,26 +13,35 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Clock,
   MapPin,
   RotateCw,
   Trash2,
   Plus,
-  ListVideoIcon,
   StopCircle,
   TrendingUp,
   Calendar,
-  Shield,
   User,
   AlertCircle,
   PlayCircle,
+  ChevronUp,
+  ChevronDown,
+  Users,
+  Check,
+  X,
+  Shield,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import useSWR from "swr";
 import { ApiResponse, fetcher, getCookie } from "@/lib/utils";
-import { mapMatchDetail, mapPlayerNames } from "./util";
+import {
+  lineUpMapperBench,
+  lineUpMapperRequests,
+  lineUpMapperStarting,
+  mapMatchDetail,
+} from "./util";
 import { Input } from "@/components/ui/input";
 import { toast, Toaster } from "sonner";
 interface Event {
@@ -48,7 +57,7 @@ export default function ManagerMatchesDetail() {
   const matchId = params.id as string;
 
   const [refreshing, setRefreshing] = useState(false);
-
+  const [showLineups, setShowLineups] = useState(false);
   const [eventPlayer, setEventPlayer] = useState("");
   const [min, setMin] = useState(0);
   const [eventTeam, setEventTeam] = useState("");
@@ -57,39 +66,140 @@ export default function ManagerMatchesDetail() {
   const [loading, setLoading] = useState(false);
   const [endLoading, setEndLoading] = useState(false);
   const [startLoading, setStartLoading] = useState(false);
-  let homePlayers: { name: string; id: string }[] = [];
-  let awayPlayers: { name: string; id: string }[] = [];
+
   const {
     data,
     isLoading,
     error,
     mutate: mutateMatch,
-  } = useSWR("/api/public/match/detail?id=" + matchId, fetcher, {
-    revalidateOnFocus: false,
-  });
+  } = useSWR(
+    matchId ? `/api/public/match/detail?id=${matchId}` : null,
+    fetcher,
+    { revalidateOnFocus: false },
+  );
 
-  const matches = mapMatchDetail(data?.data);
+  const matches = useMemo(() => mapMatchDetail(data?.data), [data]);
+  const homeTeamId = matches?.homeTeam?.id;
+  const awayTeamId = matches?.awayTeam?.id;
+  const mid = matches?.id;
 
-  if (matches?.homeTeam && matches?.awayTeam) {
-    const {
-      data: homeTeam,
-      isLoading: load,
-      error: er,
-    } = useSWR("/api/public/player/team?id=" + matches?.homeTeam?.id, fetcher, {
-      revalidateOnFocus: false,
+  const { data: homeReq, mutate: mutateHome } = useSWR(
+    homeTeamId && mid
+      ? `/api/protected/manager/match/line-up/requests?id=${homeTeamId}&mid=${mid}`
+      : null,
+    fetcher,
+  );
+
+  const { data: awayReq, mutate: mutateAway } = useSWR(
+    awayTeamId && mid
+      ? `/api/protected/manager/match/line-up/requests?id=${awayTeamId}&mid=${mid}`
+      : null,
+    fetcher,
+  );
+
+  const { data: homeLineup } = useSWR(
+    homeTeamId && mid
+      ? `/api/public/match/line-up?mid=${mid}&id=${homeTeamId}`
+      : null,
+    fetcher,
+    { revalidateOnFocus: false },
+  );
+  const homePlayers = useMemo(
+    () => lineUpMapperStarting(homeLineup?.data),
+    [homeLineup],
+  );
+
+  const homeBench = useMemo(
+    () => lineUpMapperBench(homeLineup?.data),
+    [homeLineup],
+  );
+
+  const { data: awayLineup } = useSWR(
+    awayTeamId && mid
+      ? `/api/public/match/line-up?mid=${mid}&id=${awayTeamId}`
+      : null,
+    fetcher,
+    { revalidateOnFocus: false },
+  );
+
+  const awayPlayers = useMemo(
+    () => lineUpMapperStarting(awayLineup?.data),
+    [awayLineup],
+  );
+
+  const awayBench = useMemo(
+    () => lineUpMapperBench(awayLineup?.data),
+    [awayLineup],
+  );
+  const homeLineupRequest = useMemo(
+    () => lineUpMapperRequests(homeReq?.data),
+    [homeReq],
+  );
+
+  const awayLineupRequest = useMemo(
+    () => lineUpMapperRequests(awayReq?.data),
+    [awayReq],
+  );
+
+  const lineupRequests = useMemo(() => {
+    const requests = [];
+    if (homeLineupRequest.players.length > 0) {
+      requests.push({
+        teamId: homeTeamId,
+        teamName: matches?.homeTeam?.name,
+        players: homeLineupRequest.players,
+        lineUpStatus: homeLineupRequest.status,
+        lineupId: homeLineupRequest.players[0].lineupId,
+      });
+    }
+
+    if (awayLineupRequest.players.length > 0) {
+      requests.push({
+        teamId: awayTeamId,
+        teamName: matches?.awayTeam?.name,
+        players: awayLineupRequest.players,
+        lineUpStatus: awayLineupRequest.status,
+        lineupId: awayLineupRequest.players[0].lineupId,
+      });
+    }
+
+    return requests;
+  }, [homeLineupRequest, awayLineupRequest, homeTeamId, awayTeamId, matches]);
+
+  const approveLineUp = async (lineUpId: string) => {
+    toast.loading("approving Line-Up", { id: "44" });
+    const res = await fetch("/api/protected/manager/match/line-up/approve", {
+      method: "PUT",
+      body: JSON.stringify({
+        lineUpId,
+      }),
     });
-    homePlayers = mapPlayerNames(homeTeam?.data);
-
-    const {
-      data: awayTeam,
-      isLoading: loading,
-      error: err,
-    } = useSWR("/api/public/player/team?id=" + matches?.awayTeam?.id, fetcher, {
-      revalidateOnFocus: false,
+    const response: ApiResponse = await res.json();
+    if (!response.success) {
+      toast.error(response.message, { id: "44" });
+      return;
+    }
+    toast.success(response.message, { id: "44" });
+    await mutateHome();
+    await mutateAway();
+  };
+  const rejectLineUp = async (lineUpId: string) => {
+    toast.loading("approving Line-Up", { id: "44" });
+    const res = await fetch("/api/protected/manager/match/line-up/reject", {
+      method: "PUT",
+      body: JSON.stringify({
+        lineUpId,
+      }),
     });
-    awayPlayers = mapPlayerNames(awayTeam?.data);
-  }
-
+    const response: ApiResponse = await res.json();
+    if (!response.success) {
+      toast.error(response.message, { id: "44" });
+      return;
+    }
+    toast.success(response.message, { id: "44" });
+    await mutateHome();
+    await mutateAway();
+  };
   const refreshScore = async () => {
     setRefreshing(true);
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -97,7 +207,6 @@ export default function ManagerMatchesDetail() {
 
     setRefreshing(false);
   };
-
   const addEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!eventPlayer.trim()) return;
@@ -142,7 +251,7 @@ export default function ManagerMatchesDetail() {
       `/api/protected/manager/match/event/remove?id=${id}`,
       {
         method: "DELETE",
-      }
+      },
     );
     const resp: ApiResponse = await res.json();
     if (!resp.success) {
@@ -159,7 +268,7 @@ export default function ManagerMatchesDetail() {
       {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
     if (!res) {
       toast.error("no network");
@@ -218,7 +327,6 @@ export default function ManagerMatchesDetail() {
         return "border-l-4 border-l-gray-500 bg-gray-50/50";
     }
   };
-
   return (
     <Layout role="manager" userName={userName}>
       {/* Header */}
@@ -326,85 +434,184 @@ export default function ManagerMatchesDetail() {
                     Match Information
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Left Column: Venue & Time */}
                     <div className="space-y-4">
-                      <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-200">
+                      <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-100/80">
                         <MapPin className="w-5 h-5 text-muted-foreground mt-0.5 shrink-0" />
                         <div>
                           <p className="text-xs text-muted-foreground font-medium">
                             Venue
                           </p>
                           <p className="font-semibold text-foreground">
-                            {matches?.venue}
+                            {matches?.venue || "TBD"}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-200">
+                      <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-100/80">
                         <Clock className="w-5 h-5 text-muted-foreground mt-0.5 shrink-0" />
                         <div>
                           <p className="text-xs text-muted-foreground font-medium">
                             Start Time
                           </p>
                           <p className="font-semibold text-foreground">
-                            {matches?.scheduledDate}
+                            {matches?.scheduledDate || "N/A"}
                           </p>
                         </div>
                       </div>
                     </div>
+
+                    {/* Right Column: Referee & Status */}
                     <div className="space-y-4">
-                      <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-200">
-                        {/* <Whistle className="w-5 h-5 text-muted-foreground mt-0.5 shrink-0" /> */}
+                      <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-100/80">
+                        <div className="w-5 h-5 flex items-center justify-center text-muted-foreground mt-0.5 shrink-0">
+                          ⚽
+                        </div>
                         <div>
                           <p className="text-xs text-muted-foreground font-medium">
                             Referee
                           </p>
                           <p className="font-semibold text-foreground">
-                            {/* {matches?.} */}Referee
+                            Referee Name
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-200">
+                      <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-100/80">
                         <TrendingUp className="w-5 h-5 text-muted-foreground mt-0.5 shrink-0" />
                         <div>
                           <p className="text-xs text-muted-foreground font-medium">
                             Status
                           </p>
                           <p className="font-semibold text-primary capitalize">
-                            {matches?.status}
+                            {matches?.status || "Upcoming"}
                           </p>
                         </div>
                       </div>
                     </div>
-                    <Separator className="my-6 col-span-full" />
-                    <div className="flex items-center justify-between flex-col rounded-lg gap-4 border bg-muted/40 p-4">
-                      <div className="flex items-center gap-3">
-                        <div>
-                          <p className="text-sm font-medium">Match Control</p>
-                        </div>
-                      </div>
 
+                    <Separator className="my-2 col-span-full" />
+
+                    {/* Lineup Request Section */}
+                    <div className="col-span-full">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-between hover:bg-muted/50"
+                        onClick={() => setShowLineups(!showLineups)}
+                      >
+                        <span className="flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          Lineup Requests (
+                          {lineupRequests[0]?.players?.length > 0 &&
+                          lineupRequests[1]?.players?.length > 0
+                            ? 2
+                            : lineupRequests[0]?.players?.length > 0 ||
+                                lineupRequests[1]?.players?.length
+                              ? 1
+                              : 0}
+                          )
+                        </span>
+                        {showLineups ? (
+                          <ChevronUp className="w-4 h-4" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
+                      </Button>
+
+                      {showLineups && (
+                        <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-2">
+                          {lineupRequests &&
+                          lineupRequests?.length &&
+                          (lineupRequests[0]?.players?.length > 0 ||
+                            lineupRequests[1]?.players?.length > 0) ? (
+                            lineupRequests.map((teamReq) => (
+                              <div
+                                key={teamReq.teamId}
+                                className="border rounded-lg p-4 bg-white shadow-sm"
+                              >
+                                <div className="flex justify-between items-center mb-3">
+                                  <h4 className="font-bold text-sm text-primary">
+                                    {teamReq.teamName}
+                                  </h4>
+                                  <div className="flex gap-2">
+                                    <Button
+                                      onClick={() =>
+                                        approveLineUp(
+                                          teamReq.players[0].lineupId,
+                                        )
+                                      }
+                                      size="sm"
+                                      className="h-8 bg-green-600 hover:bg-green-700 text-white gap-1 px-3"
+                                    >
+                                      <Check className="w-3 h-3" /> Approve
+                                    </Button>
+                                    <Button
+                                      onClick={() =>
+                                        rejectLineUp(
+                                          teamReq.players[0].lineupId,
+                                        )
+                                      }
+                                      size="sm"
+                                      variant="destructive"
+                                      className="h-8 gap-1 px-3"
+                                    >
+                                      <X className="w-3 h-3" /> Reject
+                                    </Button>
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-1 gap-1">
+                                  {teamReq?.players?.map((player: any) => (
+                                    <div
+                                      key={player.id}
+                                      className="text-xs flex justify-between py-1 border-b border-gray-50 last:border-0"
+                                    >
+                                      <span>
+                                        <span className="font-mono text-muted-foreground mr-2">
+                                          {player.number}
+                                        </span>{" "}
+                                        {player.name}
+                                      </span>
+                                      <span className="text-[10px] bg-gray-100 px-1.5 rounded text-gray-600 uppercase font-bold">
+                                        {player.position}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-center text-sm text-muted-foreground py-4">
+                              No pending lineup requests.
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Match Control Section */}
+                    <div className="col-span-full flex items-center justify-between rounded-xl border bg-muted/30 p-4 mt-2">
+                      <p className="text-sm font-semibold">Match Control</p>
                       {matches?.status === "LIVE" ? (
                         <Button
                           variant="destructive"
                           size="sm"
                           onClick={endMatch}
                           disabled={endLoading || refreshing}
-                          className="gap-2"
+                          className="gap-2 shadow-lg shadow-red-100"
                         >
-                          <StopCircle className="w-4 h-4" />
-                          End Match
+                          <StopCircle className="w-4 h-4" /> End Match
                         </Button>
-                      ) : (
+                      ) : matches.status !== "FINISHED" ? (
                         <Button
                           size="sm"
                           onClick={statMatch}
                           disabled={startLoading || refreshing}
-                          className="gap-2 bg-primary"
+                          className="gap-2 bg-primary hover:bg-primary/90 shadow-lg shadow-blue-100"
                         >
-                          <PlayCircle className="w-4 h-4" />
-                          Start Match
+                          <PlayCircle className="w-4 h-4" /> Start Match
                         </Button>
+                      ) : (
+                        <div></div>
                       )}
                     </div>
                   </div>
@@ -493,7 +700,7 @@ export default function ManagerMatchesDetail() {
                       <div
                         key={event.id}
                         className={`p-4 rounded-lg flex items-center justify-between transition-all hover:shadow-sm ${getEventColor(
-                          event.type
+                          event.type,
                         )}`}
                       >
                         <div className="flex items-center gap-4">
@@ -656,12 +863,12 @@ export default function ManagerMatchesDetail() {
                         </SelectTrigger>
                         <SelectContent>
                           {eventTeamSide === "home"
-                            ? homePlayers.map((player) => (
+                            ? homePlayers.map((player: any) => (
                                 <SelectItem key={player.id} value={player.id}>
                                   {player.name}
                                 </SelectItem>
                               ))
-                            : awayPlayers.map((player) => (
+                            : awayPlayers.map((player: any) => (
                                 <SelectItem key={player.id} value={player.id}>
                                   {player.name}
                                 </SelectItem>
