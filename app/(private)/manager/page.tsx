@@ -46,6 +46,7 @@ export default function ManagerDashboard() {
   const { data: tournamentRes } = useSWR(
     `/api/public/tournament/detail`,
     fetcher,
+    { revalidateOnFocus: false },
   );
   const { data: lineupReq } = useSWR(
     "/api/protected/manager/match/line-up/pending",

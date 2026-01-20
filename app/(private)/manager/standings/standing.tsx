@@ -16,7 +16,12 @@ export default function ManagerStandings({ id }: ManagerStandingsProps) {
     ? `/api/public/tournament/standings?id=${id}`
     : `/api/public/tournament/standings`;
 
-  const { data, isLoading, error } = useSWR(endpoint, fetcher, {
+  const {
+    data,
+    isLoading,
+    error,
+    mutate: mutateStanding,
+  } = useSWR(endpoint, fetcher, {
     revalidateOnFocus: false,
   });
   const initStanding = async () => {
@@ -29,7 +34,9 @@ export default function ManagerStandings({ id }: ManagerStandingsProps) {
       toast.error(response.message, { id: "12" });
       return;
     }
+
     toast.success(response.message || "initialized successfully", { id: "12" });
+    await mutateStanding();
   };
   const standing = mapApiDataToTable(data?.data || []);
 
