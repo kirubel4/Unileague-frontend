@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { MatchWeekPreview } from "@/app/(private)/manager/fixtures/setup/page";
 import { ApiResponse, getCookie } from "@/lib/utils";
 import { mapPreviewToMatches } from "@/app/(private)/manager/fixtures/setup/util";
+import { Toaster } from "sonner";
 
 type Props = {
   format: TournamentFormat;
@@ -70,6 +71,7 @@ export default function ManagerFixturesConfirm({
   return (
     <Layout role="manager" userName={userName}>
       {/* Header */}
+      <Toaster />
       <div className="mb-8">
         <Button variant="ghost" size="sm" className="mb-4" onClick={onBack}>
           <ChevronLeft className="w-4 h-4 mr-2" />

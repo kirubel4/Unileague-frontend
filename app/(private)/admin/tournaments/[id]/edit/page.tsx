@@ -157,7 +157,7 @@ export default function AdminTournamentEdit() {
 
   const handleAddManager = async () => {
     if (!selectedManagerId) {
-      toast.info("no manager is selected bro ");
+      toast.info("no manager is selected bro ", { id: "66" });
       return;
     }
 
@@ -168,10 +168,13 @@ export default function AdminTournamentEdit() {
     });
     const response: ApiResponse = await res.json();
     if (!response.success) {
-      toast.error(response.message);
+      toast.error(response.message,{id:"66"});
       return;
     }
-    toast.success(`Manager assigned to ${formData?.tournamentName} successful`);
+    toast.success(
+      `Manager assigned to ${formData?.tournamentName} successful`,
+      { id: "66" },
+    );
     setSelectedManagerId("");
     await mutateManager();
     setShowAddManager(false);

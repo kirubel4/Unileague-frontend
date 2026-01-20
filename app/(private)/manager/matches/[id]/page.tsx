@@ -284,22 +284,22 @@ export default function ManagerMatchesDetail() {
     setStartLoading(false);
   };
   const endMatch = async () => {
-    toast.loading("ending match");
+    toast.loading("ending match", { id: "99" });
     setEndLoading(true);
     const res = await fetch("/api/protected/manager/match/end/?id=" + matchId, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
     });
     if (!res) {
-      toast.error("no network");
+      toast.error("no network", { id: "99" });
       return;
     }
     const data: ApiResponse = await res.json();
     if (!data.success) {
-      toast.error(data.message);
+      toast.error(data.message, { id: "99" });
       return;
     }
-    toast.success("match ended successfully");
+    toast.success("match ended successfully", { id: "99" });
     refreshScore();
     setEndLoading(false);
   };

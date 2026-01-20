@@ -187,7 +187,7 @@ export default function TournamentDetailPage() {
 
       {/* Live Match Banner */}
       {liveMatches && liveMatches.length > 0 && (
-        <div className="bg-gradient-to-r from-red-600 via-red-500 to-orange-500 shadow-lg">
+        <div className="bg-linear-to-r from-red-600 via-red-500 to-orange-500 shadow-lg">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
             <Link
               href={`/matches/${liveMatches[0].id}`}
@@ -209,7 +209,7 @@ export default function TournamentDetailPage() {
                 <div className="flex-1 w-full">
                   <div className="flex items-center justify-between gap-4 sm:gap-6 md:gap-8">
                     {/* Home team */}
-                    <div className="text-right min-w-[100px] sm:min-w-[120px] md:min-w-[140px]">
+                    <div className="text-right min-w-25 sm:min-w-30 md:min-w-35">
                       <div className="font-bold text-lg sm:text-xl md:text-2xl truncate text-white">
                         {liveMatches[0].teamA.name}
                       </div>
@@ -237,7 +237,7 @@ export default function TournamentDetailPage() {
                     </div>
 
                     {/* Away team */}
-                    <div className="text-left min-w-[100px] sm:min-w-[120px] md:min-w-[140px]">
+                    <div className="text-left min-w-25 sm:min-w-30 md:min-w-35">
                       <div className="font-bold text-lg sm:text-xl md:text-2xl truncate text-white">
                         {liveMatches[0].teamB.name}
                       </div>
