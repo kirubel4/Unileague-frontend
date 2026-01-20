@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import useSWR from "swr";
+
 export type MatchStatus = "SCHEDULED" | "LIVE" | "FINISHED";
 
 export interface ApiMatch {
@@ -32,16 +33,40 @@ export interface ApiMatch {
     teamName: string;
   };
 }
+type Tournament = {
+  id: string;
+  tournamentName: string;
+
+  sponsor?: string;
+  status: string;
+  teamCount: number;
+};
 
 export default function ManagerFixtures() {
   const userName = getCookie("uName") || "Manager";
   const { data, isLoading, error } = useSWR(`/api/public/match`, fetcher, {
     revalidateOnFocus: false,
   });
+  const { data: tournamentRes } = useSWR(
+    `/api/public/tournament/detail`,
+    fetcher,
+    { revalidateOnFocus: false },
+  );
+  const tournament: Tournament | null = tournamentRes?.data ?? null;
+  const mappedTournament = tournament
+    ? {
+        id: tournament.id,
+        status: tournament.status,
+        teams: tournament.teamCount,
+      }
+    : null;
+  {
+    mappedTournament?.status;
+  }
   const apiMatches: ApiMatch[] = data?.data ?? [];
   const hasFixtures = apiMatches.length > 0;
-  const totalTeams = 16; // This should ideally come from an API
-  const estimatedMatches = totalTeams * (totalTeams - 1); // For round-robin
+  const totalTeams = mappedTournament?.teams; // This should ideally come from an API
+  const estimatedMatches = totalTeams ?? 0 * (totalTeams ?? 0 - 1); // For round-robin
 
   if (isLoading) {
     return (
@@ -281,7 +306,8 @@ export default function ManagerFixtures() {
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
                   Each team plays against every other team{" "}
-                  {totalTeams > 10 ? "once" : "twice"} for balanced competition
+                  {(totalTeams ?? 0 > 10) ? "once" : "twice"} for balanced
+                  competition
                 </p>
               </div>
             </div>

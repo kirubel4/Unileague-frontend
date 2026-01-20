@@ -90,11 +90,13 @@ export default function MatchDetailPage() {
       year: "numeric",
     });
   };
+
   const formatDateTime = (dateTime: string) => {
     // Expected format: "03:00 22/01/25"
-    const [time, date] = dateTime.split(" ");
-    const [hour, minute] = time.split(":").map(Number);
-    const [day, month, year] = date.split("/").map(Number);
+    console.log(dateTime);
+    const [time, date] = dateTime ?? "03:00 22/01/25".split(" ");
+    const [hour, minute] = time?.split(":").map(Number);
+    const [day, month, year] = date?.split("/").map(Number);
 
     // Convert YY → YYYY (assumes 20xx)
     const fullYear = 2000 + year;
@@ -106,10 +108,6 @@ export default function MatchDetailPage() {
       hour,
       minute,
     );
-
-    if (isNaN(parsedDate.getTime())) {
-      throw new Error("Invalid date input");
-    }
 
     return {
       date: parsedDate.toLocaleDateString("en-GB", {

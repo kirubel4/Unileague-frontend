@@ -47,19 +47,19 @@ export default function TournamentDetailPage() {
   const { data: tournamentRes } = useSWR(
     id ? `/api/public/tournament/detail?id=${id}` : null,
     fetcher,
-    { revalidateOnFocus: true }
+    { revalidateOnFocus: true },
   );
   const tournament = mapTournamentApiToUI(tournamentRes ?? []);
   console.log(tournament);
   const { data: image } = useSWR(
     id ? `/api/public/gallery?id=${id}` : null,
     fetcher,
-    { revalidateOnFocus: false }
+    { revalidateOnFocus: false },
   );
   const { data } = useSWR(
     id ? `/api/public/team/tournament?tid=${id}` : null,
     fetcher,
-    { revalidateOnFocus: false }
+    { revalidateOnFocus: false },
   );
   const teams: Team[] = mapTeams(data || { data: [] });
   const {
@@ -129,7 +129,7 @@ export default function TournamentDetailPage() {
             <div className="flex items-center gap-3 mb-4">
               <span
                 className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(
-                  tournament?.status
+                  tournament?.status,
                 )}`}
               >
                 {tournament?.status}
@@ -187,53 +187,85 @@ export default function TournamentDetailPage() {
 
       {/* Live Match Banner */}
       {liveMatches && liveMatches.length > 0 && (
-        <div className="bg-linear-to-r from-red-600 to-orange-600">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="bg-gradient-to-r from-red-600 via-red-500 to-orange-500 shadow-lg">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
             <Link
               href={`/matches/${liveMatches[0].id}`}
-              className="flex items-center justify-between text-white"
+              className="block group"
             >
-              {/* LIVE badge */}
-              <div className="flex items-center gap-3">
-                <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
-                <span className="font-semibold tracking-wide">LIVE NOW</span>
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
+                {/* LIVE badge with animation */}
+                <div className="flex items-center gap-2 sm:gap-3 self-start md:self-center">
+                  <div className="relative">
+                    <div className="w-3 h-3 bg-white rounded-full animate-ping absolute" />
+                    <div className="w-3 h-3 bg-white rounded-full relative" />
+                  </div>
+                  <span className="font-bold tracking-wider text-white text-sm sm:text-base">
+                    LIVE NOW
+                  </span>
+                </div>
+
+                {/* Match info */}
+                <div className="flex-1 w-full">
+                  <div className="flex items-center justify-between gap-4 sm:gap-6 md:gap-8">
+                    {/* Home team */}
+                    <div className="text-right min-w-[100px] sm:min-w-[120px] md:min-w-[140px]">
+                      <div className="font-bold text-lg sm:text-xl md:text-2xl truncate text-white">
+                        {liveMatches[0].teamA.name}
+                      </div>
+                      <div className="text-xs sm:text-sm text-white/80 mt-0.5">
+                        Home
+                      </div>
+                    </div>
+
+                    {/* Score */}
+                    <div className="text-center px-2 sm:px-4">
+                      <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+                        <span className="font-black text-3xl sm:text-4xl md:text-5xl text-white drop-shadow-lg">
+                          {liveMatches[0].teamA.score}
+                        </span>
+                        <span className="text-xl sm:text-2xl text-white/80 font-semibold">
+                          –
+                        </span>
+                        <span className="font-black text-3xl sm:text-4xl md:text-5xl text-white drop-shadow-lg">
+                          {liveMatches[0].teamB.score}
+                        </span>
+                      </div>
+                      <div className="text-xs sm:text-sm text-white/80 mt-1 sm:mt-2 px-2 py-1 bg-white/10 rounded-full inline-block">
+                        {liveMatches[0].round}
+                      </div>
+                    </div>
+
+                    {/* Away team */}
+                    <div className="text-left min-w-[100px] sm:min-w-[120px] md:min-w-[140px]">
+                      <div className="font-bold text-lg sm:text-xl md:text-2xl truncate text-white">
+                        {liveMatches[0].teamB.name}
+                      </div>
+                      <div className="text-xs sm:text-sm text-white/80 mt-0.5">
+                        Away
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* CTA Button */}
+                <div className="self-end md:self-center">
+                  <div className="px-4 py-2 sm:px-5 sm:py-2.5 bg-white text-red-600 font-bold rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 transform group-hover:scale-105 shadow-md hover:shadow-lg flex items-center gap-2">
+                    <svg
+                      className="w-4 h-4 sm:w-5 sm:h-5"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <span className="text-sm sm:text-base">Watch Live</span>
+                  </div>
+                </div>
               </div>
-
-              {/* Match info */}
-              <div className="flex items-center gap-8">
-                {/* Home team */}
-                <div className="text-right min-w-35">
-                  <div className="font-bold text-xl">
-                    {liveMatches[0].teamA.name}
-                  </div>
-                  <div className="text-sm opacity-90">Home</div>
-                </div>
-
-                {/* Score */}
-                <div className="text-center">
-                  <div className="flex items-center gap-3 text-4xl font-extrabold">
-                    <span>{liveMatches[0].teamA.score}</span>
-                    <span className="text-2xl opacity-80">–</span>
-                    <span>{liveMatches[0].teamB.score}</span>
-                  </div>
-                  <div className="text-sm opacity-90 mt-1">
-                    {liveMatches[0].round}
-                  </div>
-                </div>
-
-                {/* Away team */}
-                <div className="text-left min-w-35">
-                  <div className="font-bold text-xl">
-                    {liveMatches[0].teamB.name}
-                  </div>
-                  <div className="text-sm opacity-90">Away</div>
-                </div>
-              </div>
-
-              {/* CTA */}
-              <button className="px-4 py-2 bg-white text-red-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors">
-                Watch Live
-              </button>
             </Link>
           </div>
         </div>

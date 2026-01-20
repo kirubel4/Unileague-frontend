@@ -29,7 +29,7 @@ export default function AdminManagers() {
   });
   const resendCredentail = async (id: string, name: string) => {
     setOpenModalId(false);
-    toast.loading("resting.....");
+    toast.loading("resetting.....", { id: "44" });
     const res = await fetch("/api/protected/admin/manager/credential/resend", {
       method: "POST",
       body: JSON.stringify({
@@ -39,10 +39,10 @@ export default function AdminManagers() {
     });
     const respon: ApiResponse = await res.json();
     if (respon.success) {
-      toast.error(respon.message);
+      toast.error(respon.message, { id: "44" });
       return;
     }
-    toast.success("resent");
+    toast.info(respon.message, { id: "44" });
   };
   useEffect(() => {
     if (data?.data) {
@@ -53,7 +53,7 @@ export default function AdminManagers() {
   const filteredManagers = managers.filter(
     (m) =>
       m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      m.email.toLowerCase().includes(searchTerm.toLowerCase())
+      m.email.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   async function handleDeleteAdmin(adminId: string, adminName: string) {
@@ -65,7 +65,7 @@ export default function AdminManagers() {
         `/api/protected/admin/manager/delete?id=${adminId}`,
         {
           method: "DELETE",
-        }
+        },
       );
       const result: ApiResponse = await res.json();
       if (!result.success) {
@@ -79,7 +79,7 @@ export default function AdminManagers() {
       } else {
         alert(
           "Failed to delete: " +
-            (result.data?.message || result.message || "Unknown error")
+            (result.data?.message || result.message || "Unknown error"),
         );
       }
     } catch (err) {
