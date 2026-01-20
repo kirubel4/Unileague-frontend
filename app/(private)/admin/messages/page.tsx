@@ -40,7 +40,7 @@ export default function AdminMessages() {
     {
       revalidateOnFocus: true,
       refreshInterval: 10000,
-    }
+    },
   );
   const { data: messagesData, mutate: mutateMessages } = useSWR(
     selectedManager
@@ -50,7 +50,7 @@ export default function AdminMessages() {
     {
       revalidateOnFocus: true,
       refreshInterval: 10000,
-    }
+    },
   );
   const managers: Manager[] | [] =
     conversationsData?.data?.map(
@@ -67,22 +67,22 @@ export default function AdminMessages() {
         email: conv.senderId,
         lastMessage: conv.lastMessage,
         unreadCount: 0,
-      })
+      }),
     ) || [];
 
   const data = mapNotificationsToMessages(
     messagesData?.data,
-    selectedManager.toString()
+    selectedManager.toString(),
   );
   const sortedMessages = [...(data || [])].sort(
-    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
   );
 
   const selectedManagerData = managers.find((m) => m.id === selectedManager);
   const filteredManagers = managers?.filter(
     (m) =>
       m?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      m?.tournament.toLowerCase().includes(searchTerm.toLowerCase())
+      m?.tournament.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   useEffect(() => {

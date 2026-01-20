@@ -22,7 +22,7 @@ export type PlayerMatchStat = {
 
 export type MatchDetail = {
   id: string;
-  status: "UPCOMING" | "LIVE" | "FINISHED";
+  status: "SCHEDULED" | "LIVE" | "FINISHED";
   scheduledDate: string;
   venue: string;
 
@@ -73,7 +73,7 @@ export function mapMatchDetail(apiData: any): MatchDetail {
   };
 }
 export function mapPlayerNames(
-  apiResponse: any[]
+  apiResponse: any[],
 ): { id: string; name: string; number: number; position: string }[] {
   if (!Array.isArray(apiResponse)) return [];
 
@@ -86,8 +86,65 @@ export function mapPlayerNames(
     }))
     .filter(
       (
-        p
+        p,
       ): p is { id: string; name: string; number: number; position: string } =>
-        typeof p.id === "string" && typeof p.name === "string"
+        typeof p.id === "string" && typeof p.name === "string",
     );
+}
+export function lineUpMapperStarting(apiResponse: any) {
+  if (!apiResponse || !Array.isArray(apiResponse.starting)) return [];
+  return apiResponse.starting.map((p: any) => ({
+    id: p?.player?.id,
+    name: p?.player?.name,
+    number: p?.player?.number,
+    position: p?.position,
+    role: p?.role,
+    isCaptain: p?.isCaptain,
+  }));
+}
+export function lineUpMapperBench(apiResponse: any) {
+  if (!apiResponse || !Array.isArray(apiResponse.bench)) return [];
+  return apiResponse.bench.map((p: any) => ({
+    id: p?.player?.id,
+    name: p?.player?.name,
+    number: p?.player?.number,
+    position: p?.position,
+    role: p?.role,
+    isCaptain: p?.isCaptain,
+  }));
+}
+type LineupRequestPlayer = {
+  id: string;
+  name: string;
+  number: number;
+  position: string;
+  role: string;
+  isCaptain: boolean;
+  lineupId: string;
+};
+
+type LineupRequest = {
+  status: "WAITING" | "APPROVED" | "REJECTED" | "REQUESTED" | null;
+  players: LineupRequestPlayer[];
+};
+export function lineUpMapperRequests(apiResponse: any): LineupRequest {
+  if (!apiResponse || !Array.isArray(apiResponse.players)) {
+    return {
+      status: null,
+      players: [],
+    };
+  }
+
+  return {
+    status: apiResponse.state ?? null,
+    players: apiResponse.players.map((p: any) => ({
+      id: p.player?.id ?? "",
+      name: p.player?.name ?? "",
+      number: p.player?.number ?? 0,
+      position: p.position ?? "",
+      role: p.role ?? "",
+      lineupId: p.lineupId,
+      isCaptain: Boolean(p.isCaptain),
+    })),
+  };
 }

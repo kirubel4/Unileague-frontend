@@ -29,7 +29,7 @@ import ConfirmModal from "@/components/comfirm";
 export default function ManagerTeams() {
   const userName = getCookie("uName") || "Manager";
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
+
   const [openModalId, setOpenModalId] = useState(false);
   const [selected, setSelected] = useState({ id: "" });
   const {
@@ -45,44 +45,28 @@ export default function ManagerTeams() {
   const filteredTeams = teams?.filter(
     (t) =>
       t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.coachName.toLowerCase().includes(searchTerm.toLowerCase())
+      t.coachName.toLowerCase().includes(searchTerm.toLowerCase()),
   );
-
-  const handleSelectTeam = (teamId: string) => {
-    setSelectedTeams((prev) =>
-      prev.includes(teamId)
-        ? prev.filter((id) => id !== teamId)
-        : [...prev, teamId]
-    );
-  };
-
-  const handleSelectAll = () => {
-    if (selectedTeams.length === filteredTeams.length) {
-      setSelectedTeams([]);
-    } else {
-      setSelectedTeams(filteredTeams.map((team) => team.id));
-    }
-  };
   const resendCredentail = async (id: string) => {
     setOpenModalId(false);
-    toast.loading("resting.....");
+    toast.loading("resetting.....", { id: "22" });
     const res = await fetch(
       `/api/protected/manager/team/credential/resend?id=${id}`,
       {
         method: "POST",
-      }
+      },
     );
     const respon: ApiResponse = await res.json();
     if (respon.success) {
       toast.error(respon.message);
       return;
     }
-    toast.success("resent");
+    toast.success(respon?.message, { id: "22" });
   };
   async function handleDelete(id: string) {
     if (
       !confirm(
-        "Are you sure you want to delete this team? This action cannot be undone."
+        "Are you sure you want to delete this team? This action cannot be undone.",
       )
     ) {
       return;
@@ -99,17 +83,6 @@ export default function ManagerTeams() {
     }
     console.log("deleted");
     await teamMutate();
-  }
-
-  async function handleBulkDelete() {
-    if (selectedTeams.length === 0) return;
-    if (
-      !confirm(
-        `Are you sure you want to delete ${selectedTeams.length} selected teams?`
-      )
-    ) {
-      return;
-    }
   }
 
   return (
@@ -139,10 +112,6 @@ export default function ManagerTeams() {
                 Register New Team
               </Button>
             </Link>
-            <Button variant="outline" className="gap-2">
-              <Download className="w-4 h-4" />
-              Export
-            </Button>
           </div>
         </div>
       </div>
@@ -207,7 +176,7 @@ export default function ManagerTeams() {
                 {teams?.length
                   ? Math.round(
                       teams.reduce((sum, team) => sum + team.playerCount, 0) /
-                        teams.length
+                        teams.length,
                     )
                   : 0}
               </p>
@@ -240,17 +209,6 @@ export default function ManagerTeams() {
               <Filter className="w-4 h-4" />
               Filter
             </Button>
-
-            {selectedTeams.length > 0 && (
-              <Button
-                variant="destructive"
-                onClick={handleBulkDelete}
-                className="gap-2"
-              >
-                <Trash2 className="w-4 h-4" />
-                Delete ({selectedTeams.length})
-              </Button>
-            )}
           </div>
         </div>
       </div>
@@ -285,36 +243,6 @@ export default function ManagerTeams() {
           </div>
         ) : (
           <>
-            {/* Table Header */}
-            <div className="px-6 py-4 border-b border-border bg-linear-to-r from-gray-50 to-white">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={
-                        selectedTeams?.length === filteredTeams?.length &&
-                        filteredTeams?.length > 0
-                      }
-                      onChange={handleSelectAll}
-                      className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm font-medium text-foreground">
-                      {selectedTeams.length > 0
-                        ? `${selectedTeams?.length} selected`
-                        : `${filteredTeams?.length} teams`}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    Sorted by: Name
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Teams List */}
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-border">
@@ -360,12 +288,6 @@ export default function ManagerTeams() {
                       >
                         <td className="py-4 px-6">
                           <div className="flex items-center gap-3">
-                            <input
-                              type="checkbox"
-                              checked={selectedTeams.includes(team.id)}
-                              onChange={() => handleSelectTeam(team.id)}
-                              className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            />
                             <div>
                               <div className="flex items-center gap-2">
                                 <p className="font-semibold text-foreground">

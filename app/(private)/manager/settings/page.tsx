@@ -195,9 +195,17 @@ export default function ManagerSettings() {
           </button>
         ))}
       </div>
+      {isLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/70">
+          <div className="text-center">
+            <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+            <p className="text-sm text-gray-600">Loading user data...</p>
+          </div>
+        </div>
+      )}
 
       {/* Profile Tab */}
-      {activeTab === "profile" && (
+      {activeTab === "profile" && !isLoading && (
         <div className="bg-white rounded-lg border border-border p-6">
           <h3 className="text-lg font-semibold mb-6 text-foreground">
             Profile Information

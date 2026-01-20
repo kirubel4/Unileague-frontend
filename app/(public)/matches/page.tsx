@@ -1,15 +1,6 @@
 "use client";
-
-import { MatchList } from "@/components/pages/MatchList";
 import MatchesListing from "@/components/pages/publicMatchListing";
-import {
-  Calendar,
-  Trophy,
-  Clock,
-  Zap,
-  Target,
-  ChevronRight,
-} from "lucide-react";
+import { Trophy } from "lucide-react";
 
 export default function MatchesPage() {
   const matchStats = {
