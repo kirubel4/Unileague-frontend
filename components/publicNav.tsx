@@ -103,7 +103,7 @@ export default function Navbar() {
                     href={link.href}
                     className={`relative px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 group ${
                       active
-                        ? "text-white bg-linear-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-white/10"
+                        ? "text-white bg-linear-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm  "
                         : "text-gray-300 hover:text-white hover:bg-white/5"
                     }`}
                   >

@@ -48,7 +48,7 @@ export default function TeamsPage() {
 
     if (selectedTournament !== "ALL") {
       filtered = filtered.filter(
-        (team) => team.tournamentName === selectedTournament
+        (team) => team.tournamentName === selectedTournament,
       );
     }
 
@@ -56,7 +56,7 @@ export default function TeamsPage() {
       filtered = filtered.filter(
         (team) =>
           team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          team.coachName.toLowerCase().includes(searchQuery.toLowerCase())
+          team.coachName.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
 
@@ -155,7 +155,7 @@ export default function TeamsPage() {
                 (tournament) =>
                   selectedYear === "ALL" ||
                   new Date(tournament.startingDate).getFullYear() ===
-                    selectedYear
+                    selectedYear,
               ).map((tournament) => (
                 <button
                   key={tournament.id}
@@ -284,7 +284,7 @@ export default function TeamsPage() {
           ) : (
             // Teams grid with data
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {teams.map((team) => (
+              {teams?.map((team) => (
                 <Link
                   key={team.id}
                   href={`/teams/${team.id}`}

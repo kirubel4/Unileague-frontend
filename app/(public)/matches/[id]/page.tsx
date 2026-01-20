@@ -30,8 +30,13 @@ import {
   mapPlayerNames,
 } from "@/app/(private)/manager/matches/[id]/util";
 
-// Mock match data structure (based on what your API will provide)
-
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+};
 export default function MatchDetailPage() {
   const parm = useParams();
   const id = parm.id as string;
@@ -78,17 +83,41 @@ export default function MatchDetailPage() {
     awayPlayers = lineUpMapperStarting(awayTeam?.data);
     awayPlayersBench = lineUpMapperBench(awayTeam?.data);
   }
-
+  const formatDate = (dateTime: string) => {
+    return new Date(dateTime).toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
   const formatDateTime = (dateTime: string) => {
-    const date = new Date(dateTime);
+    // Expected format: "03:00 22/01/25"
+    const [time, date] = dateTime.split(" ");
+    const [hour, minute] = time.split(":").map(Number);
+    const [day, month, year] = date.split("/").map(Number);
+
+    // Convert YY → YYYY (assumes 20xx)
+    const fullYear = 2000 + year;
+
+    const parsedDate = new Date(
+      fullYear,
+      month - 1, // JS months are 0-based
+      day,
+      hour,
+      minute,
+    );
+
+    if (isNaN(parsedDate.getTime())) {
+      throw new Error("Invalid date input");
+    }
+
     return {
-      date: date.toLocaleDateString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
+      date: parsedDate.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
       }),
-      time: date.toLocaleTimeString("en-US", {
+      time: parsedDate.toLocaleTimeString("en-GB", {
         hour: "2-digit",
         minute: "2-digit",
       }),
