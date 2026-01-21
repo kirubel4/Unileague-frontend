@@ -160,7 +160,7 @@ export default function AdminTournamentEdit() {
       toast.info("no manager is selected bro ", { id: "66" });
       return;
     }
-
+    toast.loading("Assigning manager ", { id: "66" });
     const res = await fetch("/api/protected/admin/manager/assign", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -182,6 +182,9 @@ export default function AdminTournamentEdit() {
 
   // Remove a manager
   const handleRemoveManager = async (managerId: string) => {
+    toast.loading(` removing manager from ${formData?.tournamentName}`, {
+      id: "123",
+    });
     const res = await fetch("/api/protected/admin/manager/remove", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -189,11 +192,12 @@ export default function AdminTournamentEdit() {
     });
     const response: ApiResponse = await res.json();
     if (!response.success) {
-      toast.error(response.message);
+      toast.error(response.message, { id: "123" });
       return;
     }
     toast.success(
       ` removed Manager from  ${formData?.tournamentName} successful`,
+      { id: "123" },
     );
     await mutateManager();
   };
@@ -204,14 +208,17 @@ export default function AdminTournamentEdit() {
 
     setIsSaving(true);
     try {
-      // This is where you'd make your API call
-      console.log("Saving changes:", changes);
-      console.log("Updated data:", formData);
-
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // After successful save, redirect back
+      toast.loading("updating tournament info...", { id: "56" });
+      const res = await fetch("/api/protected/admin/tournament/update", {
+        method: "PUT",
+        body: JSON.stringify(formData),
+      });
+      const result: ApiResponse = await res.json();
+      if (!result.success) {
+        toast.error(result.message, { id: "56" });
+        return;
+      }
+      toast.success("tournament ino updated", { id: "56" });
       router.push(`/admin/tournaments/${id}`);
     } catch (error) {
       console.error("Failed to save:", error);
@@ -318,7 +325,7 @@ export default function AdminTournamentEdit() {
               <div>
                 <label className="text-sm font-medium text-muted-foreground block mb-2">
                   Tournament Name
-                </label>
+                </label>  
                 <Input
                   value={formData.tournamentName || ""}
                   onChange={(e) =>

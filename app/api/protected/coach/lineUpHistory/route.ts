@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest) {
   try {
     const tid = req.cookies.get("tMid")?.value;
+    const token = req.cookies.get("aToken")?.value;
     if (!tid) {
       return NextResponse.json("Team Id is required", { status: 400 });
     }
@@ -12,6 +13,7 @@ export async function GET(req: NextRequest) {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
       },
     );

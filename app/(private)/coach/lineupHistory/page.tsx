@@ -79,10 +79,6 @@ export default function LineupRequestsPage() {
   };
 
   const stats = getStats();
-  const handleRefreshData = async () => {
-    setIsLoading(true);
-    await loadData();
-  };
 
   // Handle loading state
   if (isLoading) {

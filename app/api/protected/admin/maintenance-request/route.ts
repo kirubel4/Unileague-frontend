@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     if (!backend) {
       return NextResponse.json(
         { message: "Missing NEXT_PUBLIC_BACKEND_URL" },
-        { status: 500 }
+        { status: 500 },
       );
     }
     const res = await fetch(`${backend}/admin/mail/send/maintenance`, {
@@ -26,8 +26,8 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Proxy create error:", error);
     return NextResponse.json(
-      { message: "Internal Server Error", error: String(error) },
-      { status: 500 }
+      { message: "Connect to Internat", error: String(error) },
+      { status: 500 },
     );
   }
 }

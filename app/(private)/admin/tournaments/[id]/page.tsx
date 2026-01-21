@@ -87,7 +87,7 @@ export default function AdminTournamentDetail() {
         managers: tournament.managers || [],
       }
     : null;
-  console.log(tournament);
+
   return (
     <Layout role="super_admin" userName={userName}>
       {/* Header */}
