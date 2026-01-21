@@ -49,7 +49,7 @@ export default function ManagerTeams() {
   );
   const resendCredentail = async (id: string) => {
     setOpenModalId(false);
-    toast.loading("resetting.....", { id: "22" });
+    toast.loading("resetting.....", { id: "223" });
     const res = await fetch(
       `/api/protected/manager/team/credential/resend?id=${id}`,
       {
@@ -57,11 +57,11 @@ export default function ManagerTeams() {
       },
     );
     const respon: ApiResponse = await res.json();
-    if (respon.success) {
-      toast.error(respon.message);
+    if (!respon.success) {
+      toast.error(respon.message, { id: "223" });
       return;
     }
-    toast.success(respon?.message, { id: "22" });
+    toast.success(respon?.message, { id: "223" });
   };
   async function handleDelete(id: string) {
     if (

@@ -59,7 +59,7 @@ export default function AdminTournamentEdit() {
 
   const { data: tournamentRes, isLoading } = useSWR(
     id ? `/api/public/tournament/detail?id=${id}` : null,
-    fetcher
+    fetcher,
   );
 
   const {
@@ -71,11 +71,11 @@ export default function AdminTournamentEdit() {
   });
   const managers = mapManagersToTableRows(data?.data);
   const freeManagers = managers.filter(
-    (manger) => manger.assignedTournament === "None"
+    (manger) => manger.assignedTournament === "None",
   );
   console.log(managers);
   const assignedManager = managers.filter(
-    (manager) => manager.assignedTournament === formData?.tournamentName
+    (manager) => manager.assignedTournament === formData?.tournamentName,
   );
 
   useEffect(() => {
@@ -84,7 +84,7 @@ export default function AdminTournamentEdit() {
       setOriginalData(tournament);
       setFormData(tournament);
       const assignedManagerIds = new Set(
-        tournament.managers?.map((m: any) => m.id) || []
+        tournament.managers?.map((m: any) => m.id) || [],
       );
     }
   }, [tournamentRes]);
@@ -168,7 +168,7 @@ export default function AdminTournamentEdit() {
     });
     const response: ApiResponse = await res.json();
     if (!response.success) {
-      toast.error(response.message,{id:"66"});
+      toast.error(response.message, { id: "66" });
       return;
     }
     toast.success(
@@ -193,7 +193,7 @@ export default function AdminTournamentEdit() {
       return;
     }
     toast.success(
-      ` removed Manager from  ${formData?.tournamentName} successful`
+      ` removed Manager from  ${formData?.tournamentName} successful`,
     );
     await mutateManager();
   };
@@ -408,7 +408,7 @@ export default function AdminTournamentEdit() {
                   onChange={(e) =>
                     handleInputChange("description", e.target.value)
                   }
-                  className="w-full min-h-[100px]"
+                  className="w-full min-h-25"
                   placeholder="Enter tournament description"
                 />
               </div>
