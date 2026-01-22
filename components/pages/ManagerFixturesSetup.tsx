@@ -31,7 +31,7 @@ type Props = {
   setSelectedTeams: React.Dispatch<React.SetStateAction<Team[]>>;
   onNext: () => void;
   isLoading: boolean;
-  error?: string |undefined;
+  error?: string | undefined;
 };
 
 export default function ManagerFixturesSetup({
@@ -117,35 +117,6 @@ export default function ManagerFixturesSetup({
                   </ul>
                 </div>
               </div>
-              {format === "League" && (
-                <div className="mt-4 grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium">Rounds</label>
-                    <input
-                      type="number"
-                      min={1}
-                      value={rounds}
-                      onChange={(e) => setRounds(Number(e.target.value))}
-                      className="mt-1 w-full border rounded px-2 py-1"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium">
-                      Matches per week
-                    </label>
-                    <input
-                      type="number"
-                      min={1}
-                      value={matchesPerWeek}
-                      onChange={(e) =>
-                        setMatchesPerWeek(Number(e.target.value))
-                      }
-                      className="mt-1 w-full border rounded px-2 py-1"
-                    />
-                  </div>
-                </div>
-              )}
             </label>
 
             {/* Knockout */}
@@ -223,7 +194,16 @@ export default function ManagerFixturesSetup({
           <p className="text-sm text-muted-foreground mb-4">
             Select teams to include
           </p>
-
+          <Button
+            onClick={() => {
+              Teams?.map((t) => {
+                toggleTeam(t);
+              });
+            }}
+            className="mb-5"
+          >
+            select all
+          </Button>
           <div className="space-y-2  overflow-y-auto pr-1">
             {Teams?.map((team) => (
               <label

@@ -121,7 +121,7 @@ export function MatchList({
         (match) =>
           match.homeTeam.teamName.toLowerCase().includes(query) ||
           match.awayTeam.teamName.toLowerCase().includes(query) ||
-          match.venue.toLowerCase().includes(query)
+          match.venue.toLowerCase().includes(query),
       );
     }
 
@@ -137,14 +137,17 @@ export function MatchList({
   const matchesByDate = useMemo(() => {
     if (activeTab !== "scheduled") return {};
 
-    return filteredMatches.reduce((groups, match) => {
-      const { date } = formatDateTime(match.scheduledDate);
-      if (!groups[date]) {
-        groups[date] = [];
-      }
-      groups[date].push(match);
-      return groups;
-    }, {} as Record<string, ApiMatch[]>);
+    return filteredMatches.reduce(
+      (groups, match) => {
+        const { date } = formatDateTime(match.scheduledDate);
+        if (!groups[date]) {
+          groups[date] = [];
+        }
+        groups[date].push(match);
+        return groups;
+      },
+      {} as Record<string, ApiMatch[]>,
+    );
   }, [filteredMatches, activeTab]);
 
   const getTabConfig = (tab: typeof activeTab) => {
@@ -240,110 +243,95 @@ export function MatchList({
       </div>
 
       {/* Filters Section - Only show in admin mode or with props */}
-      {(mode === "admin" || searchQuery || selectedVenue !== "all") && (
-        <>
-          {/* Mobile Filters */}
-          <div className="lg:hidden">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowMobileFilters(true)}
-                className="gap-2"
-              >
-                <Filter className="w-3 h-3" />
-                Filters
-                {(searchQuery || selectedVenue !== "all") && (
-                  <span className="bg-primary text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                    1
+
+      <>
+        {/* Mobile Filters */}
+        <div className="lg:hidden">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowMobileFilters(true)}
+              className="gap-2"
+            >
+              <Filter className="w-3 h-3" />
+              Filters
+              {(searchQuery || selectedVenue !== "all") && (
+                <span className="bg-primary text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                  1
+                </span>
+              )}
+            </Button>
+
+            {(searchQuery || selectedVenue !== "all") && (
+              <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                {searchQuery && (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+                    Search: {searchQuery}
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="hover:text-blue-900"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
                   </span>
                 )}
-              </Button>
+                {selectedVenue !== "all" && (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+                    Venue: {selectedVenue}
+                    <button
+                      onClick={() => setSelectedVenue("all")}
+                      className="hover:text-green-900"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
 
-              {(searchQuery || selectedVenue !== "all") && (
-                <div className="flex items-center gap-2 overflow-x-auto pb-2">
-                  {searchQuery && (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-                      Search: {searchQuery}
-                      <button
-                        onClick={() => setSearchQuery("")}
-                        className="hover:text-blue-900"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </span>
-                  )}
-                  {selectedVenue !== "all" && (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
-                      Venue: {selectedVenue}
-                      <button
-                        onClick={() => setSelectedVenue("all")}
-                        className="hover:text-green-900"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </span>
-                  )}
-                </div>
-              )}
+        {/* Desktop Filters */}
+        <div className="hidden lg:block bg-white rounded-xl border border-border shadow-sm p-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  type="text"
+                  placeholder="Search matches by team or venue..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <select
+                value={selectedVenue}
+                onChange={(e) => setSelectedVenue(e.target.value)}
+                className="px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+              >
+                <option value="all">All Venues</option>
+                {venues.slice(1).map((venue) => (
+                  <option key={venue} value={venue}>
+                    {venue}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
-
-          {/* Desktop Filters */}
-          <div className="hidden lg:block bg-white rounded-xl border border-border shadow-sm p-4">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                  <Input
-                    type="text"
-                    placeholder="Search matches by team or venue..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Filter className="w-4 h-4 text-muted-foreground" />
-                <select
-                  value={selectedVenue}
-                  onChange={(e) => setSelectedVenue(e.target.value)}
-                  className="px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-                >
-                  <option value="all">All Venues</option>
-                  {venues.slice(1).map((venue) => (
-                    <option key={venue} value={venue}>
-                      {venue}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {(searchQuery || selectedVenue !== "all") && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setSearchQuery("");
-                    setSelectedVenue("all");
-                  }}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Clear
-                </Button>
-              )}
-            </div>
-          </div>
-        </>
-      )}
+        </div>
+      </>
 
       {/* Tabs */}
       <div className="flex gap-2 bg-white rounded-xl border border-border p-2">
         {["scheduled", "live", "completed"].map((tab) => {
           const Icon = getTabConfig(tab as typeof activeTab).icon;
-          const count = filteredMatches.filter((m) => {
+          const count = apiMatches?.filter((m) => {
             if (tab === "scheduled") return m.status === "SCHEDULED";
             if (tab === "live") return m.status === "LIVE";
             return m.status === "FINISHED";
@@ -673,10 +661,10 @@ export function MatchList({
                                       match.homeTeam.teamName.split(" ")[0]
                                     } Wins`
                                   : match.homeScore < match.awayScore
-                                  ? `${
-                                      match.awayTeam.teamName.split(" ")[0]
-                                    } Wins`
-                                  : "Draw"}
+                                    ? `${
+                                        match.awayTeam.teamName.split(" ")[0]
+                                      } Wins`
+                                    : "Draw"}
                               </span>
                             </div>
                           )}

@@ -93,7 +93,7 @@ export default function Login() {
                 className={`px-4 py-2 rounded-lg text-sm transition duration-200 ${
                   role === "admin"
                     ? "bg-primary text-white "
-                    : "bg-white text-blue-600  hover:bg-blue-100 hover:text-blue-600"
+                    : "bg-white text-primary  hover:bg-blue-100 "
                 }`}
               >
                 Admin
@@ -105,7 +105,7 @@ export default function Login() {
                 className={`px-4 py-2 rounded-lg text-sm transition duration-200 ${
                   role === "coach"
                     ? "bg-primary text-white border-none"
-                    : "bg-white text-blue-600  hover:bg-blue-100 hover:text-blue-600"
+                    : "bg-white text-primary hover:bg-blue-100 hover:text-blue-600"
                 }`}
               >
                 Coach

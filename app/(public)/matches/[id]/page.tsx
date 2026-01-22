@@ -94,7 +94,10 @@ export default function MatchDetailPage() {
   const formatDateTime = (dateTime: string) => {
     // Expected format: "03:00 22/01/25"
     console.log(dateTime);
-    const [time, date] = dateTime ?? "03:00 22/01/25".split(" ");
+    if (!dateTime) {
+      dateTime = "03:00 22/01/25";
+    }
+    const [time, date] = dateTime.split(" ");
     const [hour, minute] = time?.split(":").map(Number);
     const [day, month, year] = date?.split("/").map(Number);
 
@@ -257,7 +260,7 @@ export default function MatchDetailPage() {
 
                     {/* Date & Time - Show on all screens */}
                     <div className="text-xs sm:text-sm text-white/60 mt-1">
-                      {date} • {time}
+                      {time}
                     </div>
                   </div>
                 </div>
