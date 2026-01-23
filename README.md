@@ -1,14 +1,10 @@
 # UniLeague - ASTU Football Management Platform
 
-<p align="center">
-  <img src="https://unileague-frontend.vercel.app/" alt="UniLeague Platform" width="100%" />
-</p>
-
-<p align="center">
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/4da788e4-b888-4faf-a306-35a324e5cc59" width="100%" max-width="900px" controls style="border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); margin: 24px 0;"></video>
+  <br /><br />
   <strong>A comprehensive football management platform for Adama Science and Technology University (ASTU)</strong>
-</p>
-
-<p align="center">
+  <br /><br />
   <a href="https://unileague-frontend.vercel.app/">🌐 Live Demo</a>
   ·
   <a href="#features">Features</a>
@@ -16,7 +12,7 @@
   <a href="#tech-stack">Tech Stack</a>
   ·
   <a href="#getting-started">Getting Started</a>
-</p>
+</div>
 
 ---
 
@@ -141,6 +137,15 @@ Authentication and authorization are handled via `middleware.ts`, which:
 - Checks user roles from cookies (`role`)
 - Redirects unauthorized users to appropriate pages
 - Protects routes based on user roles
+
+## 🔗 Backend Repository
+
+UniLeague consists of two parts:
+
+| Repository | Description |
+|------------|-------------|
+| [UniLeague-Hub](https://github.com/oneshotEFA/UniLeague-Hub/) | Backend API (Node.js/Express) |
+| [UniLeague-Frontend](https://github.com/oneshotEFA/UniLeague-frontend/) | Frontend (Next.js 16) |
 
 ## 🚀 Getting Started
 
